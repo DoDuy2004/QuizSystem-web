@@ -18,10 +18,10 @@ const answers = [
     isCorrect: true,
     content: "C. Garbage Collector (GC)",
   },
-  {
-    isCorrect: false,
-    content: "D. Common Language Specification (CLS)",
-  },
+  // {
+  //   isCorrect: false,
+  //   content: "D. Common Language Specification (CLS)",
+  // },
 ];
 
 const Answer = (answer: any) => {
@@ -69,9 +69,9 @@ const Footer = () => {
 
   return (
     <footer className="">
-      <div className="flex lg:transform lg:-mt-40 lg:translate-x-0 lg:translate-y-1/2 md:mx-72 m-0">
+      <div className="flex lg:transform lg:-mt-40 lg:translate-x-0 lg:translate-y-1/2 xl:mx-64 lg:mx-44 m-0">
         <Box
-          className="md:rounded-xl rounded-tl-xl rounded-tr-xl md:p-18 p-6"
+          className="md:rounded-xl rounded-tl-xl rounded-tr-xl md:py-14 xl:px-20 lg:px-16 p-6"
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -124,12 +124,12 @@ const Footer = () => {
             </div>
           </div>
           {!isMobile && (
-            <div className="flex w-1/2 gap-x-6 transform translate-x-14">
+            <div className="flex w-1/2 gap-x-6 transform xl:translate-x-14 lg:translate-x-10">
               <div className="w-1/2">
                 <QuestionCard answers={answers} />
               </div>
               <div className="relative w-1/2">
-                <div className="absolute w-full top-14">
+                <div className="absolute w-full top-8">
                   <QuestionCard answers={answers} />
                 </div>
               </div>
@@ -137,7 +137,7 @@ const Footer = () => {
           )}
         </Box>
       </div>
-      <div className="flex flex-col bg-[#333333] px-5 md:px-72 md:pt-80">
+      <div className="flex flex-col bg-[#333333] px-5 xl:px-72 lg:px-40 xl:pt-80 lg:pt-72">
         <div className=" grid grid-cols-1 md:grid-cols-5">
           <div className="flex flex-col gap-y-2 pb-4 border-b-1 border-[#433753] md:col-span-2">
             <img
