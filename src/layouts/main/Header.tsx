@@ -2,11 +2,21 @@ import React, { useState } from "react";
 import { useThemeMediaQuery } from "../../hooks";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Button, Drawer, Toolbar, Typography } from "@mui/material";
+import useNavigate from "../../hooks/useNavigate";
+
+// const
 
 const Header = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
-  const [activeItem, setActiveItem] = React.useState("Tính năng");
+  const [activeItem, setActiveItem] = React.useState("");
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (item: any) => {
+    setActiveItem(item?.title);
+    navigate(item.url);
+    setOpen(false);
+  };
 
   return (
     <div className="w-full px-4 flex justify-between items-center border-b-1 border-gray-100 sticky top-0 bg-white z-50">
@@ -23,19 +33,44 @@ const Header = () => {
             <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
               <div className="w-64 flex flex-col p-6">
                 {[
-                  "Tính năng",
-                  "Khám phá đề thi",
-                  "Tổ chức thi",
-                  "Luyện thi THPT Quốc Gia",
-                  "Bảng giá",
-                  "Tin tức",
-                  "Liên hệ",
-                ].map((item) => {
-                  const isActive = activeItem === item;
+                  {
+                    title: "Tính năng",
+                    url: "/feature",
+                  },
+                  // {
+                  //   title: "Khám phá đề thi",
+                  //   url: "/",
+                  // },
+                  // {
+                  //   title: "Tổ chức thi",
+                  //   url: "/",
+                  // },
+                  // {
+                  //   title: "Luyện thi THPT Quốc Gia",
+                  //   url: "/",
+                  // },
+                  // {
+                  //   title: "Bảng giá",
+                  //   url: "/",
+                  // },
+                  {
+                    title: "Giới thiệu",
+                    url: "/",
+                  },
+                  {
+                    title: "Tin tức",
+                    url: "/",
+                  },
+                  {
+                    title: "Liên hệ",
+                    url: "/contact",
+                  },
+                ].map((item: any) => {
+                  const isActive = activeItem === item.title;
                   return (
                     <Typography
                       key={item}
-                      onClick={() => setActiveItem(item)}
+                      onClick={() => handleNavigate(item)}
                       sx={{
                         position: "relative",
                         padding: "1rem 0",
@@ -74,7 +109,7 @@ const Header = () => {
                         },
                       }}
                     >
-                      {item}
+                      {item.title}
                     </Typography>
                   );
                 })}
@@ -85,7 +120,7 @@ const Header = () => {
                       background: "linear-gradient(to right, #3b82f6, #a855f7)",
                       borderRadius: "999px",
                       textTransform: "none",
-                        color: "white",
+                      color: "white",
                       width: "100%",
                       px: 3,
                       py: 1,
@@ -103,19 +138,44 @@ const Header = () => {
               <Toolbar sx={{ justifyContent: "center" }}>
                 <div className="flex gap-x-4 items-center">
                   {[
-                    "Tính năng",
-                    "Khám phá đề thi",
-                    "Tổ chức thi",
-                    "Luyện thi THPT Quốc Gia",
-                    "Bảng giá",
-                    "Tin tức",
-                    "Liên hệ",
-                  ].map((item) => {
-                    const isActive = activeItem === item;
+                    {
+                      title: "Tính năng",
+                      url: "/feature",
+                    },
+                    // {
+                    //   title: "Khám phá đề thi",
+                    //   url: "/",
+                    // },
+                    // {
+                    //   title: "Tổ chức thi",
+                    //   url: "/",
+                    // },
+                    // {
+                    //   title: "Luyện thi THPT Quốc Gia",
+                    //   url: "/",
+                    // },
+                    // {
+                    //   title: "Bảng giá",
+                    //   url: "/",
+                    // },
+                    {
+                      title: "Giới thiệu",
+                      url: "/",
+                    },
+                    {
+                      title: "Tin tức",
+                      url: "/",
+                    },
+                    {
+                      title: "Liên hệ",
+                      url: "/contact",
+                    },
+                  ].map((item: any) => {
+                    const isActive = activeItem === item.title;
                     return (
                       <Typography
-                        key={item}
-                        onClick={() => setActiveItem(item)}
+                        key={item.title}
+                        onClick={() => handleNavigate(item)}
                         sx={{
                           position: "relative",
                           cursor: "pointer",
@@ -152,7 +212,7 @@ const Header = () => {
                           },
                         }}
                       >
-                        {item}
+                        {item.title}
                       </Typography>
                     );
                   })}
