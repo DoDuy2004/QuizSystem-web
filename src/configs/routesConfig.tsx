@@ -8,7 +8,7 @@ import Error404Page from "../pages/error/Error404Page";
 import Home from "../pages/home/Home";
 
 const configModules: Record<string, unknown> = import.meta.glob(
-  "/src/app/**/*Route.tsx",
+  "/src/pages/**/*Route.tsx",
   {
     eager: true,
   }

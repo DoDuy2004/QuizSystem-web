@@ -4,7 +4,6 @@ import EditIcon from "@mui/icons-material/Edit";
 
 const FeatureSectionItem = ({ data, index }: any) => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
-  console.log({ data });
 
   return (
     <div className={`${index % 2 ? "bg-white" : "bg-[#f6f8ff]"}`}>
@@ -135,15 +134,6 @@ const FeatureSectionItem = ({ data, index }: any) => {
             )}
           </>
         )}
-        {/* {!isMobile && (
-          <div className="md:w-[65%] md:px-0 px-2">
-            <img
-              src={data?.image}
-              className="lg:w-[90%] w-full h-auto object-contain"
-              alt=""
-            />
-          </div>
-        )} */}
       </div>
     </div>
   );

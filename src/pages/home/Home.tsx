@@ -4,7 +4,7 @@ import TrustedSection from "./components/TrustedSection";
 
 const Home = () => {
   return (
-    <div className="flex flex-col gap-y-12">
+    <div className="flex flex-col gap-y-12 md:mb-0 mb-10">
       <div
         className="bg-cover bg-no-repeat w-full"
         style={{ backgroundImage: `url(/assets/images/BG.1.svg)` }}

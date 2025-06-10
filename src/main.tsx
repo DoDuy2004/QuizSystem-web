@@ -31,3 +31,4 @@ const root = createRoot(container, {
 const router = createBrowserRouter(routes);
 
 root.render(<RouterProvider router={router} />);
+

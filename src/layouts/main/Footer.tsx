@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import { FaFacebookF } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa";
+import { FaYoutube } from "react-icons/fa";
 import DoneIcon from "@mui/icons-material/Done";
 import { useThemeMediaQuery } from "../../hooks";
 
@@ -149,9 +149,9 @@ const Footer = () => {
               Nền tảng thi trắc nghiệm online tốt nhất
             </Typography>
             <div className="flex items-center gap-x-4">
-              <FacebookOutlinedIcon className="text-white" />
-              <YouTubeIcon className="text-white" />
-              <LinkedInIcon className="text-white" />
+              <FaFacebookF className="text-white text-[1.2rem]" />
+              <FaTiktok className="text-white text-[1.2rem]" />
+              <FaYoutube className="text-white text-[1.2rem]" />
             </div>
           </div>
           <div className="flex md:flex-row flex-col pb-4 border-b-1 border-[#433753] md:col-span-3 justify-between">
