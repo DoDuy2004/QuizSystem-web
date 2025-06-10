@@ -9,7 +9,7 @@ const Header = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-full px-4 flex justify-between items-center border-b-1 border-gray-100">
+    <div className="w-full px-4 flex justify-between items-center border-b-1 border-gray-100 sticky top-0 bg-white z-50">
       <img
         className="w-40 h-auto py-4"
         src="/assets/images/logo_1.png"
