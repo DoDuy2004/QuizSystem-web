@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { Provider } from "react-redux";
 import store from "./store/store";
-import Layout from "./layouts/Layout";
+import AppLayout from "./layouts/AppLayout";
 
 function App() {
   // const AppContextValue = {
@@ -11,7 +11,7 @@ function App() {
     <StrictMode>
       {/* <AppContext> */}
       <Provider store={store}>
-        <Layout />
+        <AppLayout />
       </Provider>
       {/* </AppContext> */}
     </StrictMode>

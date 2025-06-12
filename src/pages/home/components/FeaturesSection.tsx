@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { useThemeMediaQuery } from "../../../hooks";
-import FeatureSectionItem from "./FeatureSectionItem";
+import FeatureSectionItem from "../../../components/feature/FeatureSectionItem";
 
 const features = [
   {
@@ -70,7 +70,7 @@ const FeaturesSection = () => {
       </div>
       {features &&
         features.map((feature: any, index: any) => (
-          <FeatureSectionItem data={feature} index={index} />
+          <FeatureSectionItem key={index} data={feature} index={index} />
         ))}
     </div>
   );

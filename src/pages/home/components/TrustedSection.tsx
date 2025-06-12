@@ -111,7 +111,7 @@ const TrustedSection = () => {
       </div>
       <div className="flex lg:flex-row flex-col items-center justify-between lg:gap-x-52 gap-y-6 lg:px-0 px-6">
         {parties?.length > 0 &&
-          parties?.map((party: any) => <FeatureCard partyData={party} />)}
+          parties?.map((party: any, index) => <FeatureCard key={index} partyData={party} />)}
       </div>
     </div>
   );

@@ -24,31 +24,32 @@ const schema: any = yup.object().shape({
     .max(100, "Họ tên không dài quá 100 ký tự"),
   email: yup
     .string()
-    .required("Email is required")
-    .max(100, "Email cannot be longer than 100")
-    .matches(
-      /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
-      "Invalid email format"
-    )
-    .test(
-      "no-consecutive-dots",
-      "Email cannot contain consecutive dots",
-      (value: string) => !value || !/\.{2,}/.test(value.split("@")[0])
-    )
-    .test(
-      "no-special-chars-at-start-or-end",
-      "Email cannot start or end with special characters",
-      (value: string) => {
-        if (!value) return true;
-        const [localPart] = value.split("@");
-        return !/^[._%+-]|[._%+-]$/.test(localPart);
-      }
-    )
-    .test(
-      "no-accented-characters",
-      "Email cannot contain accented characters",
-      (value: string) => !value || /^[\x00-\x7F]+$/.test(value)
-    ),
+    .email("Email không hợp lệ")
+    .required("Email là bắt buộc")
+    .max(100, "Email không thể lớn hơn 100 ký tự"),
+    // .matches(
+    //   /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
+    //   "Invalid email format"
+    // )
+    // .test(
+    //   "no-consecutive-dots",
+    //   "Email cannot contain consecutive dots",
+    //   (value: string) => !value || !/\.{2,}/.test(value.split("@")[0])
+    // )
+    // .test(
+    //   "no-special-chars-at-start-or-end",
+    //   "Email cannot start or end with special characters",
+    //   (value: string) => {
+    //     if (!value) return true;
+    //     const [localPart] = value.split("@");
+    //     return !/^[._%+-]|[._%+-]$/.test(localPart);
+    //   }
+    // )
+    // .test(
+    //   "no-accented-characters",
+    //   "Email cannot contain accented characters",
+    //   (value: string) => !value || /^[\x00-\x7F]+$/.test(value)
+    // ),
   phone: yup
     .string()
     .required("You must enter phone")

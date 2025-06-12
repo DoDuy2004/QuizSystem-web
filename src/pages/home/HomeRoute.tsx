@@ -8,10 +8,6 @@ const HomeRoute: any = {
 //   auth: authRoles.user,
   children: [
     {
-      path: "feature",
-      element: <Home />,
-    },
-    {
       path: "home",
       element: <Home />,
     },
