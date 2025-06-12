@@ -6,6 +6,7 @@ import App from "../App";
 import Error401Page from "../pages/error/Error401Page";
 import Error404Page from "../pages/error/Error404Page";
 import Home from "../pages/home/Home";
+import Signin from "../pages/sign-in/Signin";
 
 const configModules: Record<string, unknown> = import.meta.glob(
   "/src/pages/**/*Route.tsx",
@@ -32,11 +33,11 @@ const routes: any = [
     // auth: settingsConfig.defaultAuth,
     errorElement: <ErrorBoundary />,
     children: [
-        {
-          path: "/",
-          // auth: authRoles.user,
-          element: <Home />,
-        },
+      {
+        path: "/",
+        // auth: authRoles.user,
+        element: <Home />,
+      },
       //   {
       //     path: "/",
       //     auth: authRoles.onlyGuest,

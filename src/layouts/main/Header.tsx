@@ -21,6 +21,7 @@ const Header = () => {
   return (
     <div className="w-full px-4 flex justify-between items-center border-b-1 border-gray-100 sticky top-0 bg-white z-50">
       <img
+        onClick={() => navigate("/")}
         className="w-40 h-auto py-4"
         src="/assets/images/logo_1.png"
         alt=""
@@ -116,6 +117,7 @@ const Header = () => {
                 <div className="py-8 w-full">
                   <Button
                     variant="contained"
+                    onClick={() => navigate("/auth/login")}
                     sx={{
                       background: "linear-gradient(to right, #3b82f6, #a855f7)",
                       borderRadius: "999px",
@@ -218,6 +220,7 @@ const Header = () => {
                   })}
                   <Button
                     variant="contained"
+                    onClick={() => navigate("/auth/login")}
                     sx={{
                       background: "linear-gradient(to right, #3b82f6, #a855f7)",
                       borderRadius: "999px",

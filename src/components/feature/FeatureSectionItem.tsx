@@ -1,14 +1,16 @@
 import { Button, Typography } from "@mui/material";
-import { useThemeMediaQuery } from "../../../hooks";
 import EditIcon from "@mui/icons-material/Edit";
+import { useThemeMediaQuery } from "../../hooks";
 
-const FeatureSectionItem = ({ data, index }: any) => {
+const FeatureSectionItem = ({ data, margin, index }: any) => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   return (
     <div className={`${index % 2 ? "bg-white" : "bg-[#f6f8ff]"}`}>
       <div
-        className={`flex md:flex-row flex-col gap-y-5 gap-x-10 items-center lg:justify-between py-5 md:text-start xl:mx-64 mx-0 lg:mx-44 `}
+        className={`flex md:flex-row flex-col gap-y-5 gap-x-10 items-center lg:justify-between py-5 md:text-start ${
+          margin || "xl:mx-64 mx-0 lg:mx-44"
+        } `}
       >
         {isMobile && (
           <div className="md:w-[65%] md:px-0 px-2">
@@ -59,7 +61,9 @@ const FeatureSectionItem = ({ data, index }: any) => {
               </Typography>
               {data?.descriptions?.length > 0 &&
                 data?.descriptions.map((description: any) => (
-                  <Typography sx={{}}>{description}</Typography>
+                  <Typography key={description} sx={{}}>
+                    {description}
+                  </Typography>
                 ))}
               <Button
                 variant="contained"
@@ -107,7 +111,9 @@ const FeatureSectionItem = ({ data, index }: any) => {
               </Typography>
               {data?.descriptions?.length > 0 &&
                 data?.descriptions.map((description: any) => (
-                  <Typography sx={{}}>{description}</Typography>
+                  <Typography key={description} sx={{}}>
+                    {description}
+                  </Typography>
                 ))}
               <Button
                 variant="contained"

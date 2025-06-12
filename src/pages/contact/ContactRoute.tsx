@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Navigate } from "react-router";
+// import { Navigate } from "react-router";
 
 const Contact = lazy(() => import("./Contact"));
 
