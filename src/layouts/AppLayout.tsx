@@ -1,13 +1,17 @@
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import Header from "./main/Header";
+import MainHeader from "./main/Header";
+import ManageHeader from "./manage/Header";
 import Footer from "./main/Footer";
+import Sidebar from "./manage/Sidebar";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
 
-  const isAdmin = pathname.startsWith("/admin");
+  const isManage = ["/my-account", "/workspace", "/personal"].some((prefix) =>
+    pathname.startsWith(prefix)
+  );
   const isAuth = pathname.startsWith("/auth");
 
   useEffect(() => {
@@ -22,11 +26,12 @@ const AppLayout = () => {
     );
   }
 
-  if (isAdmin) {
+  if (isManage) {
     return (
-      <div className="flex">
-        {/* <Sidebar /> */}
-        <main className="flex-1 p-4 bg-gray-50">
+      <div className="flex w-full">
+        <Sidebar />
+        <main className="flex-1 bg-gray-50 w-full">
+          <ManageHeader />
           <Outlet />
         </main>
       </div>
@@ -36,7 +41,7 @@ const AppLayout = () => {
   // Mặc định là layout chính
   return (
     <div className="w-full">
-      <Header />
+      <MainHeader />
       <Outlet />
       <Footer />
     </div>

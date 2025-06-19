@@ -1,7 +1,7 @@
 import { Button, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { FaUserCog } from "react-icons/fa";
-import FeatureSectionItem from "../../../components/feature/FeatureSectionItem";
+import FeatureSectionItem from "../../../../components/feature/FeatureSectionItem";
 
 const features: any = [
   {
@@ -53,7 +53,7 @@ const TabPanel = ({ icon, title, desc, isActive, index }: any) => {
       style={{
         background: isActive
           ? "linear-gradient(90deg, #3e65fe, #d23cff)"
-          : index % 2 ? "white" : "#f6f8ff",
+          : "",
         color: isActive ? "white" : "black",
       }}
     >
@@ -73,7 +73,11 @@ const TabPanel = ({ icon, title, desc, isActive, index }: any) => {
 const FeatureItem = ({ data, index }: any) => {
   const [currentTab, setCurrentTab] = useState(1);
   return (
-    <div className={`px-64 py-24 flex flex-col gap-y-4 w-full ${!(index % 2) ? "bg-white" : "bg-[#f6f8ff]"}`}>
+    <div
+      className={`px-64 py-24 flex flex-col gap-y-4 w-full ${
+        !(index % 2) ? "bg-white" : "bg-[#f6f8ff]"
+      }`}
+    >
       <Button
         sx={{
           position: "relative",
@@ -113,14 +117,23 @@ const FeatureItem = ({ data, index }: any) => {
       </Typography>
 
       <div className="w-full mt-10 flex flex-col gap-y-8">
-        <div className={`flex items-center rounded-xl overflow-hidden`}>
+        <div
+          className={`flex items-center rounded-xl overflow-hidden ${
+            index % 2 ? "bg-white" : "bg-[#f6f8ff]"
+          }`}
+        >
           <TabPanel isActive={currentTab === 0} index={index} />
           <TabPanel isActive={currentTab === 1} index={index} />
           <TabPanel isActive={currentTab === 2} index={index} />
           <TabPanel isActive={currentTab === 3} index={index} />
         </div>
         <div className="rounded-xl overflow-hidden">
-          <FeatureSectionItem key={index} data={features[0]} index={index} margin={"mx-10"} />
+          <FeatureSectionItem
+            key={index}
+            data={features[0]}
+            index={index}
+            margin={"mx-10"}
+          />
         </div>
       </div>
     </div>
