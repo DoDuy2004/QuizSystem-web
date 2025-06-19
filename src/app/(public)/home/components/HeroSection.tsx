@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ReactTyped } from "react-typed";
-import { useThemeMediaQuery } from "../../../hooks";
+import { useThemeMediaQuery } from "../../../../hooks";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 

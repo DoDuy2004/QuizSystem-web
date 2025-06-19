@@ -1,6 +1,6 @@
 import { Button, Divider, TextField, Typography } from "@mui/material";
 // import React from "react";
-import { useThemeMediaQuery } from "../../hooks";
+import { useThemeMediaQuery } from "../../../hooks";
 import { FaFacebookF } from "react-icons/fa";
 import { FaTiktok } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
@@ -27,29 +27,6 @@ const schema: any = yup.object().shape({
     .email("Email không hợp lệ")
     .required("Email là bắt buộc")
     .max(100, "Email không thể lớn hơn 100 ký tự"),
-    // .matches(
-    //   /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/,
-    //   "Invalid email format"
-    // )
-    // .test(
-    //   "no-consecutive-dots",
-    //   "Email cannot contain consecutive dots",
-    //   (value: string) => !value || !/\.{2,}/.test(value.split("@")[0])
-    // )
-    // .test(
-    //   "no-special-chars-at-start-or-end",
-    //   "Email cannot start or end with special characters",
-    //   (value: string) => {
-    //     if (!value) return true;
-    //     const [localPart] = value.split("@");
-    //     return !/^[._%+-]|[._%+-]$/.test(localPart);
-    //   }
-    // )
-    // .test(
-    //   "no-accented-characters",
-    //   "Email cannot contain accented characters",
-    //   (value: string) => !value || /^[\x00-\x7F]+$/.test(value)
-    // ),
   phone: yup
     .string()
     .required("You must enter phone")

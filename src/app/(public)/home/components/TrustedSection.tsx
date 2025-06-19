@@ -1,6 +1,6 @@
 import { Button, Typography } from "@mui/material";
-import Carousel from "../../../components/common/Carousel/Carousel";
-import { useThemeMediaQuery } from "../../../hooks";
+import Carousel from "../../../../components/common/Carousel/Carousel";
+import { useThemeMediaQuery } from "../../../../hooks";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import SwitchAccountOutlinedIcon from "@mui/icons-material/SwitchAccountOutlined";
 import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
@@ -52,9 +52,11 @@ export const FeatureCard = ({ partyData }: any) => {
             <CottageOutlinedIcon sx={{ fontSize: "18px" }} />
           )}
         </span>
-        <Typography sx={{fontWeight: "600"}}>{partyData?.name}</Typography>
+        <Typography sx={{ fontWeight: "600" }}>{partyData?.name}</Typography>
       </div>
-      <Typography sx={{ fontSize: "14px", lineHeight: "1.6rem" }}>{partyData?.content}</Typography>
+      <Typography sx={{ fontSize: "14px", lineHeight: "1.6rem" }}>
+        {partyData?.content}
+      </Typography>
       <Button
         sx={{
           padding: 0,
@@ -111,7 +113,9 @@ const TrustedSection = () => {
       </div>
       <div className="flex lg:flex-row flex-col items-center justify-between lg:gap-x-52 gap-y-6 lg:px-0 px-6">
         {parties?.length > 0 &&
-          parties?.map((party: any, index) => <FeatureCard key={index} partyData={party} />)}
+          parties?.map((party: any, index) => (
+            <FeatureCard key={index} partyData={party} />
+          ))}
       </div>
     </div>
   );

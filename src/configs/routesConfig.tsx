@@ -1,15 +1,13 @@
-// Dynamically import all *ConfigConfig.tsx files from the app folder
-// import { FuseRouteConfigType, FuseRoutesType } from "@fuse/utils/FuseUtils";
 import { Navigate } from "react-router";
-import ErrorBoundary from "../pages/error/ErrorBoundary";
-import App from "../App";
-import Error401Page from "../pages/error/Error401Page";
-import Error404Page from "../pages/error/Error404Page";
-import Home from "../pages/home/Home";
-import Signin from "../pages/sign-in/Signin";
+import ErrorBoundary from "../app/(public)/error/ErrorBoundary";
+import App from "../app/App";
+import Error401Page from "../app/(public)/error/Error401Page";
+import Error404Page from "../app/(public)/error/Error404Page";
+import Home from "../app/(public)/home/Home";
+// import Signin from "../app/pages/sign-in/Signin";
 
 const configModules: Record<string, unknown> = import.meta.glob(
-  "/src/pages/**/*Route.tsx",
+  "/src/app/**/*Route.tsx",
   {
     eager: true,
   }

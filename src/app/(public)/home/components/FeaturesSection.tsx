@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
-import { useThemeMediaQuery } from "../../../hooks";
-import FeatureSectionItem from "../../../components/feature/FeatureSectionItem";
+import { useThemeMediaQuery } from "../../../../hooks";
+import FeatureSectionItem from "../../../../components/feature/FeatureSectionItem";
 
 const features = [
   {
