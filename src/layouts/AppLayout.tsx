@@ -4,6 +4,7 @@ import MainHeader from "./main/Header";
 import ManageHeader from "./manage/Header";
 import Footer from "./main/Footer";
 import Sidebar from "./manage/Sidebar";
+import FuseMessage from "../components/FuseMessage";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -22,6 +23,7 @@ const AppLayout = () => {
     return (
       <div className="h-screen w-full bg-[#f1f5f9] flex justify-center items-center">
         <Outlet />
+        <FuseMessage />
       </div>
     );
   }
@@ -34,6 +36,7 @@ const AppLayout = () => {
           <ManageHeader />
           <Outlet />
         </main>
+        <FuseMessage />
       </div>
     );
   }
@@ -44,6 +47,7 @@ const AppLayout = () => {
       <MainHeader />
       <Outlet />
       <Footer />
+      <FuseMessage />
     </div>
   );
 };

@@ -34,7 +34,7 @@ const Profile = () => {
           </div>
           <div className="col-span-4">
             <img
-              className="w-32 h-32 rounded-full mx-auto"
+              className="w-32 h-32 rounded-full mx-auto object-cover"
               src="/assets/images/avatars/mrs.fresh.jpg"
               alt="Duy Do"
             />
@@ -192,3 +192,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

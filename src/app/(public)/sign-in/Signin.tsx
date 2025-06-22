@@ -12,6 +12,11 @@ import {
 // import { useThemeMediaQuery } from "../../hooks";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { showMessage } from "../../../components/FuseMessage/fuseMessageSlice";
+import { useDispatch } from "react-redux";
+import { type AppDispatch } from "../../../store/store";
+import { errorAnchor } from "../../../constants/confirm";
+import jwtService from "../../../services/auth/jwtService";
 
 const schema: any = yup.object().shape({
   username: yup.string().required("Vui lòng nhập username"),
@@ -35,8 +40,9 @@ type FormType = {
 };
 
 const Signin = () => {
-  const [loading, setLoadin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   const { handleSubmit, formState, watch, control, setValue, getValues } =
@@ -48,8 +54,30 @@ const Signin = () => {
 
   const { isValid, errors } = formState;
 
+  const form = watch();
+
   const onSubmit = (data: any) => {
+    const { username, password } = data;
+
     console.log({ data });
+
+    setLoading(true);
+    jwtService
+      .signInWithUsernameAndPassword(username, password)
+      .then((user: any) => {
+        setLoading(false);
+        // if (form?.remember) {
+        //   localStorage.setItem("username", username);
+        // } else {
+        //   localStorage.setItem("username", "");
+        // }
+      })
+      .catch((err: any) => {
+        if (err) {
+          dispatch(showMessage({message: "Tên đăng nhập hoặc mật khẩu không đúng, vui lòng thử lại", ...errorAnchor}));
+        }
+        setLoading(false);
+      });
   };
 
   return (
