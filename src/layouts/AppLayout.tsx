@@ -9,7 +9,6 @@ import FuseMessage from "../components/FuseMessage";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
-
   const isManage = ["/my-account", "/workspace", "/personal"].some((prefix) =>
     pathname.startsWith(prefix)
   );

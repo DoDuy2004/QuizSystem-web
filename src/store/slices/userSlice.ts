@@ -73,7 +73,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const selectUser = ({ userSlice }: any) => userSlice;
+export const selectUser = ({ userSlice }: any) => userSlice?.data;
 
 export default userSlice.reducer;
 

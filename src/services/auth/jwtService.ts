@@ -139,8 +139,10 @@ class JwtService {
     const role = auth.user?.roles?.[0]?.name.replace("ROLE_", "").toLowerCase();
     const userId = auth.user?.id;
 
+    // console.log({auth})
+
     const currentUserResponse = await axios
-      .get(`${import.meta.env.DOMAIN}/api/user/current`, {
+      .get(`${DOMAIN}/api/user/current`, {
         headers: {
           userId,
           Authorization: `Bearer ${token}`,
@@ -157,8 +159,6 @@ class JwtService {
         displayName: `${currentUserResponse?.data?.data?.fullName}`,
       },
       role: [role],
-      shortcuts: [],
-      permissions: [],
     };
 
     return user;
@@ -167,7 +167,7 @@ class JwtService {
   signInWithToken = async (): Promise<User> => {
     return new Promise((resolve, reject) => {
       axios
-        .post(`${import.meta.env.VITE_AUTH_DOMAIN}/api/auth/token`, {
+        .post(`${DOMAIN}/api/auth/token`, {
           token: this.getToken(),
         })
         .then(async (response: AxiosResponse<ApiResponse>) => {
@@ -178,7 +178,9 @@ class JwtService {
             this.emit("onNoAccessToken");
           }
           if (response.data.data && response.data.data.user) {
-            const user = await this.getCurrentSession(response.data.data);
+            const user = await this.getCurrentSession(
+              response?.data?.data?.user
+            );
             resolve(user);
             this.emit("onLogin", user);
           } else {
@@ -211,8 +213,9 @@ class JwtService {
 
           try {
             if (response?.data?.data?.user) {
-              const user = await this.getCurrentSession(response.data.data);
+              const user = await this.getCurrentSession(response?.data?.data);
               resolve(user);
+              // console.log({user: response?.data?.data?.user})
               this.emit("onLogin", user);
             } else {
               reject(response.data);
@@ -234,10 +237,11 @@ class JwtService {
   logout = (): Promise<ApiResponse> => {
     return new Promise((resolve, reject) => {
       axios
-        .post(`${import.meta.env.DOMAIN}/api/auth/logout`)
+        .post(`${DOMAIN}/api/auth/logout`)
         .then((response: AxiosResponse<ApiResponse>) => {
           this.setSession(null);
           this.emit("onLogout", "Logged out");
+          resolve(response.data);
           return response;
         })
         .catch((error: AxiosError) => {
