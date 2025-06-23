@@ -16,17 +16,47 @@ import SearchInput from "../../components/SearchInput";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useThemeMediaQuery } from "../../hooks";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../../store/slices/userSlice";
+import jwtService from "../../services/auth/jwtService";
+import { successAnchor } from "../../constants/confirm";
+import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
+import { type AppDispatch } from "../../store/store";
+import { useNavigate } from "react-router-dom";
+import FullscreenLoader from "../../components/FullScreenLoader";
 
 const Header = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
+  const userData = useSelector(selectUser);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  // console.log({ userData });
+  const handleLogout = () => {
+    handleClose();
+    setLoading(true);
+    jwtService.logout().then((res) => {
+      console.log({res})
+      dispatch(
+        showMessage({ message: "Đăng xuất thành công", ...successAnchor })
+      );
+      setLoading(false);
+      navigate("/auth/login");
+    });
+  };
+
+  if (loading) {
+    return <FullscreenLoader open={loading} />;
+  }
 
   return (
     <div>
@@ -38,9 +68,15 @@ const Header = () => {
               <Avatar alt="Duy Do" src="" />
               <div>
                 <Typography sx={{ fontSize: 14, color: "#3E65FE", width: 100 }}>
-                  Do Dinh Duy
+                  {userData?.fullName}
                 </Typography>
-                <Typography sx={{ fontSize: 12 }}>Sinh vien</Typography>
+                <Typography sx={{ fontSize: 12 }}>
+                  {userData?.role === "TEACHER"
+                    ? "Giảng viên"
+                    : userData?.role === "STUDENT"
+                    ? "Sinh viên"
+                    : ""}
+                </Typography>
               </div>
             </>
           )}
@@ -93,7 +129,7 @@ const Header = () => {
           <ListItemText>Hồ sơ</ListItemText>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ paddingY: 0.5 }} onClick={handleClose}>
+        <MenuItem sx={{ paddingY: 0.5 }} onClick={handleLogout}>
           <ListItemIcon>
             <ExitToAppIcon sx={{ color: "orange" }} />
           </ListItemIcon>

@@ -9,9 +9,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-// import { useThemeMediaQuery } from "../../hooks";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { showMessage } from "../../../components/FuseMessage/fuseMessageSlice";
+import { useDispatch } from "react-redux";
+import { type AppDispatch } from "../../../store/store";
+import { errorAnchor, successAnchor } from "../../../constants/confirm";
+import jwtService from "../../../services/auth/jwtService";
+import { useNavigate } from "react-router-dom";
 
 const schema: any = yup.object().shape({
   username: yup.string().required("Vui lòng nhập username"),
@@ -19,13 +24,13 @@ const schema: any = yup.object().shape({
     .string()
     .required("Vui lòng nhập mật khẩu")
     .min(6)
-    .matches(/[a-z]/, "Mật khẩu phải có ít nhất 1 chữ thường")
-    .matches(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
-    .matches(/\d/, "Mật khẩu phải có ít nhất 1 chữ số")
-    .matches(
-      /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/?]/,
-      "Mật khẩu phải có ít nhất 1 ký tự đặc biệt"
-    ),
+    // .matches(/[a-z]/, "Mật khẩu phải có ít nhất 1 chữ thường")
+    // .matches(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
+    // .matches(/\d/, "Mật khẩu phải có ít nhất 1 chữ số")
+    // .matches(
+    //   /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    //   "Mật khẩu phải có ít nhất 1 ký tự đặc biệt"
+    // ),
 });
 
 type FormType = {
@@ -35,9 +40,11 @@ type FormType = {
 };
 
 const Signin = () => {
-  const [loading, setLoadin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
+  const navigate = useNavigate();
 
   const { handleSubmit, formState, watch, control, setValue, getValues } =
     useForm<FormType>({
@@ -48,8 +55,33 @@ const Signin = () => {
 
   const { isValid, errors } = formState;
 
+  const form = watch();
+
   const onSubmit = (data: any) => {
-    console.log({ data });
+    const { username, password } = data;
+
+    setLoading(true);
+    jwtService
+      .signInWithUsernameAndPassword(username, password)
+      .then((user: any) => {
+        setLoading(false);
+        // if (form?.remember) {
+        //   localStorage.setItem("username", username);
+        // } else {
+        //   localStorage.setItem("username", "");
+        // }
+        dispatch(showMessage({ message: "Đăng nhập thành công", ...successAnchor }));
+        console.log({ user })
+        if (user?.data) {
+          navigate("/my-account/profile")
+        }
+      })
+      .catch((err: any) => {
+        if (err) {
+          dispatch(showMessage({message: "Tên đăng nhập hoặc mật khẩu không đúng, vui lòng thử lại", ...errorAnchor}));
+        }
+        setLoading(false);
+      });
   };
 
   return (
