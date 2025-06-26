@@ -7,173 +7,240 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { useThemeMediaQuery } from "../../../../../hooks";
+import { useEffect, useState } from "react";
+import { useDeepCompareEffect, useThemeMediaQuery } from "../../../../../hooks";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import * as yup from "yup";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import UserModel from "../../../../../models/UserModel";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../../../store/slices/userSlice";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import _ from "lodash";
+
+const schema: any = yup.object().shape({
+  email: yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
+  phoneNumber: yup.string().required("Số điện thoại là bắt buộc"),
+  fullName: yup.string().required("Họ tên là bắt buộc"),
+  gender: yup.string(),
+  birthday: yup.date().nullable(),
+});
 
 const Profile = () => {
+  const user = useSelector(selectUser);
   const [loading, setLoading] = useState(false);
-  const isValid = false;
+  const [initialValues, setInitialValues] = useState(UserModel({}));
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { dirtyFields, errors, isValid },
+  } = useForm({
+    mode: "onChange",
+    resolver: yupResolver(schema),
+    defaultValues: initialValues,
+  });
+
+  useEffect(() => {
+    if (user) {
+      const transformedUser = {
+        ...UserModel(user),
+        gender: user.gender ? "MALE" : "FEMALE",
+        birthday: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
+      };
+
+      reset(transformedUser); // reset form với dữ liệu mới
+    }
+  }, [user]);
+
+  const onSubmit = (data: any) => {
+    console.log("Submit data:", data);
+  };
 
   return (
     <div className="col-span-5 bg-white rounded-md flex flex-col gap-y-4 shadow px-6 py-4">
-      <form action="">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Avatar */}
         <div className="grid grid-cols-6 border-b-1 border-[#e4e3e3] py-6 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Ảnh đại diện
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
-              Chọn ản đại diện cho hồ sơ của bạn
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+              Chọn ảnh đại diện cho hồ sơ của bạn
             </Typography>
           </div>
           <div className="col-span-4">
             <img
               className="w-32 h-32 rounded-full mx-auto object-cover"
               src="/assets/images/avatars/mrs.fresh.jpg"
-              alt="Duy Do"
+              alt="avatar"
             />
           </div>
         </div>
+
+        {/* Email */}
         <div className="grid grid-cols-6 py-4 pt-8 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Email
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
               Nhập email của bạn
             </Typography>
           </div>
           <div className="col-span-4">
-            <TextField
-              fullWidth
-              label={
-                <>
-                  Email <span className="text-red-500">*</span>
-                </>
-              }
-            ></TextField>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }: any) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Email *"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                />
+              )}
+            />
           </div>
         </div>
+
+        {/* Phone */}
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Số điện thoại
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
               Nhập số điện thoại của bạn
             </Typography>
           </div>
           <div className="col-span-4">
-            <TextField
-              fullWidth
-              variant="outlined"
-              label={
-                <>
-                  Số điện thoại <span className="text-red-500">*</span>
-                </>
-              }
-            ></TextField>
+            <Controller
+              name="phoneNumber"
+              control={control}
+              render={({ field }: any) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Số điện thoại *"
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                />
+              )}
+            />
           </div>
         </div>
+
+        {/* Full name */}
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Họ tên
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
               Nhập họ tên của bạn
             </Typography>
           </div>
           <div className="col-span-4">
-            <TextField
-              fullWidth
-              variant="outlined"
-              label={
-                <>
-                  Họ tên <span className="text-red-500">*</span>
-                </>
-              }
-            ></TextField>
+            <Controller
+              name="fullName"
+              control={control}
+              render={({ field }: any) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Họ tên *"
+                  error={!!errors.fullName}
+                  helperText={errors.fullName?.message}
+                />
+              )}
+            />
           </div>
         </div>
+
+        {/* Gender */}
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Giới tính
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
-              Chọn Giới tính của bạn của bạn
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+              Chọn giới tính của bạn
             </Typography>
           </div>
           <div className="col-span-4">
-            <FormControl fullWidth variant="outlined">
-              <InputLabel id="gender-label">
-                Giới tính <span className="text-red-500">*</span>
-              </InputLabel>
-              <Select
-                labelId="gender-label"
-                id="gender"
-                // value={gender}
-                // onChange={handleChange}
-                label={
-                  <>
-                    Giới tính <span>*</span>
-                  </>
-                } // phải có label trùng với InputLabel
-              >
-                <MenuItem value={"MALE"}>Nam</MenuItem>
-                <MenuItem value={"FEMALE"}>Nữ</MenuItem>
-              </Select>
-            </FormControl>
+            <Controller
+              name="gender"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel id="gender-label">Giới tính *</InputLabel>
+                  <Select
+                    {...field}
+                    labelId="gender-label"
+                    label="Giới tính *"
+                    error={!!errors.gender}
+                  >
+                    <MenuItem value="MALE">Nam</MenuItem>
+                    <MenuItem value="FEMALE">Nữ</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            />
           </div>
         </div>
+
+        {/* Birthday */}
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Ngày sinh
             </Typography>
-            <Typography
-              sx={{ fontSize: 14, color: "#6B7280", fontWeight: 600 }}
-            >
+            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
               Nhập ngày sinh của bạn
             </Typography>
           </div>
           <div className="col-span-4">
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DateTimePicker
-                className="w-full"
-                // value={value}
-                // onChange={(newValue) => setValue(newValue)}
-                slotProps={{
-                  textField: { fullWidth: true },
-                }}
+              <Controller
+                name="birthday"
+                control={control}
+                defaultValue={null}
+                render={({ field }: any) => (
+                  <DatePicker
+                    {...field}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        error: !!errors.birthday,
+                        helperText: errors.birthday?.message,
+                      },
+                    }}
+                  />
+                )}
               />
             </LocalizationProvider>
           </div>
         </div>
+
+        {/* Submit */}
         <div className="w-full flex justify-end pb-4">
           <Button
             variant="contained"
-            disabled={!isValid || loading}
+            disabled={_.isEmpty(dirtyFields) || !isValid || loading}
             type="submit"
             sx={{
-              background: !isValid
-                ? "gray"
-                : "linear-gradient(to right, #3b82f6, #a855f7)",
+              background:
+                !isValid || loading || _.isEmpty(dirtyFields)
+                  ? "gray"
+                  : "linear-gradient(to right, #3b82f6, #a855f7)",
               borderRadius: "999px",
               textTransform: "none",
               color: "white",
@@ -183,7 +250,7 @@ const Profile = () => {
               marginLeft: "auto",
             }}
           >
-            Cập nhập
+            Cập nhật
           </Button>
         </div>
       </form>
@@ -192,4 +259,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

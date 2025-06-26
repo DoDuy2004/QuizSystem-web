@@ -5,6 +5,7 @@ import ManageHeader from "./manage/Header";
 import Footer from "./main/Footer";
 import Sidebar from "./manage/Sidebar";
 import FuseMessage from "../components/FuseMessage";
+import ConfirmationDialog from "../dialogs/confirmation-dialog/ConfirmationDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -36,6 +37,7 @@ const AppLayout = () => {
           <Outlet />
         </main>
         <FuseMessage />
+        <ConfirmationDialog />
       </div>
     );
   }

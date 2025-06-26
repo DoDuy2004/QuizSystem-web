@@ -12,6 +12,7 @@ import { showMessage } from "../components/FuseMessage/fuseMessageSlice";
 import { type AppDispatch } from "../store/store";
 import { setUser, userLoggedOut } from "../store/slices/userSlice";
 import { Box, CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   isAuthenticated: boolean | undefined;
@@ -29,6 +30,7 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
   );
   const [waitAuthCheck, setWaitAuthCheck] = useState<boolean>(true);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     jwtService.on("onAutoLogin", () => {
@@ -40,6 +42,7 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
         .catch((error: any) => {
           pass(error.message);
         });
+      navigate("/my-account/profile");
     });
 
     jwtService.on("networkError", () => {
@@ -56,19 +59,23 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
 
     jwtService.on("onLogin", (user: any) => {
       success(user);
+      navigate("/my-account/profile");
     });
 
     jwtService.on("onLogout", () => {
       dispatch(userLoggedOut());
+      navigate("/auth/login");
     });
 
     jwtService.on("onAutoLogout", (message: string) => {
       pass(message);
       dispatch(userLoggedOut());
+      navigate("/auth/login");
     });
 
     jwtService.on("onNoAccessToken", () => {
       pass();
+      navigate("/auth/login");
     });
 
     jwtService.init();
@@ -78,7 +85,7 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
         dispatch(showMessage({ message }));
       }
 
-      console.log("user: ", user);
+      // console.log("user: ", user);
 
       Promise.all([dispatch(setUser(user))]).then(() => {
         setWaitAuthCheck(false);

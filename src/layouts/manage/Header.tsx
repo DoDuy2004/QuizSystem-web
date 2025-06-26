@@ -23,7 +23,7 @@ import { successAnchor } from "../../constants/confirm";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { type AppDispatch } from "../../store/store";
 import { useNavigate } from "react-router-dom";
-import FullscreenLoader from "../../components/FullScreenLoader";
+import FullscreenLoader from "../../components/FullscreenLoader";
 
 const Header = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
@@ -45,12 +45,16 @@ const Header = () => {
     handleClose();
     setLoading(true);
     jwtService.logout().then((res) => {
-      console.log({res})
+      console.log({ res });
       dispatch(
         showMessage({ message: "Đăng xuất thành công", ...successAnchor })
       );
-      setLoading(false);
-      navigate("/auth/login");
+      const timeoutId = setTimeout(() => {
+        navigate("/auth/login");
+        setLoading(false);
+      }, 2000);
+
+      return () => clearTimeout(timeoutId);
     });
   };
 

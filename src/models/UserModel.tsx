@@ -10,15 +10,14 @@ function UserModel(data?: any) {
     email: "",
     phoneNumber: "",
     gender: true,
-    dateOfBirth: "",
+    dateOfBirth: null,
     avatarUrl: "",
     status: null,
-    passwordHash: "",
     createdAt: "",
     role: null,
-    code: "",
-    isFirstTimeLogin: null,
-    facutly: "",
+    // code: "",
+    // isFirstTimeLogin: null,
+    // facutly: "",
   });
 }
 
