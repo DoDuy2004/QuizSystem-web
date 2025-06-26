@@ -64,17 +64,17 @@ const Signin = () => {
     jwtService
       .signInWithUsernameAndPassword(username, password)
       .then((user: any) => {
-        setLoading(false);
         // if (form?.remember) {
         //   localStorage.setItem("username", username);
         // } else {
         //   localStorage.setItem("username", "");
         // }
-        dispatch(showMessage({ message: "Đăng nhập thành công", ...successAnchor }));
-        console.log({ user })
+        // console.log({ user })
         if (user?.data) {
           navigate("/my-account/profile")
         }
+        dispatch(showMessage({ message: "Đăng nhập thành công", ...successAnchor }));
+        setLoading(false);
       })
       .catch((err: any) => {
         if (err) {

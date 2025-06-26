@@ -7,7 +7,7 @@ const User = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="px-8 py-4 flex flex-col gap-y-6">
+    <div className="px-8 py-4 flex flex-col gap-y-6 h-screen overflow-y-auto">
       <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
         Cài đặt tài khoản
       </Typography>

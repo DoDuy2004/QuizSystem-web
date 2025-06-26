@@ -1,15 +1,56 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, InputAdornment, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useThemeMediaQuery } from "../../../../../hooks";
+import * as yup from "yup";
+import { Controller, useForm } from "react-hook-form";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+const defaultValues = {};
+
+const schema: any = yup.object().shape({
+  currentPassword: yup.string().required("Vui lòng nhập mật khẩu hiện tại"),
+  newPassword: yup
+    .string()
+    .required("Vui lòng nhập mật khẩu")
+    .min(8, "Mật khẩu mới phải có tối thiểu 8 ký tự")
+    .matches(/[a-z]/, "Mật khẩu phải có ít nhất 1 chữ thường")
+    .matches(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
+    .matches(/\d/, "Mật khẩu phải có ít nhất 1 chữ số")
+    .matches(
+      /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/?]/,
+      "Mật khẩu phải có ít nhất 1 ký tự đặc biệt"
+    ),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("newPassword")], "Mật khẩu xác nhận không khớp")
+    .required("Vui lòng xác nhận mật khẩu"),
+});
 
 const ChangePassword = () => {
   const [loading, setLoading] = useState(false);
-  const isValid = false;
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { handleSubmit, formState, watch, control, setValue, getValues }: any =
+    useForm({
+      mode: "onChange",
+      defaultValues,
+      resolver: yupResolver(schema),
+    });
+
+  const { isValid, errors, dirtyFields } = formState;
+
+  const onSubmit = (data: any) => {
+    console.log({ data });
+  };
 
   return (
     <div className="col-span-5 bg-white rounded-md flex flex-col gap-y-4 shadow px-6 py-4">
-      <form action="">
+      <form action="" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-6">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
@@ -17,15 +58,41 @@ const ChangePassword = () => {
             </Typography>
           </div>
           <div className="col-span-6">
-            <TextField
-              fullWidth
-              variant="outlined"
-              // label={
-              //   <>
-              //     Mật khẩu hiện tại <span className="text-red-500">*</span>
-              //   </>
-              // }
-            ></TextField>
+            <Controller
+              name="currentPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  className=""
+                  type={showCurrentPassword ? "text" : "password"}
+                  error={!!errors.currentPassword}
+                  helperText={errors?.currentPassword?.message}
+                  variant="outlined"
+                  disabled={loading}
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {showCurrentPassword ? (
+                            <VisibilityIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowCurrentPassword(false)}
+                            />
+                          ) : (
+                            <VisibilityOffIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowCurrentPassword(true)}
+                            />
+                          )}
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
         <div className="grid grid-cols-6 py-4 gap-4">
@@ -35,33 +102,85 @@ const ChangePassword = () => {
             </Typography>
           </div>
           <div className="col-span-6">
-            <TextField
-              fullWidth
-              variant="outlined"
-              // label={
-              //   <>
-              //     Mật khẩu mới <span className="text-red-500">*</span>
-              //   </>
-              // }
-            ></TextField>
+            <Controller
+              name="newPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  className=""
+                  type={showNewPassword ? "text" : "password"}
+                  error={!!errors.newPassword}
+                  helperText={errors?.newPassword?.message}
+                  variant="outlined"
+                  disabled={loading}
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {showNewPassword ? (
+                            <VisibilityIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowNewPassword(false)}
+                            />
+                          ) : (
+                            <VisibilityOffIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowNewPassword(true)}
+                            />
+                          )}
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-6">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Xác nhận mật khẩu 
+              Xác nhận mật khẩu
             </Typography>
           </div>
           <div className="col-span-6">
-            <TextField
-              fullWidth
-              variant="outlined"
-              // label={
-              //   <>
-              //     Xác nhận mật khẩu <span className="text-red-500">*</span>
-              //   </>
-              // }
-            ></TextField>
+            <Controller
+              name="confirmPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  className=""
+                  type={showConfirmPassword ? "text" : "password"}
+                  error={!!errors.confirmPassword}
+                  helperText={errors?.confirmPassword?.message}
+                  variant="outlined"
+                  disabled={loading}
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {showConfirmPassword ? (
+                            <VisibilityIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowConfirmPassword(false)}
+                            />
+                          ) : (
+                            <VisibilityOffIcon
+                              sx={{ cursor: "pointer" }}
+                              onClick={() => setShowConfirmPassword(true)}
+                            />
+                          )}
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
         <div className="w-full flex justify-end pb-4">

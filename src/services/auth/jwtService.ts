@@ -179,7 +179,7 @@ class JwtService {
           }
           if (response.data.data && response.data.data.user) {
             const user = await this.getCurrentSession(
-              response?.data?.data?.user
+              response?.data?.data
             );
             resolve(user);
             this.emit("onLogin", user);

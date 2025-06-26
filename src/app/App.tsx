@@ -9,15 +9,17 @@ function App() {
   //   routes,
   // };
   return (
-    <StrictMode>
-      {/* <AppContext> */}
-      <Provider store={store}>
-        <AuthProvider>
-          <AppLayout />
-        </AuthProvider>
-      </Provider>
-      {/* </AppContext> */}
-    </StrictMode>
+    <>
+      <StrictMode>
+        {/* <AppContext> */}
+        <Provider store={store}>
+          <AuthProvider>
+            <AppLayout />
+          </AuthProvider>
+        </Provider>
+        {/* </AppContext> */}
+      </StrictMode>
+    </>
   );
 }
 

@@ -6,7 +6,7 @@ interface LoadingProps {
   open: boolean;
 }
 
-const FullscreenLoader: React.FC<LoadingProps> = ({ open }) => {
+const FullscreenLoader: React.FC<LoadingProps> = ({ open }: any) => {
   return (
     <Backdrop
       sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}

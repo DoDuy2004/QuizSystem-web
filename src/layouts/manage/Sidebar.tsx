@@ -13,26 +13,23 @@ import {
 } from "@mui/material";
 import {
   Person,
-  Explore,
   Home,
-  AccessTime,
-  Favorite,
   AssignmentTurnedIn,
-  Whatshot,
-  ExpandLess,
   ExpandMore,
   Description,
   School,
-  Category,
   EmojiEvents,
-  Settings,
-  ChevronLeft,
   ChevronRight,
+  ChevronLeft,
   SupportAgent,
 } from "@mui/icons-material";
+import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { useThemeMediaQuery } from "../../hooks";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../store/slices/userSlice";
+import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
@@ -42,6 +39,7 @@ const Sidebar = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuItems, setMenuItems] = useState([]);
+  const user = useSelector(selectUser);
   const open = Boolean(anchorEl);
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -60,23 +58,55 @@ const Sidebar = () => {
   };
 
   const personalItems = [
-    { icon: <Explore />, label: "Khám phá đề thi" },
-    { icon: <Home />, label: "Thư viện của tôi" },
-    { icon: <AccessTime />, label: "Truy cập gần đây" },
-    { icon: <Favorite />, label: "Đề thi yêu thích" },
-    { icon: <AssignmentTurnedIn />, label: "Kết quả thi của tôi" },
-    { icon: <Whatshot sx={{ color: "orange" }} />, label: "BXH thi đua" },
+    {
+      icon: <PersonIcon />,
+      label: "Thông tin tài khoản",
+      path: "/my-account/profile",
+      roles: ["TEACHER", "STUDENT"],
+    },
+    // { icon: <Home />, label: "Thư viện của tôi" },
+    // { icon: <AccessTime />, label: "Truy cập gần đây" },
+    // { icon: <Favorite />, label: "Đề thi yêu thích" },
+    {
+      icon: <AssignmentTurnedIn />,
+      label: "Kết quả thi",
+      path: "/exam-result",
+      roles: ["STUDENT"],
+    },
   ];
 
   const managementItems = [
-    { icon: <Description />, label: "Đề thi" },
-    { icon: <School />, label: "Lớp học tập" },
-    { icon: <Category />, label: "Môn học" },
-    { icon: <EmojiEvents />, label: "Ngân hàng câu hỏi" },
-    { icon: <Settings />, label: "Cài đặt" },
+    {
+      icon: <Description />,
+      label: "Đề thi",
+      path: "/workspace/exam",
+      roles: ["TEACHER"],
+    },
+    {
+      icon: <School />,
+      label: "Lớp học tập",
+      path: "/workspace/class",
+      roles: ["TEACHER", "STUDENT"],
+    },
+    {
+      icon: <Home />,
+      label: "Phòng thi",
+      path: "/workspace/exam-room",
+      roles: ["TEACHER", "STUDENT"],
+    },
+    // { icon: <Category />, label: "Môn học" },
+    {
+      icon: <EmojiEvents />,
+      label: "Ngân hàng câu hỏi",
+      path: "/workspace/question-bank",
+      roles: ["TEACHER"],
+    },
+    // { icon: <Settings />, label: "Cài đặt" },
   ];
 
   if (isMobile) return;
+
+  console.log({ user });
 
   return (
     <>
@@ -102,9 +132,13 @@ const Sidebar = () => {
             className="w-11 h-11"
             alt=""
           />
-          {!collapsed && !isAnimating && <Typography sx={{fontSize: "25.6px", fontWeight: 600}}>EduQuiz</Typography>}
+          {!collapsed && !isAnimating && (
+            <Typography sx={{ fontSize: "25.6px", fontWeight: 600 }}>
+              EduQuiz
+            </Typography>
+          )}
         </div>
-        <List sx={{paddingX: 1}}>
+        <List sx={{ paddingX: 1 }}>
           <ListItem
             sx={{ paddingRight: 0 }}
             component="button"
@@ -138,19 +172,29 @@ const Sidebar = () => {
             unmountOnExit
           >
             <List component="div" disablePadding>
-              {personalItems.map((item, i) => (
-                <ListItem component="button" key={i} sx={{ pl: 4 }} className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]">
-                  <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.label} />
-                </ListItem>
-              ))}
+              {personalItems
+                .filter((item) => item.roles.includes(user?.role))
+                .map((item, i) => (
+                  <Link to={item.path} key={i}>
+                    <ListItem
+                      component="button"
+                      sx={{ pl: 4 }}
+                      className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  </Link>
+                ))}
             </List>
           </Collapse>
         </List>
 
         <Divider />
 
-        <List sx={{paddingX: 1}}>
+        <List sx={{ paddingX: 1 }}>
           <ListItem
             component="button"
             sx={{ paddingRight: 0 }}
@@ -184,12 +228,23 @@ const Sidebar = () => {
             unmountOnExit
           >
             <List component="div" disablePadding>
-              {managementItems.map((item, i) => (
-                <ListItem component="button" key={i} sx={{ pl: 4 }} className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]">
-                  <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.label} />
-                </ListItem>
-              ))}
+              {managementItems
+                .filter((item) => item.roles.includes(user?.role))
+                .map((item, i) => (
+                  <Link to={item.path} key={i}>
+                    <ListItem
+                      component="button"
+                      key={i}
+                      sx={{ pl: 4 }}
+                      className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  </Link>
+                ))}
             </List>
           </Collapse>
         </List>
@@ -251,7 +306,7 @@ const Sidebar = () => {
         PaperProps={{
           sx: {
             px: 1.5,
-            boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)'
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
           },
         }}
       >
