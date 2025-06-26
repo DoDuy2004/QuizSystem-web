@@ -141,7 +141,7 @@ const QuestionBankDetail = () => {
             </Tooltip>
           </div>
         </div>
-        <div className="col-span-4 flex flex-col gap-y-4 bg-white p-6 shadow rounded-md">
+        <div className="col-span-4 flex flex-col gap-y-4 bg-white px-6 py-4 shadow rounded-md">
           {questionBank?.questions && questionBank?.questions?.length === 0 ? (
             <Typography>
               Không có câu hỏi nào trong ngân hàng câu hỏi

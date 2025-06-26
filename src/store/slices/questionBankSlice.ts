@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import QuestionBankService from "../../services/question-bank/QuestionBankService";
-import { PermCameraMicRounded } from "@mui/icons-material";
+import CourseClassService from "../../services/course-class/CourseClassService";
 
 export interface QuestionBankStateProps {
   data: [];
@@ -94,12 +94,39 @@ export const deleteQuestionBank = createAsyncThunk(
 
 export const addQuestionBank = createAsyncThunk(
   "questionBank/addQuestionBank",
-  async (params) => {}
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await QuestionBankService.addQuestionBank({ form });
+
+    const data = response.data;
+    return data;
+  }
 );
 
 export const editQuestionBank = createAsyncThunk(
   "questionBank/editQuestionBank",
-  async (params) => {}
+  async (params: any) => {
+    const form = params?.form;
+    const id = params?.id;
+    const response: any = await QuestionBankService.updateQuestionBank({
+      id,
+      form,
+    });
+
+    const data = response.data;
+    return data;
+  }
+);
+
+export const getSujects = createAsyncThunk(
+  "questionBank/getSubjects",
+  async () => {
+    const response: any = await CourseClassService.getSubjects();
+
+    const data = response.data;
+
+    return data;
+  }
 );
 
 export const questionBankSlice = createSlice({
@@ -131,6 +158,14 @@ export const questionBankSlice = createSlice({
       if (index !== -1) {
         state.data.splice(index, 1);
       }
+    });
+    builder.addCase(addQuestionBank.fulfilled, (state, action) => {
+      console.log({ data: action.payload });
+      state.questionBankDetail.data = action.payload.data;
+    });
+    builder.addCase(editQuestionBank.fulfilled, (state, action) => {
+      console.log({ data: action.payload });
+      state.questionBankDetail.data = action.payload.data;
     });
   },
 });

@@ -1,6 +1,10 @@
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import React from "react";
-
+import { Box, IconButton, Tab, Tabs, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import QuestionBankForm from "./tabs/QuestionBankForm";
+import { selectQuestionBank } from "../../../../../../store/slices/questionBankSlice";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -32,6 +36,16 @@ function a11yProps(index: number) {
 
 const CreateQuestionBank = () => {
   const [value, setValue] = React.useState(0);
+  const questionBank = useSelector(selectQuestionBank);
+  const routeParams = useParams();
+  const [isQuestionTabEnabled, setIsQuestionTabEnabled] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (routeParams.id) {
+      setIsQuestionTabEnabled(true);
+    }
+  }, [routeParams.id]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -39,26 +53,49 @@ const CreateQuestionBank = () => {
 
   return (
     <>
-      <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-        Ngân hàng câu hỏi
-      </Typography>
-      <div className=" bg-white rounded-md shadow-md">
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <div className="flex items-center gap-x-4">
+        <IconButton onClick={() => navigate(-1)}>
+          <ArrowBackOutlinedIcon />
+        </IconButton>
+        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
+          Ngân hàng câu hỏi
+        </Typography>
+      </div>
+      <div className="flex flex-col gap-y-4">
+        <Box
+          sx={{ borderBottom: 1, borderColor: "divider" }}
+          className="shadow-sm bg-white"
+        >
           <Tabs
             value={value}
             onChange={handleChange}
             aria-label="basic tabs example"
           >
-            <Tab sx={{ textTransform: "none", fontSize: 14 }} label="Thông tin cơ bản" {...a11yProps(0)} />
-            <Tab sx={{ textTransform: "none", fontSize: 14 }} label="Soạn câu hỏi" {...a11yProps(1)} />
+            <Tab
+              sx={{ textTransform: "none", fontSize: 14 }}
+              label="Thông tin cơ bản"
+              {...a11yProps(0)}
+            />
+            <Tab
+              sx={{ textTransform: "none", fontSize: 14 }}
+              label="Soạn câu hỏi"
+              {...a11yProps(1)}
+              disabled={!isQuestionTabEnabled}
+            />
           </Tabs>
         </Box>
-        <CustomTabPanel value={value} index={0}>
-          Item One
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
-          Item Two
-        </CustomTabPanel>
+        <div className="bg-white rounded-md">
+          <CustomTabPanel value={value} index={0}>
+            <QuestionBankForm
+              data={questionBank.data}
+              setIsQuestionTabEnabled={setIsQuestionTabEnabled}
+              setTabValue={setValue}
+            />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            Item Two
+          </CustomTabPanel>
+        </div>
       </div>
     </>
   );
