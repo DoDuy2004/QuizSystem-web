@@ -70,8 +70,10 @@ const Header = () => {
           {!isMobile && (
             <>
               <Avatar alt="Duy Do" src="" />
-              <div>
-                <Typography sx={{ fontSize: 14, color: "#3E65FE", width: 100 }}>
+              <div className="w-1/2">
+                <Typography
+                  sx={{ fontSize: 14, color: "#3E65FE", width: "fit-content" }}
+                >
                   {userData?.fullName}
                 </Typography>
                 <Typography sx={{ fontSize: 12 }}>

@@ -54,7 +54,7 @@ const Profile = () => {
         birthday: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
       };
 
-      reset(transformedUser); // reset form với dữ liệu mới
+      reset(transformedUser);
     }
   }, [user]);
 

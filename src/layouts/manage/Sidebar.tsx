@@ -106,7 +106,7 @@ const Sidebar = () => {
 
   if (isMobile) return;
 
-  console.log({ user });
+  // console.log({ user });
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getQuestionBanks,
@@ -24,15 +24,15 @@ const QuestionBank = () => {
   const [loading, setLoading] = useState(false);
   const hasFetched = useRef(false);
   const navigate = useNavigate();
-
   //   console.log({ questionBanks });
 
   useDeepCompareEffect(() => {
     if (hasFetched.current) return;
 
-    hasFetched.current = true;
     setLoading(true);
-    dispatch(getQuestionBanks()).then((res) => {
+    hasFetched.current = true;
+
+    dispatch(getQuestionBanks()).finally(() => {
       setLoading(false);
     });
 
@@ -41,7 +41,9 @@ const QuestionBank = () => {
     };
   }, [dispatch]);
 
-  if (loading) return <CircularLoading delay={50} />;
+  if (loading || (!questionBanks?.length && !hasFetched.current)) {
+    return <CircularLoading delay={0} />;
+  }
 
   return (
     <>
