@@ -5,6 +5,7 @@ import { selectQuestionBank } from "../../../../../../store/slices/questionBankS
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import ComposeQuestion from "./tabs/ComposeQuestion";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -22,7 +23,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 }
@@ -84,7 +85,7 @@ const CreateQuestionBank = () => {
             />
           </Tabs>
         </Box>
-        <div className="bg-white rounded-md">
+        <div className="">
           <CustomTabPanel value={value} index={0}>
             <QuestionBankForm
               data={questionBank.data}
@@ -93,7 +94,10 @@ const CreateQuestionBank = () => {
             />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            Item Two
+            <ComposeQuestion
+              questions={questionBank?.questions}
+              questionBankId={questionBank?.data?.id}
+            />
           </CustomTabPanel>
         </div>
       </div>

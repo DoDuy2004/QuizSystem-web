@@ -85,7 +85,7 @@ const Signin = () => {
   };
 
   return (
-    <div className="w-1/4 rounded-xl m-auto h-fit shodow bg-white px-8 py-16 flex flex-col gap-y-6">
+    <div className="lg:w-1/4 sm:w-1/2 w-full rounded-xl m-auto sm:h-fit h-full shodow bg-white px-8 py-16 flex flex-col gap-y-6">
       <Typography sx={{ fontSize: 24 }}>Đăng nhập</Typography>
       <div
         className="flex items-center gap-x-4 px-8 rounded-md py-2 w-full cursor-pointer bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
