@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import QuestionBankService from "../../services/question-bank/QuestionBankService";
 import CourseClassService from "../../services/course-class/CourseClassService";
+import { create } from "lodash";
 
 export interface QuestionBankStateProps {
   data: [];
@@ -122,6 +123,31 @@ export const getSujects = createAsyncThunk(
   "questionBank/getSubjects",
   async () => {
     const response: any = await CourseClassService.getSubjects();
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const addQuestionToQuestionBank = createAsyncThunk(
+  "questionBank/addQuestion",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await QuestionBankService.addQuestionToQuestionBank({
+      form,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const getQuestionById = createAsyncThunk(
+  "questionBank/getQuestionById",
+  async (id: string) => {
+    const response: any = await QuestionBankService.getQuestionById(id);
 
     const data = response.data;
 

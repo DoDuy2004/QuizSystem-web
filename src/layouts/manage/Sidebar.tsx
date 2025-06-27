@@ -124,7 +124,7 @@ const Sidebar = () => {
           display: "flex",
           paddingRight: 0,
           flexDirection: "column",
-        }}
+        } as React.CSSProperties}
       >
         <div className={`flex items-center px-3 gap-x-2 py-1`}>
           <img

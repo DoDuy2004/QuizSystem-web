@@ -18,40 +18,6 @@ import QuestionBankModel from "../../../../../../../models/QuestionBankModel";
 import _ from "lodash";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import CircularLoading from "../../../../../../../components/CircularLoading";
-// import CircularLoading from "../../../../../../../components/CircularLoading";
-
-// Payload create question
-// {
-//   "topic": "Classes",
-//   "type": "Multiple Choice",
-//   "content": "Lớp trong OOP là gì?",
-//   "status": 0,
-//   "difficulty": "Medium",
-// "image": "",
-//   "createdBy": "49bb4611-fb01-4a42-b96d-74c10715263e",
-//   "chapterId": "91c4d295-58b0-4d7c-9f53-fac03b998f22",
-//   "questionBankId": "65caa47c-d838-4fbc-9387-243460906bb8",
-//   "answers": [
-//     {
-//       "content": "Hàm toán học",
-//       "isCorrect": false
-//     },
-//     {
-//       "content": "Lớp và đối tượng",
-//       "isCorrect": true
-//     }
-//   ]
-// }
-
-// public Guid Id { get; set; } = Guid.NewGuid();
-// public string Name { get; set; } = string.Empty;
-// public string Description {  get; set; } = string.Empty;
-// public Status Status { get; set; }
-// //public string Subject { get; set; } = null!;
-// public Guid CourseClassId { get; set; }
-// public virtual ICollection<Question>? Questions { get; set; } = null!;
-// //public virtual Subject Subject { get; set; } = null!;
-// public virtual CourseClass Course { get; set; } = null!;
 
 const schema: any = yup.object().shape({
   name: yup.string().required("Tên ngân hàng là bắt buộc"),
@@ -67,6 +33,7 @@ const QuestionBankForm = ({
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
   const hasFetched = useRef(false);
+  const hasFetchedSubject = useRef(false);
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const user = useSelector(selectUser);
@@ -106,10 +73,10 @@ const QuestionBankForm = ({
   }, [data, reset]);
 
   useDeepCompareEffect(() => {
-    if (hasFetched.current) return;
+    if (hasFetchedSubject.current) return;
 
     setLoading(true);
-    hasFetched.current = true;
+    hasFetchedSubject.current = true;
     dispatch(getSujects())
       .then((res: any) => {
         // console.log({ res });
@@ -118,7 +85,7 @@ const QuestionBankForm = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [dispatch]);
+  }, [dispatch, routeParams?.id]);
 
   const onSubmit = (data: any) => {
     setLoading(true);
@@ -154,7 +121,7 @@ const QuestionBankForm = ({
   }
 
   return (
-    <div className="flex flex-col gap-y-5">
+    <div className="bg-white rounded-md px-6 py-4 flex flex-col gap-y-5">
       <Typography>Thông tin cơ bản</Typography>
       <form action="" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-y-6 px-2">
@@ -186,19 +153,27 @@ const QuestionBankForm = ({
               <Autocomplete
                 options={subjects}
                 freeSolo
-                getOptionLabel={(option) => option || ""}
-                isOptionEqualToValue={(option, value) => option === value}
-                value={field.value || ""}
+                getOptionLabel={(option) => {
+                  if (typeof option === "string") {
+                    return option;
+                  }
+                  return option?.name || "";
+                }}
+                isOptionEqualToValue={(option, value) => {
+                  if (typeof option === "object" && typeof value === "object") {
+                    return option.id === value.id;
+                  }
+                  return option?.name === value?.name;
+                }}
+                value={field.value || null}
                 onChange={(event, newValue) => {
-                  field.onChange(newValue);
-                  setValue("subject", newValue, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
+                  if (typeof newValue === "string") {
+                    field.onChange({ name: newValue });
+                  } else {
+                    field.onChange(newValue.name);
+                  }
                 }}
-                onInputChange={(event, newInputValue) => {
-                  field.onChange(newInputValue);
-                }}
+                onInputChange={(event, newInputValue) => {}}
                 renderInput={(params) => (
                   <TextField
                     {...params}
