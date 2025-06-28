@@ -6,6 +6,9 @@ import Footer from "./main/Footer";
 import Sidebar from "./manage/Sidebar";
 import FuseMessage from "../components/FuseMessage";
 import ConfirmationDialog from "../dialogs/confirmation-dialog/ConfirmationDialog";
+import withReducer from "../store/withReducer";
+import reducer from "../store/slices/globalSlice";
+import AddClassDialog from "../dialogs/add-class-dialog/AddClassDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -38,6 +41,7 @@ const AppLayout = () => {
         </main>
         <FuseMessage />
         <ConfirmationDialog />
+        <AddClassDialog />
       </div>
     );
   }
@@ -53,4 +57,4 @@ const AppLayout = () => {
   );
 };
 
-export default AppLayout;
+export default withReducer("globalSlice", reducer)(AppLayout);

@@ -19,7 +19,7 @@ export const setUser = createAsyncThunk(
   async (user: any, { dispatch }) => {
     const roleType = user.role[0] ?? "";
 
-    console.log("role: ", roleType);
+    // console.log("role: ", roleType);
 
     return _.merge({}, initialState, user);
   }

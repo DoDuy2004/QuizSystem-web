@@ -155,6 +155,23 @@ export const getQuestionById = createAsyncThunk(
   }
 );
 
+export const editQuestion = createAsyncThunk(
+  "questionBank/editQuestion",
+  async (params: any) => {
+    const id = params?.id;
+    const form = params?.form;
+
+    const response: any = await QuestionBankService.editQuestion({
+      id,
+      form,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const questionBankSlice = createSlice({
   name: "questionBankSlice",
   initialState,

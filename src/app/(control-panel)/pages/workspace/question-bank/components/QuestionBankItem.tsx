@@ -45,10 +45,15 @@ const QuestionBankItem = ({ data }: any) => {
 
   return (
     <div
-      className="col-span-1 shadow-md p-4 flex flex-col gap-y-4"
+      className="col-span-1 shadow-md p-4 flex flex-col gap-y-4  hover:cursor-pointer"
       onClick={handleQuestionBankDetail}
     >
-      <Typography component={"h6"} fontSize={14} color="primary">
+      <Typography
+        component={"h6"}
+        fontSize={14}
+        color="primary"
+        className="truncate max-w-ful"
+      >
         {data?.name}
       </Typography>
 

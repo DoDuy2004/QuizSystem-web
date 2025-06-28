@@ -14,22 +14,26 @@ import {
 import { useDeepCompareEffect } from "../../../../../../../hooks";
 import CircularLoading from "../../../../../../../components/CircularLoading";
 import QuestionForm from "../components/QuestionForm";
+import _ from "lodash";
 
 const ComposeQuestion = ({ questions, questionBankId }: any) => {
-  const [isActive, setIsActive] = useState<number | null>(null); // Sử dụng null khi chưa chọn
+  const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
   const routeParams = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const [loading, setLoading] = useState(false);
-  const questionBank = useSelector(selectQuestionBank);
-  const [questionLoading, setQuestionLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // const questionBank = useSelector(selectQuestionBank);
+  const [questionLoading, setQuestionLoading] = useState(true);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
-  const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 0);
+  const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
   const [questionsData, setQuestionsData] = useState(questions || []);
   const hasFetched = useRef(false);
 
   useDeepCompareEffect(() => {
     const fetchData = async () => {
-      if (hasFetched.current || !routeParams.id) return;
+      if (hasFetched.current || !routeParams.id) {
+        setLoading(false);
+        return;
+      }
 
       hasFetched.current = true;
       setLoading(true);
@@ -39,13 +43,13 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
           getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
         ).unwrap();
 
-        console.log({ res });
+        // console.log({ res });
 
         const data = Array.isArray(res?.data) ? res.data : [];
-        setNoOfQuestions(data.length);
+        setNoOfQuestions(data.length || 1);
         setQuestionsData(data);
       } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu:", error);
+        // console.error("Lỗi khi lấy dữ liệu:", error);
         setNoOfQuestions(0);
       } finally {
         setLoading(false);
@@ -57,8 +61,6 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
 
   useDeepCompareEffect(() => {
     if (routeParams.id && questionsData?.length > 0) {
-      console.log("hrere");
-      setQuestionLoading(true);
       dispatch(getQuestionById(questions[0]?.id))
         .then((res) => {
           setQuestion(res.payload.data);
@@ -70,10 +72,17 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
           setQuestionLoading(false);
           setIsActive(0);
         });
+    } else {
+      setQuestionLoading(false);
     }
   }, [dispatch, routeParams?.id, questionsData]);
 
   const handleGetQuestion = (index: number) => {
+    if (index === isActive) {
+      setQuestionLoading(false);
+      return;
+    }
+
     setIsActive(index);
     const questionId = questionsData?.[index]?.id;
 
@@ -89,25 +98,27 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
         .finally(() => {
           setQuestionLoading(false);
         });
+    } else {
+      setQuestionLoading(false);
     }
   };
 
-  console.log({ questionsData });
+  // console.log({ questionsData });
 
   const handleAddQuestion = () => {
     const newIndex = noOfQuestions;
-    setIsActive(newIndex); // Chọn index mới
-    setQuestion({}); // Làm mới form
-    setNoOfQuestions((prev: any) => prev + 1); // Tăng số lượng câu hỏi
+    setIsActive(newIndex);
+    setQuestion({});
+    setNoOfQuestions((prev: any) => prev + 1);
   };
 
-  console.log({ noOfQuestions });
+  // console.log({ noOfQuestions });
 
   return (
     <div className="grid grid-cols-6 gap-4">
       <div className="px-6 py-4 bg-white rounded-md shadow-md col-span-2 flex flex-col gap-y-5 h-fit">
         <Typography>Danh mục câu hỏi</Typography>
-        {loading && questions?.length === 0 ? (
+        {loading ? (
           <CircularLoading />
         ) : (
           <>

@@ -56,7 +56,7 @@ const Profile = () => {
 
       reset(transformedUser);
     }
-  }, [user]);
+  }, [user, reset]);
 
   const onSubmit = (data: any) => {
     console.log("Submit data:", data);

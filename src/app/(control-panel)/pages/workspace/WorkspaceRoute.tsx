@@ -10,13 +10,16 @@ const QuestionBankDetail = lazy(
 const EditQuestionBank = lazy(
   () => import("./question-bank/edit-question-bank/EditQuestionBank")
 );
+const Class = lazy(() => import("./class/Class"));
+const ClassList = lazy(() => import("./class/ClassList"));
+const ClassDetail = lazy(() => import("./class/class-detail/ClassDetail"));
 
 const WorkspaceRoute = {
   path: "workspace",
   children: [
     {
       path: "",
-      element: <Navigate to="/class" />,
+      element: <Navigate to="class" />,
     },
     {
       path: "exam",
@@ -51,6 +54,24 @@ const WorkspaceRoute = {
         {
           path: "new",
           element: <EditQuestionBank />,
+        },
+      ],
+    },
+    {
+      path: "class",
+      element: <Class />,
+      children: [
+        {
+          path: "",
+          element: <Navigate to="list" />,
+        },
+        {
+          path: "list",
+          element: <ClassList />,
+        },
+        {
+          path: ":id",
+          element: <ClassDetail />,
         },
       ],
     },

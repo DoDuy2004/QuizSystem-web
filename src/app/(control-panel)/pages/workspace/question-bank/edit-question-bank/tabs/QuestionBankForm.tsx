@@ -116,6 +116,8 @@ const QuestionBankForm = ({
       .finally(() => setLoading(false));
   };
 
+  console.log({ form: watch() });
+
   if (loading) {
     return <CircularLoading />;
   }
@@ -168,7 +170,7 @@ const QuestionBankForm = ({
                 value={field.value || null}
                 onChange={(event, newValue) => {
                   if (typeof newValue === "string") {
-                    field.onChange({ name: newValue });
+                    field.onChange(newValue);
                   } else {
                     field.onChange(newValue.name);
                   }
