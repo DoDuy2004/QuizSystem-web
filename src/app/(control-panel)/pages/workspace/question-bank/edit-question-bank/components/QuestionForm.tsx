@@ -121,6 +121,16 @@ const QuestionForm = ({ questionData }: any) => {
   console.log({ empty: _.isEmpty(questionData) });
 
   useEffect(() => {
+    if (_.isEmpty(questionData)) {
+      reset(QuestionModel({}));
+    } else {
+      const transformedData = {
+        ...questionData,
+        chapterId: questionData?.chapter?.id,
+      };
+      reset(QuestionModel(transformedData));
+    }
+
     setValue(
       `answers.${0}`,
       { isCorrect: true, content: "", answerOrder: 0 },
@@ -131,22 +141,6 @@ const QuestionForm = ({ questionData }: any) => {
     );
     setValue("type", selectedValue);
 
-    // if (questionData) {
-    //   const transformedData = {
-    //     ...questionData,
-    //     chapterId: questionData?.chapter?.id,
-    //   };
-    //   reset(QuestionModel(transformedData));
-    // }
-    if (_.isEmpty(questionData)) {
-      reset(QuestionModel({}));
-    } else {
-      const transformedData = {
-        ...questionData,
-        chapterId: questionData?.chapter?.id,
-      };
-      reset(QuestionModel(transformedData));
-    }
   }, [reset, questionData]);
 
   useDeepCompareEffect(() => {
@@ -179,16 +173,16 @@ const QuestionForm = ({ questionData }: any) => {
     };
 
   // const form = watch();
-  // schema
-  //   .validate(form, { abortEarly: false })
-  //   .then(() => {
-  //     console.log("VALID");
-  //   })
-  //   .catch((err) => {
-  //     console.log("INVALID", err.errors);
-  //   });
+  schema
+    .validate(form, { abortEarly: false })
+    .then(() => {
+      console.log("VALID");
+    })
+    .catch((err) => {
+      console.log("INVALID", err.errors);
+    });
 
-  // console.log({ form });
+  console.log({ form });
 
   const onSubmit = (data: any) => {
     setLoading(true);

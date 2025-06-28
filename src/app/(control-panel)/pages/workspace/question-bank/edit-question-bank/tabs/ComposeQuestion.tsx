@@ -107,7 +107,7 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
     <div className="grid grid-cols-6 gap-4">
       <div className="px-6 py-4 bg-white rounded-md shadow-md col-span-2 flex flex-col gap-y-5 h-fit">
         <Typography>Danh mục câu hỏi</Typography>
-        {loading ? (
+        {loading && questions?.length === 0 ? (
           <CircularLoading />
         ) : (
           <>
