@@ -24,37 +24,40 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
   const [questionLoading, setQuestionLoading] = useState(false);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
   const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 0);
+  const [questionsData, setQuestionsData] = useState(questions || []);
   const hasFetched = useRef(false);
 
   useDeepCompareEffect(() => {
-    if (hasFetched.current) return;
+    const fetchData = async () => {
+      if (hasFetched.current || !routeParams.id) return;
 
-    if (routeParams.id) {
       hasFetched.current = true;
       setLoading(true);
 
-      dispatch(
-        getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-      )
-        // .unwrap()
-        .then((res) => {
-          const data = res?.payload?.data || [];
-          setNoOfQuestions(data.length);
-          if (data.length > 0) {
-            handleGetQuestion(0);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
+      try {
+        const res = await dispatch(
+          getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
+        ).unwrap();
+
+        console.log({ res });
+
+        const data = Array.isArray(res?.data) ? res.data : [];
+        setNoOfQuestions(data.length);
+        setQuestionsData(data);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setNoOfQuestions(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [dispatch, routeParams?.id, questionBankId]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && questions?.length > 0 && isActive === null) {
+    if (routeParams.id && questionsData?.length > 0) {
+      console.log("hrere");
       setQuestionLoading(true);
       dispatch(getQuestionById(questions[0]?.id))
         .then((res) => {
@@ -68,11 +71,11 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
           setIsActive(0);
         });
     }
-  }, [dispatch, routeParams?.id, isActive]);
+  }, [dispatch, routeParams?.id, questionsData]);
 
   const handleGetQuestion = (index: number) => {
     setIsActive(index);
-    const questionId = questions[index]?.id;
+    const questionId = questionsData?.[index]?.id;
 
     if (questionId) {
       setQuestionLoading(true);
@@ -88,6 +91,8 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
         });
     }
   };
+
+  console.log({ questionsData });
 
   const handleAddQuestion = () => {
     const newIndex = noOfQuestions;

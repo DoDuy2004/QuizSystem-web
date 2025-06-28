@@ -10,7 +10,7 @@ function App() {
   // };
   return (
     <>
-      <StrictMode>
+      {/* <StrictMode> */}
         {/* <AppContext> */}
         <Provider store={store}>
           <AuthProvider>
@@ -18,7 +18,7 @@ function App() {
           </AuthProvider>
         </Provider>
         {/* </AppContext> */}
-      </StrictMode>
+      {/* </StrictMode>  */}
     </>
   );
 }
