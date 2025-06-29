@@ -116,15 +116,17 @@ const Sidebar = () => {
         transition={{ duration: 0.3 }}
         onAnimationStart={() => setIsAnimating(true)}
         onAnimationComplete={() => setIsAnimating(false)}
-        style={{
-          height: "100vh",
-          background: "#fff",
-          borderRight: "1px solid #f3f1f1",
-          position: "relative",
-          display: "flex",
-          paddingRight: 0,
-          flexDirection: "column",
-        } as React.CSSProperties}
+        style={
+          {
+            height: "100vh",
+            background: "#fff",
+            borderRight: "1px solid #f3f1f1",
+            position: "relative",
+            display: "flex",
+            paddingRight: 0,
+            flexDirection: "column",
+          } as React.CSSProperties
+        }
       >
         <div className={`flex items-center px-3 gap-x-2 py-1`}>
           <img
@@ -311,10 +313,12 @@ const Sidebar = () => {
         }}
       >
         {menuItems.map((item: any, index) => (
-          <MenuItem sx={{ paddingY: 1.5 }} onClick={handleClose} key={index}>
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText>{item.label}</ListItemText>
-          </MenuItem>
+          <Link to={item.path} key={index}>
+            <MenuItem sx={{ paddingY: 1.5 }} onClick={handleClose} key={index}>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText>{item.label}</ListItemText>
+            </MenuItem>
+          </Link>
         ))}
       </Menu>
     </>

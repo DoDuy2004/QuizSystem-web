@@ -9,6 +9,7 @@ import ConfirmationDialog from "../dialogs/confirmation-dialog/ConfirmationDialo
 import withReducer from "../store/withReducer";
 import reducer from "../store/slices/globalSlice";
 import AddClassDialog from "../dialogs/add-class-dialog/AddClassDialog";
+import AddMultiQuestionsDialog from "../dialogs/add-multi-questions-dialog/AddMultiQuestionsDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -42,6 +43,7 @@ const AppLayout = () => {
         <FuseMessage />
         <ConfirmationDialog />
         <AddClassDialog />
+        <AddMultiQuestionsDialog />
       </div>
     );
   }

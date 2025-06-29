@@ -8,22 +8,23 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { type AppDispatch } from "../../../../../../store/store";
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
-import { deleteQuestionBank } from "../../../../../../store/slices/questionBankSlice";
+import { deleteExam } from "../../../../../../store/slices/examSlice";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
-const QuestionBankItem = ({ data }: any) => {
+const ExamListItem = ({ data }: any) => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const handleQuestionBankDetail = () => {
-    navigate(`/workspace/question-bank/${data?.id}`);
+  const handleExamDetail = () => {
+    navigate(`/workspace/exam/${data?.id}`);
   };
 
   const handleComposeQuestion = (e: any) => {
     e.stopPropagation();
-    navigate(`/workspace/question-bank/${data?.id}/edit?step=question`);
+    navigate(`/workspace/exam/${data?.id}/edit?step=question`);
   };
   const handleUpdate = (e: any) => {
     e.stopPropagation();
-    navigate(`/workspace/question-bank/${data?.id}/edit?step=info`);
+    navigate(`/workspace/exam/${data?.id}/edit?step=info`);
   };
 
   const openConfirmDialog = (id: any, e: any) => {
@@ -32,7 +33,7 @@ const QuestionBankItem = ({ data }: any) => {
       openConfirmationDialog({
         data: {
           onAgree: () => {
-            dispatch(deleteQuestionBank({ id }));
+            dispatch(deleteExam({ id }));
           },
           dialogContent: "Bạn có chắc muốn xóa ngân hàng câu hỏi này",
           titleContent: "Xóa ngân hàng câu hỏi",
@@ -47,7 +48,7 @@ const QuestionBankItem = ({ data }: any) => {
   return (
     <div
       className="col-span-1 shadow-sm p-4 flex flex-col gap-y-4  hover:cursor-pointer hover:shadow-lg hover:-translate-y-1 transition duration-200 ease-in-out"
-      onClick={handleQuestionBankDetail}
+      onClick={handleExamDetail}
     >
       <Typography
         component={"h6"}
@@ -73,7 +74,15 @@ const QuestionBankItem = ({ data }: any) => {
         className="flex items-center gap-x-2"
       >
         <HelpCenterIcon className="text-orange-500" fontSize={"small"} />{" "}
-        {data?.noOfQuestions} câu hỏi
+        {data?.noOfQuestions || 0} câu hỏi
+      </Typography>
+      <Typography
+        component={"p"}
+        fontSize={12}
+        className="flex items-center gap-x-2"
+      >
+        <AccessTimeIcon className="text-orange-500" fontSize={"small"} />{" "}
+        {data?.durationMinutes || 0} phút
       </Typography>
       <Divider />
       <div className="flex items-center gap-x-2">
@@ -101,4 +110,4 @@ const QuestionBankItem = ({ data }: any) => {
   );
 };
 
-export default QuestionBankItem;
+export default ExamListItem;

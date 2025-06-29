@@ -60,10 +60,7 @@ const difficultyOptions = [
 
 const schema = yup.object().shape({
   type: yup.string().required("Loại câu hỏi là bắt buộc"),
-  content: yup
-    .string()
-    .required("Nội dung câu hỏi là bắt buộc")
-    .min(20, "Nội dung câu hỏi phải có ít nhất 20 ký tự"),
+  content: yup.string().required("Nội dung câu hỏi là bắt buộc"),
   topic: yup.string().optional(),
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
@@ -139,7 +136,7 @@ const QuestionForm = ({ questionData }: any) => {
     remove(index);
   };
 
-  console.log({ empty: _.isEmpty(questionData) });
+  // console.log({ empty: _.isEmpty(questionData) });
 
   useEffect(() => {
     if (_.isEmpty(questionData)) {
@@ -155,9 +152,11 @@ const QuestionForm = ({ questionData }: any) => {
         type: selectedValue,
       });
     } else {
+      setQuestion(questionData);
       const transformedData = {
         ...questionData,
         chapterId: questionData?.chapter?.id,
+        difficulty: difficultyOptions[questionData.difficulty].value,
       };
       reset(QuestionModel(transformedData));
     }
@@ -204,12 +203,15 @@ const QuestionForm = ({ questionData }: any) => {
   const onSubmit = (data: any) => {
     // console.log({ data });
     setLoading(true);
+
     const payload = {
       topic: data.topic,
       type: data.type,
       content: data.content,
       status: 0,
-      difficulty: data.difficulty,
+      difficulty: difficultyOptions.findIndex(
+        (item) => item.value == data.difficulty
+      ),
       image: data.image,
       chapterId: data.chapterId,
       answers: data.answers,
@@ -217,7 +219,7 @@ const QuestionForm = ({ questionData }: any) => {
       createdBy: user?.id,
     };
 
-    const action = question.id
+    const action = !_.isEmpty(questionData)
       ? editQuestion({
           id: question.id,
           form: { id: question.id, ...payload },
@@ -235,12 +237,12 @@ const QuestionForm = ({ questionData }: any) => {
       });
   };
 
-  const answerErrors = errors.answers as
-    | Array<{
-        content?: FieldError;
-        isCorrect?: FieldError;
-      }>
-    | undefined;
+  // const answerErrors = errors.answers as
+  //   | Array<{
+  //       content?: FieldError;
+  //       isCorrect?: FieldError;
+  //     }>
+  //   | undefined;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -283,11 +285,6 @@ const QuestionForm = ({ questionData }: any) => {
           render={({ field }) => (
             <div>
               <RichTextEditor value={field.value} onChange={field.onChange} />
-              {errors?.content && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.content.message as string}
-                </p>
-              )}
             </div>
           )}
         />

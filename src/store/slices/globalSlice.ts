@@ -6,6 +6,9 @@ export interface GlobalSliceState {
     isOpen: boolean;
     type: "new" | "edit";
   };
+  addMultiQuestionsDialog: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: GlobalSliceState = {
@@ -13,6 +16,9 @@ const initialState: GlobalSliceState = {
   addClassDialog: {
     isOpen: false,
     type: "new",
+  },
+  addMultiQuestionsDialog: {
+    isOpen: false,
   },
 };
 
@@ -30,12 +36,27 @@ const globalSlice = createSlice({
     closeAddClassDialog: (state) => {
       state.addClassDialog.isOpen = false;
     },
+
+    // question
+    openAddMultiQuestionsDialog: (state) => {
+      state.addMultiQuestionsDialog.isOpen = true;
+    },
+    closeAddMultiQuestionsDialog: (state) => {
+      state.addMultiQuestionsDialog.isOpen = false;
+    },
   },
 });
 
-export const { openAddClassDialog, closeAddClassDialog } = globalSlice.actions;
+export const {
+  openAddClassDialog,
+  closeAddClassDialog,
+  openAddMultiQuestionsDialog,
+  closeAddMultiQuestionsDialog,
+} = globalSlice.actions;
 
 export const selectAddClassDialog = ({ globalSlice }: any) =>
   globalSlice.addClassDialog;
+export const selectAddMultiQuestionsDialog = ({ globalSlice }: any) =>
+  globalSlice.addMultiQuestionsDialog;
 
 export default globalSlice.reducer;

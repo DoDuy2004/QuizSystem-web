@@ -1,11 +1,11 @@
 import axios from "axios";
 import { reject } from "lodash";
 
-class QuestionBankService {
-  getQuestionBanks = () => {
+class ExamService {
+  getExams = () => {
     return new Promise((resolve, reject) => {
       axios
-        .get(`${import.meta.env.VITE_DOMAIN}/api/questionbanks`)
+        .get(`${import.meta.env.VITE_DOMAIN}/api/exam/getexams`)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -26,10 +26,10 @@ class QuestionBankService {
     });
   };
 
-  getQuestionBankById = (id: string) => {
+  getExambyId = (id: string) => {
     return new Promise((resolve, reject) => {
       axios
-        .get(`${import.meta.env.VITE_DOMAIN}/api/questionbanks/${id}`)
+        .get(`${import.meta.env.VITE_DOMAIN}/api/exam/getbyid/${id}`)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -50,11 +50,11 @@ class QuestionBankService {
     });
   };
 
-  addQuestionBank = (params: any) => {
+  addExam = (params: any) => {
     return new Promise((resolve, reject) => {
       const form = params?.form;
       axios
-        .post(`${import.meta.env.VITE_DOMAIN}/api/questionbanks`, form)
+        .post(`${import.meta.env.VITE_DOMAIN}/api/exam/createexam`, form)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -75,12 +75,12 @@ class QuestionBankService {
     });
   };
 
-  updateQuestionBank = (params: any) => {
+  updateExam = (params: any) => {
     return new Promise((resolve, reject) => {
       const form = params?.form;
       const id = params?.id;
       axios
-        .put(`${import.meta.env.VITE_DOMAIN}/api/questionbanks/${id}`, form)
+        .put(`${import.meta.env.VITE_DOMAIN}/api/exam/updateexam/${id}`, form)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -101,10 +101,10 @@ class QuestionBankService {
     });
   };
 
-  deleteQuestionBank = (id: string) => {
+  deleteExam = (id: string) => {
     return new Promise((resolve, reject) => {
       axios
-        .delete(`${import.meta.env.VITE_DOMAIN}/api/questionbanks/${id}`)
+        .delete(`${import.meta.env.VITE_DOMAIN}/api/exam/${id}`)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -125,10 +125,11 @@ class QuestionBankService {
     });
   };
 
-  getQuestionsByQuestionBank = (id: string) => {
+  createExamMatrix = (params: any) => {
     return new Promise((resolve, reject) => {
+      const form = params?.form;
       axios
-        .get(`${import.meta.env.VITE_DOMAIN}/api/questionbanks/${id}/questions`)
+        .post(`${import.meta.env.VITE_DOMAIN}/api/exam/create-matrix`, form)
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {
@@ -249,6 +250,6 @@ class QuestionBankService {
   };
 }
 
-const instance = new QuestionBankService();
+const instance = new ExamService();
 
 export default instance;

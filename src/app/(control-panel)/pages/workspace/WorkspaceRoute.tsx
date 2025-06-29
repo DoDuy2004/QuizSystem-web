@@ -13,6 +13,9 @@ const EditQuestionBank = lazy(
 const Class = lazy(() => import("./class/Class"));
 const ClassList = lazy(() => import("./class/ClassList"));
 const ClassDetail = lazy(() => import("./class/class-detail/ClassDetail"));
+const ExamList = lazy(() => import("./exam/ExamList"));
+const ExamDetail = lazy(() => import("./exam/exam-detail/ExamDetail"));
+const EditExam = lazy(() => import("./exam/edit-exam/EditExam"));
 
 const WorkspaceRoute = {
   path: "workspace",
@@ -26,8 +29,24 @@ const WorkspaceRoute = {
       element: <Exam />,
       children: [
         {
+          path: "",
+          element: <Navigate to="list" />,
+        },  
+        {
           path: "list",
-          element: <Exam />,
+          element: <ExamList />,
+        },
+        {
+          path: ":id",
+          element: <ExamDetail />,
+        },
+        {
+          path: ":id/edit",
+          element: <EditExam />,
+        },
+        {
+          path: "new",
+          element: <EditExam />,
         },
       ],
     },
@@ -70,8 +89,16 @@ const WorkspaceRoute = {
           element: <ClassList />,
         },
         {
+          path: ":id/edit",
+          element: <ClassList />,
+        },
+        {
           path: ":id",
           element: <ClassDetail />,
+        },
+        {
+          path: "new",
+          element: <ClassList />,
         },
       ],
     },

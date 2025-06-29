@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import CourseClassService from "../../services/course-class/CourseClassService";
 
 export interface QuestionBankStateProps {
-  data: [];
+  data: any[];
   classDetail: {
     data: {};
     students: [];
@@ -30,8 +30,7 @@ export const getClasses = createAsyncThunk(
 
 export const getClassById = createAsyncThunk(
   "class/getClassById",
-  async (params: any) => {
-    const id = params?.id;
+  async (id: any) => {
     const response: any = await CourseClassService.getClassById(id);
 
     const data = response.data;
@@ -115,7 +114,6 @@ export const classSlice = createSlice({
     });
     builder.addCase(getClassById.fulfilled, (state, action) => {
       //   console.log({ data: action.payload });
-
       state.classDetail.data = action.payload.data;
     });
     builder.addCase(getStudentsByClass.fulfilled, (state, action) => {
@@ -135,9 +133,13 @@ export const classSlice = createSlice({
     builder.addCase(addClass.fulfilled, (state, action) => {
       console.log({ data: action.payload });
       state.classDetail.data = action.payload.data;
+      state.data = [...(state.data || []), action.payload.data];
     });
     builder.addCase(editClass.fulfilled, (state, action) => {
-      console.log({ data: action.payload });
+      //   console.log({ data: action.payload });
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = action.payload.data;
       state.classDetail.data = action.payload.data;
     });
   },
@@ -146,7 +148,7 @@ export const classSlice = createSlice({
 export const selectClasses = ({ courseClass }: any) =>
   courseClass?.courseClass?.data;
 export const selectClass = ({ courseClass }: any) =>
-  courseClass?.courseClass?.classDetil;
+  courseClass?.courseClass?.classDetail;
 
 export const { resetClassState } = classSlice.actions;
 

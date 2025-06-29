@@ -9,26 +9,35 @@ import {
   selectClasses,
 } from "../../../../../store/slices/classSlice";
 import { selectUser } from "../../../../../store/slices/userSlice";
-import { Button, IconButton, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { openAddClassDialog } from "../../../../../store/slices/globalSlice";
 import CircularLoading from "../../../../../components/CircularLoading";
+import { useNavigate } from "react-router-dom";
 
 const ClassList = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // loading true từ đầu
+  const [hasFetched, setHasFetched] = useState(false); // đánh dấu đã fetch xong
   const user = useSelector(selectUser);
   const classes = useSelector(selectClasses);
+  const navigate = useNavigate();
 
   useDeepCompareEffect(() => {
+    if (!user?.id) return;
+
     setLoading(true);
-    dispatch(getClasses(user?.id))
+    dispatch(getClasses(user.id))
       .unwrap()
       .finally(() => {
         setLoading(false);
+        setHasFetched(true);
       });
-  }, [dispatch]);
+  }, [dispatch, user?.id]);
 
-  if (loading) return <CircularLoading />;
+  const handleAddClass = () => {
+    dispatch(openAddClassDialog("new"));
+    navigate("/workspace/class/new");
+  };
 
   return (
     <>
@@ -41,26 +50,31 @@ const ClassList = () => {
           startIcon={<AddIcon />}
           sx={{ textTransform: "none" }}
           variant="outlined"
-          onClick={() => dispatch(openAddClassDialog("new"))}
+          onClick={handleAddClass}
         >
           Thêm lớp học
         </Button>
       </div>
-      <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 grid-cols-1 lg:gap-4">
-        {classes && classes?.length > 0 ? (
-          classes?.map((item: any, index: number) => {
-            return <ClassItem key={index} data={{ ...item, teacher: user }} />;
-          })
-        ) : (
-          <Typography
-            fontSize={16}
-            fontWeight={550}
-            className="text-center col-span-5"
-          >
-            Chưa có lớp học nào
-          </Typography>
-        )}
-      </div>
+
+      {loading && !hasFetched ? (
+        <CircularLoading />
+      ) : (
+        <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 grid-cols-1 lg:gap-4 mt-6">
+          {classes && classes.length > 0 ? (
+            classes.map((item: any, index: number) => (
+              <ClassItem key={index} data={{ ...item, teacher: user }} />
+            ))
+          ) : (
+            <Typography
+              fontSize={16}
+              fontWeight={550}
+              className="text-center col-span-5"
+            >
+              Chưa có lớp học nào
+            </Typography>
+          )}
+        </div>
+      )}
     </>
   );
 };

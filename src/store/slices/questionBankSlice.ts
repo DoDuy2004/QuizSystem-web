@@ -7,7 +7,7 @@ export interface QuestionBankStateProps {
   data: [];
   questionBankDetail: {
     data: {};
-    questions: [];
+    questions: any[];
   };
   totalElements: number;
   totalPages: number;
@@ -172,6 +172,17 @@ export const editQuestion = createAsyncThunk(
   }
 );
 
+export const deleteQuestion = createAsyncThunk(
+  "questionBank/deleteQuestion",
+  async (id: any) => {
+    const response: any = await QuestionBankService.deleteQuestion(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const questionBankSlice = createSlice({
   name: "questionBankSlice",
   initialState,
@@ -202,6 +213,17 @@ export const questionBankSlice = createSlice({
         state.data.splice(index, 1);
       }
     });
+    builder.addCase(deleteQuestion.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.questionBankDetail.questions.findIndex(
+        (item: any) => item.id === id
+      );
+      console.log({ index });
+      console.log({ id });
+      if (index !== -1) {
+        state.questionBankDetail.questions.splice(index, 1);
+      }
+    });
     builder.addCase(addQuestionBank.fulfilled, (state, action) => {
       console.log({ data: action.payload });
       state.questionBankDetail.data = action.payload.data;
@@ -209,6 +231,13 @@ export const questionBankSlice = createSlice({
     builder.addCase(editQuestionBank.fulfilled, (state, action) => {
       console.log({ data: action.payload });
       state.questionBankDetail.data = action.payload.data;
+    });
+    builder.addCase(addQuestionToQuestionBank.fulfilled, (state, action) => {
+      // console.log({ data: action.payload });
+      state.questionBankDetail.questions = [
+        ...state.questionBankDetail.questions,
+        action.payload.data,
+      ];
     });
   },
 });

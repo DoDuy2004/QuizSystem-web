@@ -7,7 +7,7 @@ function CourseClassModel(data?: any) {
     id: null,
     classCode: "",
     name: "",
-    credit: null,
+    credit: 0,
     status: 0,
     teacherId: "",
     subjectId: "",

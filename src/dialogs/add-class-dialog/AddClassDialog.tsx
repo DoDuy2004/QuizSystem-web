@@ -28,8 +28,18 @@ import CourseClassModel from "../../models/CourseClassModel";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getSujects } from "../../store/slices/questionBankSlice";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import _ from "lodash";
+import {
+  addClass,
+  editClass,
+  getClassById,
+  selectClass,
+} from "../../store/slices/classSlice";
+import CircularLoading from "../../components/CircularLoading";
+import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
+import { successAnchor } from "../../constants/confirm";
+import { selectUser } from "../../store/slices/userSlice";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -58,6 +68,9 @@ const AddClassDialog = () => {
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const routeParams = useParams();
+  const courseClass = useSelector(selectClass);
+  const navigate = useNavigate();
+  const user = useSelector(selectUser);
 
   const {
     handleSubmit,
@@ -73,19 +86,17 @@ const AddClassDialog = () => {
   });
 
   useDeepCompareEffect(() => {
-    if (hasFetchedSubject.current) return;
-
-    setLoading(true);
-    hasFetchedSubject.current = true;
-    dispatch(getSujects())
-      .then((res: any) => {
-        // console.log({ res });
-        setSubjects(res.payload.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [dispatch]);
+    if (addClassDialog?.isOpen && routeParams?.id) {
+      setLoading(true);
+      if (routeParams?.id && addClassDialog?.isOpen) {
+        dispatch(getClassById(routeParams?.id))
+          .unwrap()
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }
+  }, [dispatch, routeParams?.id, addClassDialog?.isOpen]);
 
   useDeepCompareEffect(() => {
     if (hasFetchedSubject.current) return;
@@ -103,18 +114,58 @@ const AddClassDialog = () => {
   }, [dispatch, routeParams?.id]);
 
   const handleClose = () => {
+    navigate("/workspace/class/list");
     dispatch(closeAddClassDialog());
   };
 
   useEffect(() => {
-    if (addClassDialog?.isOpen) {
-      reset(CourseClassModel({}));
-      setValue("subjectId", null);
+    if (addClassDialog?.isOpen && !routeParams?.id) {
+      reset(CourseClassModel({ subjectId: "" }));
+      setValue("subjectId", "", { shouldDirty: true });
     }
-  }, [reset, addClassDialog?.isOpen]);
+  }, [addClassDialog?.isOpen, routeParams?.id]);
+
+  useEffect(() => {
+    if (addClassDialog?.isOpen && routeParams?.id && courseClass?.data) {
+      const transformedData = {
+        ...courseClass.data,
+      };
+      reset(CourseClassModel(transformedData));
+    }
+    return () => {
+      setValue("subjectId", "", { shouldDirty: true });
+    };
+  }, [addClassDialog?.isOpen, courseClass?.data]);
 
   const onSubmit = (data: any) => {
-    console.log({ data });
+    const payload = {
+      name: data.name,
+      classCode: data.name,
+      credit: data.credit,
+      status: data.status,
+      teacherId: user?.id,
+      subjectId: data.subjectId,
+      description: data.description,
+    };
+
+    const action = routeParams?.id
+      ? editClass({
+          id: routeParams?.id,
+          form: { id: routeParams?.id, ...payload },
+        })
+      : addClass({ form: payload });
+    // console.log({ payload });
+    dispatch(action)
+      .then((res) => {
+        reset(CourseClassModel({ subjectId: "" }));
+        dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
+      })
+      .finally(() => {
+        setLoading(false);
+        if (!loading) {
+          dispatch(closeAddClassDialog());
+        }
+      });
   };
 
   return (
@@ -129,12 +180,12 @@ const AddClassDialog = () => {
           "& .MuiDialog-paper": {
             margin: isMobile ? 0 : isTablet ? "1.5vh auto" : "2vh auto",
             width: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-            height: "100%",
+            height: "80%",
             maxWidth: isMobile ? "100vw" : isTablet ? "50%" : "40%",
             maxHeight: isMobile ? "100vh" : "auto",
             borderRadius: isMobile ? 0 : 2,
             boxSizing: "border-box",
-            overflow: isMobile ? "hidden" : "visible",
+            overflow: isMobile ? "hidden" : "hidden",
             padding: isMobile
               ? "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"
               : 0,
@@ -144,149 +195,163 @@ const AddClassDialog = () => {
           },
         }}
       >
-        <DialogTitle className="flex items-center justify-between">
+        <DialogTitle
+          className="flex items-center justify-between bg-blue-50"
+          sx={{ paddingY: 1.5 }}
+        >
           <Typography>Thêm lớp học</Typography>
           <IconButton onClick={() => dispatch(closeAddClassDialog())}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <form
-            action=""
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-y-6 mt-2"
-          >
-            <div className="grid grid-cols-3 gap-x-4">
-              {/* <Typography>Tên lớp học phần</Typography> */}
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }: any) => (
-                  <TextField
-                    {...field}
-                    id="name"
-                    className="col-span-2"
-                    label={
-                      <>
-                        Tên lớp học phần <span className="text-red-500">*</span>
-                      </>
-                    }
-                    error={!!errors.name}
-                    helperText={errors?.name?.message}
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-              <Controller
-                name="credit"
-                control={control}
-                render={({ field }: any) => (
-                  <TextField
-                    {...field}
-                    id="credit"
-                    type="number"
-                    label={<>Số tín chỉ</>}
-                    error={!!errors.credit}
-                    helperText={errors?.credit?.message}
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-            </div>
-            <Controller
-              name="subjectId"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  options={subjects}
-                  freeSolo
-                  getOptionLabel={(option: any) =>
-                    typeof option === "string" ? option : option?.name || ""
-                  }
-                  isOptionEqualToValue={(option, value: any) =>
-                    typeof option === "object" && typeof value === "string"
-                      ? option.id === value
-                      : option?.name === value
-                  }
-                  value={
-                    subjects.find((c: any) => c.id === field.value) || null
-                  }
-                  onChange={(event, newValue: any) => {
-                    field.onChange(newValue?.id || "");
-                  }}
-                  onInputChange={(event, newInputValue) => {}}
-                  renderInput={(params: any) => (
+          {loading && addClassDialog?.isOpen ? (
+            <CircularLoading />
+          ) : (
+            <form
+              action=""
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex flex-col gap-y-6 mt-4"
+            >
+              <div className="grid grid-cols-3 gap-x-4">
+                {/* <Typography>Tên lớp học phần</Typography> */}
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }: any) => (
                     <TextField
-                      {...params}
-                      fullWidth
+                      {...field}
+                      id="name"
+                      className="col-span-2"
                       label={
                         <>
-                          Môn học <span className="text-red-500">*</span>
+                          Tên lớp học phần{" "}
+                          <span className="text-red-500">*</span>
                         </>
                       }
+                      error={!!errors.name}
+                      helperText={errors?.name?.message}
                       variant="outlined"
-                      error={!!errors.subjectId}
-                      helperText={errors.subjectId?.message}
+                      fullWidth
                     />
                   )}
                 />
-              )}
-            />
-            <div>
-              {/* <Typography>Mô tả</Typography> */}
+                <Controller
+                  name="credit"
+                  control={control}
+                  render={({ field }: any) => (
+                    <TextField
+                      {...field}
+                      id="credit"
+                      type="number"
+                      label="Số tín chỉ"
+                      error={!!errors.credit}
+                      helperText={errors?.credit?.message}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </div>
               <Controller
-                name="description"
+                name="subjectId"
                 control={control}
-                render={({ field }: any) => (
-                  <TextField
-                    {...field}
-                    id="description"
-                    label={<>Mô tả</>}
-                    multiline
-                    rows={4}
-                    error={!!errors.description}
-                    helperText={errors?.description?.message}
-                    variant="outlined"
-                    fullWidth
+                render={({ field }) => (
+                  <Autocomplete
+                    options={subjects}
+                    key={field.value || "empty"}
+                    freeSolo
+                    // inputValue={field.value === "" ? "" : undefined}
+                    getOptionLabel={(option: any) =>
+                      typeof option === "string" ? option : option?.name || ""
+                    }
+                    isOptionEqualToValue={(option, value: any) =>
+                      typeof option === "object" && typeof value === "string"
+                        ? option.id === value
+                        : option?.name === value
+                    }
+                    value={
+                      field.value
+                        ? subjects.find((c: any) => {
+                            return c.id === field.value;
+                          })
+                        : null
+                    }
+                    onChange={(event, newValue: any) => {
+                      field.onChange(newValue?.id || "");
+                    }}
+                    onInputChange={(event, newInputValue) => {}}
+                    renderInput={(params: any) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        label={
+                          <>
+                            Môn học <span className="text-red-500">*</span>
+                          </>
+                        }
+                        variant="outlined"
+                        error={!!errors.subjectId}
+                        helperText={errors.subjectId?.message}
+                      />
+                    )}
                   />
                 )}
               />
-            </div>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }: any) => (
-                <FormControlLabel
-                  {...field}
-                  control={<Switch defaultChecked />}
-                  label="Hoạt động"
+              <div>
+                {/* <Typography>Mô tả</Typography> */}
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }: any) => (
+                    <TextField
+                      {...field}
+                      id="description"
+                      label={<>Mô tả</>}
+                      multiline
+                      rows={4}
+                      error={!!errors.description}
+                      helperText={errors?.description?.message}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
                 />
-              )}
-            />
-            <div className="flex justify-end pt-4">
-              <Button
-                loading={loading}
-                type="submit"
-                variant="contained"
-                disabled={_.isEmpty(dirtyFields) || !isValid || loading}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "999px",
-                  background:
-                    !isValid || _.isEmpty(dirtyFields) || loading
-                      ? "gray"
-                      : "linear-gradient(to right, #3b82f6, #a855f7)",
-                  color: "white",
-                  px: 3,
-                  py: 1,
-                }}
-              >
-                Lưu lớp học
-              </Button>
-            </div>
-          </form>
+              </div>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }: any) => (
+                  <FormControlLabel
+                    {...field}
+                    control={<Switch defaultChecked />}
+                    label="Hoạt động"
+                  />
+                )}
+              />
+              <div className="flex justify-end pt-4">
+                <Button
+                  loading={loading}
+                  type="submit"
+                  variant="contained"
+                  disabled={_.isEmpty(dirtyFields) || !isValid || loading}
+                  sx={{
+                    textTransform: "none",
+                    borderRadius: "999px",
+                    background:
+                      !isValid || _.isEmpty(dirtyFields) || loading
+                        ? "gray"
+                        : "linear-gradient(to right, #3b82f6, #a855f7)",
+                    color: "white",
+                    px: 3,
+                    py: 1,
+                  }}
+                >
+                  Lưu lớp học
+                </Button>
+              </div>
+            </form>
+          )}
         </DialogContent>
         {/* <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>

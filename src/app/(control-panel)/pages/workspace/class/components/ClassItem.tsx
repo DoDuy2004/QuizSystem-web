@@ -14,6 +14,10 @@ import { useDispatch } from "react-redux";
 import { type AppDispatch } from "../../../../../../store/store";
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
 import { deleteClass } from "../../../../../../store/slices/classSlice";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import { useNavigate } from "react-router-dom";
+import { openAddClassDialog } from "../../../../../../store/slices/globalSlice";
 
 const backgrounds = [
   "/assets/images/backgrounds/Honors.jpg",
@@ -28,7 +32,10 @@ const ClassItem = ({ data }: any) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const dispatch = useDispatch<AppDispatch>();
-  const [randomBackground, setRandomBackground] = useState(backgrounds[Math.floor(Math.random() * backgrounds.length)])
+  const navigate = useNavigate();
+  const [randomBackground, setRandomBackground] = useState(
+    backgrounds[Math.floor(Math.random() * backgrounds.length)]
+  );
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -38,12 +45,14 @@ const ClassItem = ({ data }: any) => {
 
   const handleUpdate = (e: any) => {
     e.stopPropagation();
+    navigate(`/workspace/class/${data?.id}/edit`);
+    dispatch(openAddClassDialog("edit"));
     handleClose();
   };
 
-//   console.log({ data }); 
+  //   console.log({ data });
 
-  const openConfirmDialog = (id: any, e: any) => {
+  const openConfirmDialog = (e: any, id: any) => {
     e.stopPropagation();
     handleClose();
     dispatch(
@@ -52,9 +61,9 @@ const ClassItem = ({ data }: any) => {
           onAgree: () => {
             dispatch(deleteClass({ id }));
           },
-          dialogContent: "Bạn có chắc muốn xóa ngân hàng câu hỏi này",
-          titleContent: "Xóa ngân hàng câu hỏi",
-          agreeText: "Xóa",
+          dialogContent: "Bạn có chắc muốn lưu trữ lớp học này này",
+          titleContent: "Lưu trữ lớp học",
+          agreeText: "Xác nhận",
           disagreeText: "Hủy",
           onDisagree: () => {},
         },
@@ -63,7 +72,7 @@ const ClassItem = ({ data }: any) => {
   };
 
   return (
-    <div className="col-span-1 hover:cursor-pointer rounded-md border-1 border-gray-200 overflow-hidden ">
+    <div className="col-span-1 hover:cursor-pointer hover:shadow rounded-md border-1 border-gray-200 overflow-hidden ">
       <div
         className="flex items-start justify-between border-b-1 border-gray-200 p-3 bg-cover"
         style={{
@@ -136,18 +145,30 @@ const ClassItem = ({ data }: any) => {
             onClick={(e) => openConfirmDialog(e, data?.id)}
           >
             <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
-              Đăng xuất
+              Lưu trữ
             </ListItemText>
           </MenuItem>
         </Menu>
       </div>
-      <div className="h-36 relative bg-white">
+      <div className="h-28 relative bg-white border-b-1 border-gray-200">
         <Avatar
           sx={{ width: 75, height: 75 }}
-          className="absolute -top-1/4 left-[65%]"
+          className="absolute -top-1/3 left-[65%]"
         >
           {data?.teacher?.fullName[0]}
         </Avatar>
+      </div>
+      <div className="w-full ml-auto flex items-center justify-end px-3 gap-x-2 py-1 bg-white">
+        <Tooltip title="Học sinh">
+          <IconButton size="small">
+            <GroupOutlinedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Bảng tin">
+          <IconButton size="small">
+            <AssignmentOutlinedIcon />
+          </IconButton>
+        </Tooltip>
       </div>
     </div>
   );
