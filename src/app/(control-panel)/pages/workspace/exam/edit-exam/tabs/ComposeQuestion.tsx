@@ -1,5 +1,5 @@
 import { Button, Typography } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,58 +13,25 @@ import {
 } from "../../../../../../../store/slices/questionBankSlice";
 import { useDeepCompareEffect } from "../../../../../../../hooks";
 import CircularLoading from "../../../../../../../components/CircularLoading";
-import QuestionForm from "../components/QuestionForm";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import _ from "lodash";
 import { openAddMultiQuestionsDialog } from "../../../../../../../store/slices/globalSlice";
 import { openConfirmationDialog } from "../../../../../../../store/slices/confirmationSlice";
+import QuestionForm from "../../../question-bank/edit-question-bank/components/QuestionForm";
 
-const ComposeQuestion = ({ questions, questionBankId }: any) => {
+const ComposeQuestion = ({ questions }: any) => {
   const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
   const routeParams = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const [loading, setLoading] = useState(true);
-  // const questionBank = useSelector(selectQuestionBank);
+  const [loading, setLoading] = useState(false);
   const [questionLoading, setQuestionLoading] = useState(true);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
   const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
   const [questionsData, setQuestionsData] = useState(questions || []);
-  const hasFetched = useRef(false);
-
-  useDeepCompareEffect(() => {
-    const fetchData = async () => {
-      if (hasFetched.current || !routeParams.id) {
-        setLoading(false);
-        return;
-      }
-
-      hasFetched.current = true;
-      setLoading(true);
-
-      try {
-        const res = await dispatch(
-          getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-        ).unwrap();
-
-        // console.log({ res });
-
-        const data = Array.isArray(res?.data) ? res.data : [];
-        setNoOfQuestions(data.length || 1);
-        setQuestionsData(data);
-      } catch (error) {
-        // console.error("Lỗi khi lấy dữ liệu:", error);
-        setNoOfQuestions(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [dispatch, routeParams?.id, questionBankId]);
 
   useDeepCompareEffect(() => {
     if (routeParams.id && questionsData?.length > 0) {
-      dispatch(getQuestionById(questions[0]?.id))
+      dispatch(getQuestionById(questions[0]?.questionId))
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -86,10 +53,8 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
       return;
     }
 
-    // console.log({ index });
-
     setIsActive(index);
-    const questionId = questions?.[index]?.id;
+    const questionId = questionsData?.[index]?.id;
 
     if (questionId) {
       setQuestionLoading(true);
@@ -104,7 +69,6 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
           setQuestionLoading(false);
         });
     } else {
-      setQuestion({});
       setQuestionLoading(false);
     }
   };

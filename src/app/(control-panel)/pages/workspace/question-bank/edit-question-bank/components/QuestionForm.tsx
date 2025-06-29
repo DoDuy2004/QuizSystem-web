@@ -11,7 +11,12 @@ import {
 } from "@mui/material";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  type FieldError,
+} from "react-hook-form";
 import * as yup from "yup";
 import QuestionModel from "../../../../../../../models/QuestionModel";
 import RichTextEditor from "../../../../../../../components/RichTextEditor/RichTextEditor";
@@ -23,10 +28,19 @@ import { type AppDispatch } from "../../../../../../../store/store";
 import { getChapters } from "../../../../../../../store/slices/subjectSlice";
 import {
   addQuestionToQuestionBank,
+  editQuestion,
   selectQuestionBank,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
+import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
+import { successAnchor } from "../../../../../../../constants/confirm";
 
+const difficultyOptions = [
+  { label: "Dễ", value: "EASY" },
+  { label: "Trung bình", value: "MEDIUM" },
+  { label: "Vừa", value: "MODERATE" },
+  { label: "Khó", value: "HARD" },
+];
 // Payload create question
 // {
 //   "topic": "Classes",
@@ -51,13 +65,16 @@ const schema = yup.object().shape({
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
   chapterId: yup.string().required("Chương là bắt buộc"),
-  answers: yup.array().of(
-    yup.object().shape({
-      isCorrect: yup.bool(),
-      content: yup.string().required("Nội dung câu trả lời là bắt buộc"),
-      answerOrder: yup.number(),
-    })
-  ),
+  answers: yup
+    .array()
+    .of(
+      yup.object().shape({
+        isCorrect: yup.bool(),
+        content: yup.string().required("Nội dung câu trả lời là bắt buộc"),
+        answerOrder: yup.number(),
+      })
+    )
+    .min(2, "Phải có ít nhất 2 câu trả lời"),
 });
 
 const QuestionForm = ({ questionData }: any) => {
@@ -115,35 +132,31 @@ const QuestionForm = ({ questionData }: any) => {
   };
 
   const handleRemoveAnswer = (index: number) => {
+    setValue(`answers.${0}.isCorrect`, true);
     remove(index);
   };
 
-  console.log({ empty: _.isEmpty(questionData) });
+  // console.log({ empty: _.isEmpty(questionData) });
 
   useEffect(() => {
-    setValue(
-      `answers.${0}`,
-      { isCorrect: true, content: "", answerOrder: 0 },
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      }
-    );
-    setValue("type", selectedValue);
-
-    // if (questionData) {
-    //   const transformedData = {
-    //     ...questionData,
-    //     chapterId: questionData?.chapter?.id,
-    //   };
-    //   reset(QuestionModel(transformedData));
-    // }
     if (_.isEmpty(questionData)) {
-      reset(QuestionModel({}));
+      const defaultAnswers = Array.from({ length: 4 }, (_, index) => ({
+        isCorrect: index === 0,
+        content: "",
+        answerOrder: index,
+      }));
+
+      reset({
+        ...QuestionModel({}),
+        answers: defaultAnswers,
+        type: selectedValue,
+      });
     } else {
+      setQuestion(questionData);
       const transformedData = {
         ...questionData,
         chapterId: questionData?.chapter?.id,
+        difficulty: difficultyOptions[questionData.difficulty].value,
       };
       reset(QuestionModel(transformedData));
     }
@@ -178,7 +191,6 @@ const QuestionForm = ({ questionData }: any) => {
       }
     };
 
-  // const form = watch();
   // schema
   //   .validate(form, { abortEarly: false })
   //   .then(() => {
@@ -188,31 +200,49 @@ const QuestionForm = ({ questionData }: any) => {
   //     console.log("INVALID", err.errors);
   //   });
 
-  // console.log({ form });
-
   const onSubmit = (data: any) => {
+    // console.log({ data });
     setLoading(true);
+
     const payload = {
       topic: data.topic,
       type: data.type,
       content: data.content,
       status: 0,
-      difficulty: data.difficulty,
+      difficulty: difficultyOptions.findIndex(
+        (item) => item.value == data.difficulty
+      ),
       image: data.image,
       chapterId: data.chapterId,
       answers: data.answers,
       questionBankId: questionBank?.data?.id,
       createdBy: user?.id,
     };
+
+    const action = !_.isEmpty(questionData)
+      ? editQuestion({
+          id: question.id,
+          form: { id: question.id, ...payload },
+        })
+      : addQuestionToQuestionBank({ form: payload });
     // console.log({ payload });
-    dispatch(addQuestionToQuestionBank({ form: payload }))
+    dispatch(action)
       .then((res) => {
         setQuestion(res.payload.data);
+        reset(QuestionModel(payload));
+        dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {
         setLoading(false);
       });
   };
+
+  // const answerErrors = errors.answers as
+  //   | Array<{
+  //       content?: FieldError;
+  //       isCorrect?: FieldError;
+  //     }>
+  //   | undefined;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -253,7 +283,9 @@ const QuestionForm = ({ questionData }: any) => {
           control={control}
           rules={{ required: "Bạn chưa nhập nội dung câu hỏi" }}
           render={({ field }) => (
-            <RichTextEditor value={field.value} onChange={field.onChange} />
+            <div>
+              <RichTextEditor value={field.value} onChange={field.onChange} />
+            </div>
           )}
         />
         <Controller
@@ -312,18 +344,29 @@ const QuestionForm = ({ questionData }: any) => {
             control={control}
             name="difficulty"
             render={({ field }: any) => (
-              <TextField
-                {...field}
-                id="difficulty"
-                label={
-                  <>
-                    Độ khó <span className="text-red-500">*</span>
-                  </>
+              <Autocomplete
+                disablePortal
+                options={difficultyOptions}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option: any, value) =>
+                  option.value === value
                 }
-                error={!!errors.difficulty}
-                helperText={errors?.difficulty?.message}
-                variant="outlined"
-                fullWidth
+                value={
+                  difficultyOptions.find((opt) => opt.value === field.value) ||
+                  null
+                }
+                onChange={(event, newValue) => {
+                  field.onChange(newValue?.value || "");
+                }}
+                renderInput={(params: any) => (
+                  <TextField
+                    {...params}
+                    label="Độ khó"
+                    error={!!errors.difficulty}
+                    helperText={errors?.difficulty?.message}
+                  />
+                )}
+                sx={{ width: 300 }}
               />
             )}
           />
@@ -359,6 +402,7 @@ const QuestionForm = ({ questionData }: any) => {
                   <Button
                     sx={{ textTransform: "none" }}
                     color="error"
+                    disabled={watch("answers").length < 2}
                     startIcon={<DeleteForeverOutlinedIcon />}
                     onClick={() => handleRemoveAnswer(index)}
                   >
@@ -377,8 +421,8 @@ const QuestionForm = ({ questionData }: any) => {
                           Nội dung <span className="text-red-500">*</span>
                         </>
                       }
-                      // error={!!errors?.answers?.[index]?.content}
-                      // helperText={errors?.answers?.[index]?.content?.message}
+                      // error={!!answerErrors?.[index]?.content}
+                      // helperText={answerErrors?.[index]?.content?.message}
                       variant="outlined"
                       fullWidth
                     />
@@ -399,6 +443,9 @@ const QuestionForm = ({ questionData }: any) => {
                 />
               </div>
             ))}
+          {watch("answers").length < 2 && (
+            <p className="text-red-500 text-sm">Cần có ít nhất 2 câu trả lời</p>
+          )}
           <Button
             sx={{ textTransform: "none", width: "fit-content" }}
             startIcon={<AddIcon />}

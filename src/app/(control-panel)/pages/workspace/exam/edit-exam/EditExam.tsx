@@ -1,11 +1,13 @@
 import { Box, IconButton, Tab, Tabs, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import QuestionBankForm from "./tabs/QuestionBankForm";
+import QuestionBankForm from "./tabs/ExamForm";
 import { selectQuestionBank } from "../../../../../../store/slices/questionBankSlice";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ComposeQuestion from "./tabs/ComposeQuestion";
+import { selectExam } from "../../../../../../store/slices/examSlice";
+import ExamForm from "./tabs/ExamForm";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -37,9 +39,9 @@ function a11yProps(index: number) {
 
 const tabSteps = ["info", "question"];
 
-const CreateQuestionBank = () => {
+const CreateExam = () => {
   const [value, setValue] = React.useState(0);
-  const questionBank = useSelector(selectQuestionBank);
+  const exam = useSelector(selectExam);
   const routeParams = useParams();
   const [isQuestionTabEnabled, setIsQuestionTabEnabled] = useState(false);
   const navigate = useNavigate();
@@ -53,7 +55,7 @@ const CreateQuestionBank = () => {
   }, [routeParams.id]);
 
   useEffect(() => {
-    console.log({ searchParams });
+    // console.log({ searchParams });
     setValue(tabSteps.indexOf(stepParam as string));
 
     console.log(stepParam);
@@ -70,7 +72,7 @@ const CreateQuestionBank = () => {
           <ArrowBackOutlinedIcon />
         </IconButton>
         <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-          Ngân hàng câu hỏi
+          Đề thi
         </Typography>
       </div>
       <div className="flex flex-col gap-y-4">
@@ -98,16 +100,14 @@ const CreateQuestionBank = () => {
         </Box>
         <div className="">
           <CustomTabPanel value={value} index={0}>
-            <QuestionBankForm
-              data={questionBank.data}
+            <ExamForm
               setIsQuestionTabEnabled={setIsQuestionTabEnabled}
               setTabValue={setValue}
             />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
             <ComposeQuestion
-              questions={questionBank?.questions}
-              questionBankId={questionBank?.data?.id}
+              questions={exam?.data?.examQuestions}
             />
           </CustomTabPanel>
         </div>
@@ -116,4 +116,4 @@ const CreateQuestionBank = () => {
   );
 };
 
-export default CreateQuestionBank;
+export default CreateExam;

@@ -7,9 +7,6 @@ import { useDeepCompareEffect } from "../../../../../../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../../store/store";
 import {
-  addQuestionBank,
-  editQuestionBank,
-  getQuestionBankById,
   getSujects,
   // selectQuestionBank,
 } from "../../../../../../../store/slices/questionBankSlice";
@@ -18,25 +15,29 @@ import QuestionBankModel from "../../../../../../../models/QuestionBankModel";
 import _ from "lodash";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import CircularLoading from "../../../../../../../components/CircularLoading";
+import {
+  addExam,
+  editExam,
+  getExambyId,
+  selectExam,
+} from "../../../../../../../store/slices/examSlice";
+import ExamModel from "../../../../../../../models/ExamModel";
 
 const schema: any = yup.object().shape({
-  name: yup.string().required("Tên ngân hàng là bắt buộc"),
-  description: yup.string(),
+  name: yup.string().required("Tên đề thi là bắt buộc"),
+  durationMinutes: yup.string(),
   subject: yup.string().required("Môn học là bắt buộc"),
+  examCode: yup.string().required("Mã đề là bắt buộc"),
 });
 
-const QuestionBankForm = ({
-  data,
-  setIsQuestionTabEnabled,
-  setTabValue,
-}: any) => {
+const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
   const hasFetched = useRef(false);
   const hasFetchedSubject = useRef(false);
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
-  const user = useSelector(selectUser);
+  const exam = useSelector(selectExam);
   const {
     handleSubmit,
     watch,
@@ -46,7 +47,7 @@ const QuestionBankForm = ({
     control,
   }: any = useForm({
     mode: "onChange",
-    defaultValues: QuestionBankModel({}),
+    defaultValues: ExamModel({}),
     resolver: yupResolver(schema),
   });
 
@@ -57,20 +58,22 @@ const QuestionBankForm = ({
       hasFetched.current = true;
       setLoading(true);
 
-      dispatch(getQuestionBankById({ id: routeParams.id })).finally(() => {
-        setLoading(false);
-      });
+      dispatch(getExambyId({ id: routeParams.id }))
+        .unwrap()
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [dispatch, routeParams?.id]);
 
   useEffect(() => {
-    if (data) {
+    if (exam) {
       const transformedData = {
-        ...data,
+        ...exam?.data,
       };
-      reset(QuestionBankModel(transformedData));
+      reset(ExamModel(transformedData));
     }
-  }, [data, reset]);
+  }, [exam, reset]);
 
   useDeepCompareEffect(() => {
     if (hasFetchedSubject.current) return;
@@ -91,19 +94,21 @@ const QuestionBankForm = ({
     setLoading(true);
     const payload = {
       name: data.name,
-      description: data.description,
       subject: data.subject,
-      teacherId: user?.id,
+      durationMinutes: data?.durationMinutes,
       status: 0,
+      examCode: data.examCode,
+      startDate: new Date(),
+      noOfQuestions: 0
     };
 
     const action =
-      routeParams.id || data.id
-        ? editQuestionBank({
-            id: routeParams.id || data.id,
-            form: { id: routeParams.id || data.id, ...payload },
+      routeParams.id
+        ? editExam({
+            id: routeParams.id,
+            form: { id: routeParams.id, ...payload },
           })
-        : addQuestionBank({ form: payload });
+        : addExam({ form: payload });
 
     dispatch(action)
       .then(() => {
@@ -116,7 +121,7 @@ const QuestionBankForm = ({
       .finally(() => setLoading(false));
   };
 
-  console.log({ form: watch() });
+  // console.log({ form: watch() });
 
   if (loading) {
     return <CircularLoading />;
@@ -127,25 +132,46 @@ const QuestionBankForm = ({
       <Typography>Thông tin cơ bản</Typography>
       <form action="" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-y-6 px-2">
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                label={
-                  <>
-                    Tên ngân hàng câu hỏi{" "}
-                    <span className="text-red-500">*</span>
-                  </>
-                }
-                variant="outlined"
-                error={!!errors.name}
-                helperText={errors.name?.message}
-              />
-            )}
-          />
+          <div className="grid grid-cols-4 gap-4">
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  className="col-span-3"
+                  label={
+                    <>
+                      Tên đề thi <span className="text-red-500">*</span>
+                    </>
+                  }
+                  variant="outlined"
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              )}
+            />
+            <Controller
+              name="examCode"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  className="col-span-1"
+                  label={
+                    <>
+                      Mã đề thi <span className="text-red-500">*</span>
+                    </>
+                  }
+                  variant="outlined"
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              )}
+            />
+          </div>
 
           {/* Môn học */}
           <Controller
@@ -196,18 +222,17 @@ const QuestionBankForm = ({
 
           {/* Mô tả */}
           <Controller
-            name="description"
+            name="durationMinutes"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                label="Mô tả"
+                label="Thời gian làm bài"
                 variant="outlined"
-                multiline
-                rows={3}
-                error={!!errors.description}
-                helperText={errors.description?.message}
+                type="number"
+                error={!!errors.durationMinutes}
+                helperText={errors.durationMinutes?.message}
               />
             )}
           />
@@ -230,7 +255,7 @@ const QuestionBankForm = ({
                 py: 1,
               }}
             >
-              Lưu ngân hàng câu hỏi
+              Lưu đề thi
             </Button>
           </div>
         </div>
@@ -239,4 +264,4 @@ const QuestionBankForm = ({
   );
 };
 
-export default QuestionBankForm;
+export default ExamForm;

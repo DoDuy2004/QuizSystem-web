@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import SubjectService from "../../services/subjectd/SubjectService";
+import SubjectService from "../../services/subject/SubjectService";
 
 export interface SubjectStateProps {
   data: [];

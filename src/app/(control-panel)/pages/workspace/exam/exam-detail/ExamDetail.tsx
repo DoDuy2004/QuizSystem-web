@@ -10,25 +10,24 @@ import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import QuizIcon from "@mui/icons-material/Quiz";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import {
-  deleteQuestionBank,
-  getQuestionBankById,
-  getQuestionsByQuestionBank,
-  selectQuestionBank,
-} from "../../../../../../store/slices/questionBankSlice";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import useParams from "../../../../../../hooks/useParams";
 import CircularLoading from "../../../../../../components/CircularLoading";
-import QuestionItem from "./components/QuestionItem";
+import QuestionItem from "../../question-bank/question-bank-detail/components/QuestionItem"; // should move to reuse component
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
+import {
+  deleteExam,
+  getExambyId,
+  selectExam,
+} from "../../../../../../store/slices/examSlice";
 
-const QuestionBankDetail = () => {
+const ExamDetail = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
   const routeParams = useParams();
   const hasFetched = useRef(false);
   const navigate = useNavigate();
-  const questionBank = useSelector(selectQuestionBank);
-
+  const exam = useSelector(selectExam);
   useDeepCompareEffect(() => {
     if (hasFetched.current) return;
 
@@ -39,10 +38,7 @@ const QuestionBankDetail = () => {
       setLoading(true);
 
       try {
-        await Promise.all([
-          dispatch(getQuestionsByQuestionBank({ id: routeParams?.id })),
-          dispatch(getQuestionBankById({ id: routeParams?.id })),
-        ]);
+        dispatch(getExambyId({ id: routeParams?.id }));
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -55,11 +51,11 @@ const QuestionBankDetail = () => {
 
   const handleComposeQuestion = (e: any) => {
     e.stopPropagation();
-    navigate(`/workspace/question-bank/${routeParams?.id}/edit?step=question`);
+    navigate(`/workspace/exam/${routeParams?.id}/edit?step=question`);
   };
   const handleUpdate = (e: any) => {
     e.stopPropagation();
-    navigate(`/workspace/question-bank/${routeParams?.id}/edit?step=info`);
+    navigate(`/workspace/exam/${routeParams?.id}/edit?step=info`);
   };
 
   const openConfirmDialog = (id: any, e: any) => {
@@ -68,7 +64,7 @@ const QuestionBankDetail = () => {
       openConfirmationDialog({
         data: {
           onAgree: () => {
-            dispatch(deleteQuestionBank({ id }));
+            dispatch(deleteExam({ id }));
           },
           dialogContent: "Bạn có chắc muốn xóa ngân hàng câu hỏi này",
           titleContent: "Xóa ngân hàng câu hỏi",
@@ -89,27 +85,20 @@ const QuestionBankDetail = () => {
           <ArrowBackOutlinedIcon />
         </IconButton>
         <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-          Chi tiết ngân hàng câu hỏi
+          Chi tiết đề thi
         </Typography>
       </div>
       <div className="grid grid-cols-6 gap-8">
         <div className="col-span-2 flex flex-col gap-y-4 bg-white rounded-md shadow-md px-6 py-4 h-fit">
           <Typography component={"h6"} fontSize={14} color="primary">
-            {questionBank?.data?.name}
+            {exam?.data?.name}
           </Typography>
           <Typography
             component={"p"}
             fontSize={14}
             className="truncate max-w-full"
           >
-            Môn: {questionBank?.data?.subject}
-          </Typography>
-          <Typography
-            component={"p"}
-            fontSize={14}
-            className="flex items-center gap-x-2"
-          >
-            {questionBank?.data?.description}
+            Môn: {exam?.data?.subject}
           </Typography>
           <Typography
             component={"p"}
@@ -117,7 +106,15 @@ const QuestionBankDetail = () => {
             className="flex items-center gap-x-2"
           >
             <HelpCenterIcon className="text-orange-500" fontSize={"small"} />{" "}
-            {questionBank?.data?.noOfQuestions} câu hỏi
+            {exam?.data?.noOfQuestions} câu hỏi
+          </Typography>
+          <Typography
+            component={"p"}
+            fontSize={12}
+            className="flex items-center gap-x-2"
+          >
+            <AccessTimeIcon className="text-orange-500" fontSize={"small"} />{" "}
+            {exam?.data?.durationMinutes || 0} phút
           </Typography>
           <Divider />
           <div className="flex items-center gap-x-2">
@@ -144,13 +141,14 @@ const QuestionBankDetail = () => {
           </div>
         </div>
         <div className="col-span-4 flex flex-col gap-y-4 bg-white px-6 py-4 shadow rounded-md">
-          {questionBank?.questions && questionBank?.questions?.length === 0 ? (
+          {exam?.data?.examQuestions &&
+          exam?.data?.examQuestions?.length === 0 ? (
             <Typography>
-              Không có câu hỏi nào trong ngân hàng câu hỏi
+              Không có câu hỏi nào trong đề thi
             </Typography>
           ) : (
-            questionBank?.questions?.map((item: any, index: number) => (
-              <QuestionItem data={item} key={index} />
+            exam?.data?.examQuestions?.map((item: any, index: number) => (
+              <QuestionItem data={item?.question} key={index} />
             ))
           )}
         </div>
@@ -159,4 +157,4 @@ const QuestionBankDetail = () => {
   );
 };
 
-export default QuestionBankDetail;
+export default ExamDetail;

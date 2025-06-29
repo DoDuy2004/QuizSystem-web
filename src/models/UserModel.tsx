@@ -9,7 +9,7 @@ function UserModel(data?: any) {
     fullName: "",
     email: "",
     phoneNumber: "",
-    gender: true,
+    gender: true ? "MALE" : "FEMALE",
     dateOfBirth: null,
     avatarUrl: "",
     status: null,
