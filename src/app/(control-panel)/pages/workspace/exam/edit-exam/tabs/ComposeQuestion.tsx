@@ -9,29 +9,59 @@ import { type AppDispatch } from "../../../../../../../store/store";
 import {
   deleteQuestion,
   getQuestionById,
-  getQuestionsByQuestionBank,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { useDeepCompareEffect } from "../../../../../../../hooks";
 import CircularLoading from "../../../../../../../components/CircularLoading";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import _ from "lodash";
-import { openAddMultiQuestionsDialog } from "../../../../../../../store/slices/globalSlice";
+import {
+  openAddMultiQuestionsDialog,
+  openAddQuestionToExamDialog,
+} from "../../../../../../../store/slices/globalSlice";
 import { openConfirmationDialog } from "../../../../../../../store/slices/confirmationSlice";
-import QuestionForm from "../../../question-bank/edit-question-bank/components/QuestionForm";
+import QuestionForm from "../components/QuestionForm";
+import { getQuestionsByExam } from "../../../../../../../store/slices/examSlice";
 
 const ComposeQuestion = ({ questions }: any) => {
   const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
   const routeParams = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [questionLoading, setQuestionLoading] = useState(true);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
   const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
   const [questionsData, setQuestionsData] = useState(questions || []);
 
   useDeepCompareEffect(() => {
+    const fetchData = async () => {
+      if (!routeParams.id) {
+        setLoading(false);
+        return;
+      }
+      // setLoading(true);
+      try {
+        const res = await dispatch(
+          getQuestionsByExam(routeParams?.id)
+        ).unwrap();
+
+        // console.log({ res });
+
+        const data = Array.isArray(res?.data) ? res.data : [];
+        setNoOfQuestions(data.length || 1);
+        setQuestionsData(data);
+      } catch (error) {
+        setNoOfQuestions(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, routeParams?.id, questions]);
+
+  useDeepCompareEffect(() => {
     if (routeParams.id && questionsData?.length > 0) {
-      dispatch(getQuestionById(questions[0]?.questionId))
+      dispatch(getQuestionById(questionsData[0]?.id))
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -69,6 +99,7 @@ const ComposeQuestion = ({ questions }: any) => {
           setQuestionLoading(false);
         });
     } else {
+      setQuestion({});
       setQuestionLoading(false);
     }
   };
@@ -108,8 +139,8 @@ const ComposeQuestion = ({ questions }: any) => {
           onAgree: () => {
             handleDeleteQuestion();
           },
-          dialogContent: "Bạn có chắc muốn xóa ngân hàng câu hỏi này",
-          titleContent: "Xóa ngân hàng câu hỏi",
+          dialogContent: "Bạn có chắc muốn xóa câu hỏi này",
+          titleContent: "Xóa câu hỏi",
           agreeText: "Xóa",
           disagreeText: "Hủy",
           onDisagree: () => {},
@@ -152,8 +183,9 @@ const ComposeQuestion = ({ questions }: any) => {
                 size="small"
                 variant="contained"
                 sx={{ textTransform: "none" }}
+                onClick={() => dispatch(openAddQuestionToExamDialog())}
               >
-                Thêm bằng văn bản
+                Thêm từ ngân hàng
               </Button>
               <Button
                 startIcon={<AttachFileOutlinedIcon />}
@@ -169,6 +201,7 @@ const ComposeQuestion = ({ questions }: any) => {
                 startIcon={<DeleteIcon />}
                 color="error"
                 size="small"
+                disabled={_.isEmpty(question)}
                 variant="contained"
                 sx={{ textTransform: "none" }}
                 onClick={openConfirmDialog}

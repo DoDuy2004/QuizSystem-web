@@ -1,6 +1,5 @@
 import { Typography } from "@mui/material";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
-import React from "react";
 
 const QuestionItem = ({ data }: any) => {
   return (

@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import CourseClassService from "../../services/course-class/CourseClassService";
-import ExamService from "../../services/exam/ExamService"
+import ExamService from "../../services/exam/ExamService";
 
 export interface ExamStateProps {
   data: [];
   examDetail: {
     data: {};
-    questions: [];
+    questions: any[];
   };
   totalElements: number;
   totalPages: number;
@@ -44,16 +44,13 @@ const initialState: ExamStateProps = {
   },
 };
 
-export const getExams = createAsyncThunk(
-  "exam/getExams",
-  async () => {
-    const response: any = await ExamService.getExams();
+export const getExams = createAsyncThunk("exam/getExams", async () => {
+  const response: any = await ExamService.getExams();
 
-    const data = response.data;
+  const data = response.data;
 
-    return data;
-  }
-);
+  return data;
+});
 
 export const getExambyId = createAsyncThunk(
   "exam/getExambyId",
@@ -78,16 +75,13 @@ export const deleteExam = createAsyncThunk(
   }
 );
 
-export const addExam = createAsyncThunk(
-  "exam/addExam",
-  async (params: any) => {
-    const form = params?.form;
-    const response: any = await ExamService.addExam({ form });
+export const addExam = createAsyncThunk("exam/addExam", async (params: any) => {
+  const form = params?.form;
+  const response: any = await ExamService.addExam({ form });
 
-    const data = response.data;
-    return data;
-  }
-);
+  const data = response.data;
+  return data;
+});
 
 export const editExam = createAsyncThunk(
   "exam/editExam",
@@ -104,10 +98,10 @@ export const editExam = createAsyncThunk(
   }
 );
 
-export const getSujects = createAsyncThunk(
-  "questionBank/getSubjects",
-  async () => {
-    const response: any = await CourseClassService.getSubjects();
+export const getQuestionsByExam = createAsyncThunk(
+  "exam/getQuestionByExam",
+  async (id: string) => {
+    const response: any = await ExamService.getQuestionByExam(id);
 
     const data = response.data;
 
@@ -115,19 +109,21 @@ export const getSujects = createAsyncThunk(
   }
 );
 
-// export const addQuestionToQuestionBank = createAsyncThunk(
-//   "questionBank/addQuestion",
-//   async (params: any) => {
-//     const form = params?.form;
-//     const response: any = await QuestionBankService.addQuestionToQuestionBank({
-//       form,
-//     });
+export const addQuestionToExam = createAsyncThunk(
+  "exam/addQuestionToExam",
+  async (params: any) => {
+    const form = params?.form;
+    const id = params?.id;
+    const response: any = await ExamService.addQuestionToExam({
+      id,
+      form,
+    });
 
-//     const data = response.data;
+    const data = response.data;
 
-//     return data;
-//   }
-// );
+    return data;
+  }
+);
 
 export const examSlice = createSlice({
   name: "questionBankSlice",
@@ -155,20 +151,30 @@ export const examSlice = createSlice({
       }
     });
     builder.addCase(addExam.fulfilled, (state, action) => {
-      console.log({ data: action.payload });
+      // console.log({ data: action.payload });
       state.examDetail.data = action.payload.data;
     });
     builder.addCase(editExam.fulfilled, (state, action) => {
-    //   console.log({ data: action.payload });
+      //   console.log({ data: action.payload });
       state.examDetail.data = action.payload.data;
+    });
+    builder.addCase(getQuestionsByExam.fulfilled, (state, action) => {
+      state.examDetail.questions = action.payload.data;
+    });
+    builder.addCase(addQuestionToExam.fulfilled, (state, action) => {
+      const addedQuestions = action.payload.data.questionScores.map(
+        (item: any) => item.question
+      );
+      state.examDetail.questions = [
+        ...state.examDetail.questions,
+        ...addedQuestions,
+      ];
     });
   },
 });
 
-export const selectExams = ({ exams }: any) =>
-  exams?.exams?.data;
-export const selectExam = ({ exams }: any) =>
-  exams?.exams?.examDetail;
+export const selectExams = ({ exams }: any) => exams?.exams?.data;
+export const selectExam = ({ exams }: any) => exams?.exams?.examDetail;
 
 export const { resetExamState } = examSlice.actions;
 

@@ -20,17 +20,14 @@ import { useNavigate } from "react-router-dom";
 
 const schema: any = yup.object().shape({
   username: yup.string().required("Vui lòng nhập username"),
-  password: yup
-    .string()
-    .required("Vui lòng nhập mật khẩu")
-    .min(6)
-    // .matches(/[a-z]/, "Mật khẩu phải có ít nhất 1 chữ thường")
-    // .matches(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
-    // .matches(/\d/, "Mật khẩu phải có ít nhất 1 chữ số")
-    // .matches(
-    //   /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/?]/,
-    //   "Mật khẩu phải có ít nhất 1 ký tự đặc biệt"
-    // ),
+  password: yup.string().required("Vui lòng nhập mật khẩu").min(6),
+  // .matches(/[a-z]/, "Mật khẩu phải có ít nhất 1 chữ thường")
+  // .matches(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
+  // .matches(/\d/, "Mật khẩu phải có ít nhất 1 chữ số")
+  // .matches(
+  //   /[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/?]/,
+  //   "Mật khẩu phải có ít nhất 1 ký tự đặc biệt"
+  // ),
 });
 
 type FormType = {
@@ -71,14 +68,22 @@ const Signin = () => {
         // }
         // console.log({ user })
         if (user?.data) {
-          navigate("/my-account/profile")
+          navigate("/workspace/class");
         }
-        dispatch(showMessage({ message: "Đăng nhập thành công", ...successAnchor }));
+        dispatch(
+          showMessage({ message: "Đăng nhập thành công", ...successAnchor })
+        );
         setLoading(false);
       })
       .catch((err: any) => {
         if (err) {
-          dispatch(showMessage({message: "Tên đăng nhập hoặc mật khẩu không đúng, vui lòng thử lại", ...errorAnchor}));
+          dispatch(
+            showMessage({
+              message:
+                "Tên đăng nhập hoặc mật khẩu không đúng, vui lòng thử lại",
+              ...errorAnchor,
+            })
+          );
         }
         setLoading(false);
       });

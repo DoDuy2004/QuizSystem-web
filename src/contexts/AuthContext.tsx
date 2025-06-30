@@ -6,13 +6,13 @@ import {
   createContext,
   useContext,
 } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import jwtService from "../services/auth/jwtService";
 import { showMessage } from "../components/FuseMessage/fuseMessageSlice";
 import { type AppDispatch } from "../store/store";
-import { setUser, userLoggedOut } from "../store/slices/userSlice";
+import { selectUser, setUser, userLoggedOut } from "../store/slices/userSlice";
 import { Box, CircularProgress } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   isAuthenticated: boolean | undefined;
@@ -31,18 +31,32 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
   const [waitAuthCheck, setWaitAuthCheck] = useState<boolean>(true);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const user = useSelector(selectUser);
+
+  const shouldNavigateToClass = (pathname: string): boolean => {
+    const excludedRoutes = ["/my-account", "/workspace"];
+    return !excludedRoutes.some((route) => pathname.startsWith(route));
+  };
 
   useEffect(() => {
+    let shouldRedirect = true;
+
     jwtService.on("onAutoLogin", () => {
       jwtService
         .signInWithToken()
         .then((user: any) => {
           success(user);
+          shouldRedirect = false;
         })
         .catch((error: any) => {
           pass(error.message);
         });
-      navigate("/my-account/profile");
+      if (shouldNavigateToClass(location.pathname) && shouldRedirect) {
+        user?.role !== "ADMIN"
+          ? navigate("/workspace/class")
+          : navigate("/manage/dashboard");
+      }
     });
 
     jwtService.on("networkError", () => {
@@ -59,7 +73,6 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
 
     jwtService.on("onLogin", (user: any) => {
       success(user);
-      navigate("/my-account/profile");
     });
 
     jwtService.on("onLogout", () => {
@@ -75,7 +88,7 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
 
     jwtService.on("onNoAccessToken", () => {
       pass();
-      navigate("/auth/login");
+      navigate("/");
     });
 
     jwtService.init();

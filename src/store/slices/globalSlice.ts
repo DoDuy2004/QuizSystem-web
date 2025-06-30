@@ -9,6 +9,9 @@ export interface GlobalSliceState {
   addMultiQuestionsDialog: {
     isOpen: boolean;
   };
+  addQuestionToExamDialog: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: GlobalSliceState = {
@@ -18,6 +21,9 @@ const initialState: GlobalSliceState = {
     type: "new",
   },
   addMultiQuestionsDialog: {
+    isOpen: false,
+  },
+  addQuestionToExamDialog: {
     isOpen: false,
   },
 };
@@ -44,6 +50,14 @@ const globalSlice = createSlice({
     closeAddMultiQuestionsDialog: (state) => {
       state.addMultiQuestionsDialog.isOpen = false;
     },
+
+    // exam
+    openAddQuestionToExamDialog: (state) => {
+      state.addQuestionToExamDialog.isOpen = true;
+    },
+    closeAddQuestionToExamDialog: (state) => {
+      state.addQuestionToExamDialog.isOpen = false;
+    },
   },
 });
 
@@ -52,11 +66,15 @@ export const {
   closeAddClassDialog,
   openAddMultiQuestionsDialog,
   closeAddMultiQuestionsDialog,
+  openAddQuestionToExamDialog,
+  closeAddQuestionToExamDialog,
 } = globalSlice.actions;
 
 export const selectAddClassDialog = ({ globalSlice }: any) =>
   globalSlice.addClassDialog;
 export const selectAddMultiQuestionsDialog = ({ globalSlice }: any) =>
   globalSlice.addMultiQuestionsDialog;
+export const selectAddQuestionToExamDialog = ({ globalSlice }: any) =>
+  globalSlice.addQuestionToExamDialog;
 
 export default globalSlice.reducer;

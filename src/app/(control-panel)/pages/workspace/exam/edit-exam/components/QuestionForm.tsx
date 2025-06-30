@@ -14,11 +14,11 @@ import {
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
-import RadioButtonCheckedOutlinedIcon from "@mui/icons-material/RadioButtonCheckedOutlined";
 import * as yup from "yup";
 import QuestionModel from "../../../../../../../models/QuestionModel";
 import RichTextEditor from "../../../../../../../components/RichTextEditor/RichTextEditor";
+import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
+import RadioButtonCheckedOutlinedIcon from "@mui/icons-material/RadioButtonCheckedOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { useDeepCompareEffect } from "../../../../../../../hooks";
@@ -26,11 +26,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../../store/store";
 import { getChapters } from "../../../../../../../store/slices/subjectSlice";
 import {
-  addQuestionToQuestionBank,
   editQuestion,
-  selectQuestionBank,
+  getQuestionBanks,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
+import {
+  addQuestionToExam,
+  selectExam,
+} from "../../../../../../../store/slices/examSlice";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../../../../../../constants/confirm";
 
@@ -40,6 +43,22 @@ const difficultyOptions = [
   { label: "Vừa", value: "MODERATE" },
   { label: "Khó", value: "HARD" },
 ];
+// Payload create question
+// {
+//   "topic": "Classes",
+//   "type": "Multiple Choice",
+//   "content": "Lớp trong OOP là gì?",
+//   "status": 0,
+//   "difficulty": "Medium",
+//   "image": "",
+//   "createdBy": "49bb4611-fb01-4a42-b96d-74c10715263e",
+//   "chapterId": "91c4d295-58b0-4d7c-9f53-fac03b998f22",
+//   "questionBankId": "65caa47c-d838-4fbc-9387-243460906bb8",
+//   "answers": [
+//     { "content": "Hàm toán học", "isCorrect": false },
+//     { "content": "Lớp và đối tượng", "isCorrect": true }
+//   ]
+// }
 
 const schema = yup.object().shape({
   type: yup.string().required("Loại câu hỏi là bắt buộc"),
@@ -48,12 +67,16 @@ const schema = yup.object().shape({
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
   chapterId: yup.string().required("Chương là bắt buộc"),
+  questionBankId: yup.string().required("Ngân hàng câu hỏi là bắt buộc"),
   answers: yup
     .array()
     .of(
       yup.object().shape({
         isCorrect: yup.bool(),
-        content: yup.string().required("Nội dung câu trả lời là bắt buộc"),
+        content: yup
+          .string()
+          .required("Nội dung câu trả lời là bắt buộc")
+          .trim(),
         answerOrder: yup.number(),
       })
     )
@@ -64,9 +87,10 @@ const QuestionForm = ({ questionData }: any) => {
   const [selectedValue, setSelectedValue] = useState("SINGLE"); // Mặc định là "Một đáp án"
   const [loading, setLoading] = useState(false);
   const [chapters, setChapters] = useState([]);
+  const [questionBanks, setQuestionBanks] = useState([]);
   const hasFetchedChapters = useRef(false);
-  const questionBank = useSelector(selectQuestionBank);
   const [question, setQuestion] = useState(questionData || {});
+  const exam = useSelector(selectExam);
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
   const {
@@ -88,23 +112,22 @@ const QuestionForm = ({ questionData }: any) => {
     name: "answers",
   });
 
-  // Theo dõi giá trị type để điều chỉnh logic
   const watchType = watch("type");
 
-  const handleChangeType = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedValue(event.target.value);
-    setValue("type", event.target.value);
-    if (event.target.value === "SINGLE") {
-      const answers = watch("answers") || [];
-      const updatedAnswers = answers.map((answer: any, index: number) => ({
-        ...answer,
-        isCorrect: index === 0 ? true : false,
-      }));
-      updatedAnswers.forEach((answer: any, index: number) =>
-        setValue(`answers.${index}.isCorrect`, answer.isCorrect)
-      );
-    }
-  };
+  // const handleChangeType = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSelectedValue(event.target.value);
+  //   setValue("type", event.target.value);
+  //   if (event.target.value === "SINGLE") {
+  //     const answers = watch("answers") || [];
+  //     const updatedAnswers = answers.map((answer: any, index: number) => ({
+  //       ...answer,
+  //       isCorrect: index === 0 ? true : false,
+  //     }));
+  //     updatedAnswers.forEach((answer: any, index: number) =>
+  //       setValue(`answers.${index}.isCorrect`, answer.isCorrect)
+  //     );
+  //   }
+  // };
 
   const handleAddAnswer = () => {
     append({
@@ -139,8 +162,11 @@ const QuestionForm = ({ questionData }: any) => {
       const transformedData = {
         ...questionData,
         chapterId: questionData?.chapter?.id,
+        questionBankId: questionData?.questionBank?.id,
         difficulty: questionData.difficulty,
       };
+
+      console.log({ transformedData });
 
       reset(QuestionModel(transformedData));
     }
@@ -149,16 +175,27 @@ const QuestionForm = ({ questionData }: any) => {
   useDeepCompareEffect(() => {
     if (hasFetchedChapters.current || chapters.length > 0) return;
 
-    setLoading(true);
-    hasFetchedChapters.current = true;
-    dispatch(getChapters())
-      .then((res) => {
-        // console.log({ res });
-        setChapters(res.payload.data);
-      })
-      .finally(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      hasFetchedChapters.current = true;
+      try {
+        await Promise.all([
+          dispatch(getChapters()).then((res) => {
+            // console.log({ res });
+            setChapters(res.payload.data);
+          }),
+          dispatch(getQuestionBanks()).then((res) => {
+            setQuestionBanks(res.payload.data);
+          }),
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [dispatch]);
 
   const handleAnswerChange =
@@ -186,29 +223,39 @@ const QuestionForm = ({ questionData }: any) => {
 
   const onSubmit = (data: any) => {
     // console.log({ data });
-    setLoading(true);
+    // setLoading(true);
 
     const payload = {
-      topic: data.topic,
-      type: data.type,
-      content: data.content,
-      status: 0,
-      difficulty: difficultyOptions.findIndex(
-        (item) => item.value == data.difficulty
-      ),
-      image: data.image,
-      chapterId: data.chapterId,
-      answers: data.answers,
-      questionBankId: questionBank?.data?.id,
-      createdBy: user?.id,
+      questionScores: [
+        {
+          question: {
+            topic: data.topic,
+            type: data.type,
+            content: data.content.trim(),
+            status: 0,
+            difficulty: difficultyOptions.findIndex(
+              (item) => item.value == data.difficulty
+            ),
+            image: data.image,
+            chapterId: data.chapterId,
+            answers: data.answers,
+            questionBankId: data.questionBankId,
+            createdBy: user?.id,
+          },
+          score: 0,
+        },
+      ],
+      examId: exam?.data?.id,
     };
+
+    // console.log({ payload });
 
     const action = !_.isEmpty(questionData)
       ? editQuestion({
           id: question.id,
           form: { id: question.id, ...payload },
         })
-      : addQuestionToQuestionBank({ form: payload });
+      : addQuestionToExam({ id: exam?.data?.id, form: payload });
     // console.log({ payload });
     dispatch(action)
       .then((res) => {
@@ -278,6 +325,44 @@ const QuestionForm = ({ questionData }: any) => {
             <div>
               <RichTextEditor value={field.value} onChange={field.onChange} />
             </div>
+          )}
+        />
+        <Controller
+          name="questionBankId"
+          control={control}
+          render={({ field }) => (
+            <Autocomplete
+              options={questionBanks}
+              freeSolo={false}
+              getOptionLabel={(option: any) =>
+                typeof option === "string" ? option : option?.name || ""
+              }
+              isOptionEqualToValue={(option, value: any) =>
+                typeof option === "object" && typeof value === "string"
+                  ? option.id === value
+                  : option?.name === value
+              }
+              value={
+                questionBanks.find((c: any) => c.id === field.value) || null
+              }
+              onChange={(event, newValue: any) => {
+                field.onChange(newValue?.id || "");
+              }}
+              renderInput={(params: any) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  label={
+                    <>
+                      Lưu vào ngân hàng <span className="text-red-500">*</span>
+                    </>
+                  }
+                  variant="outlined"
+                  error={!!errors.questionBankId}
+                  helperText={errors.questionBankId?.message}
+                />
+              )}
+            />
           )}
         />
         <Controller

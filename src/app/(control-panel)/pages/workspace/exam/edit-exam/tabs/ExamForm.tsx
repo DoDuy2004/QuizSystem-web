@@ -11,9 +11,7 @@ import {
   // selectQuestionBank,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { useParams } from "react-router-dom";
-import QuestionBankModel from "../../../../../../../models/QuestionBankModel";
 import _ from "lodash";
-import { selectUser } from "../../../../../../../store/slices/userSlice";
 import CircularLoading from "../../../../../../../components/CircularLoading";
 import {
   addExam,
@@ -98,7 +96,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
       durationMinutes: data?.durationMinutes,
       status: 0,
       examCode: data.examCode,
-      startDate: new Date(),
+      // startDate: new Date(),
       noOfQuestions: 0
     };
 
