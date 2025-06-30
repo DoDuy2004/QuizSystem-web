@@ -40,7 +40,7 @@ const ClassList = () => {
   };
 
   return (
-    <>
+    <div className="px-8 py-4">
       <div className="flex items-center justify-between pr-10">
         <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
           Lớp học của tôi
@@ -75,7 +75,7 @@ const ClassList = () => {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

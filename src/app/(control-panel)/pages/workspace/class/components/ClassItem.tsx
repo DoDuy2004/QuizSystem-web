@@ -38,23 +38,25 @@ const ClassItem = ({ data }: any) => {
   );
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+    event.stopPropagation();
   };
-  const handleClose = () => {
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(null);
+    event.stopPropagation();
   };
 
   const handleUpdate = (e: any) => {
     e.stopPropagation();
     navigate(`/workspace/class/${data?.id}/edit`);
     dispatch(openAddClassDialog("edit"));
-    handleClose();
+    handleClose(e);
   };
 
   //   console.log({ data });
 
   const openConfirmDialog = (e: any, id: any) => {
     e.stopPropagation();
-    handleClose();
+    handleClose(e);
     dispatch(
       openConfirmationDialog({
         data: {
@@ -72,7 +74,10 @@ const ClassItem = ({ data }: any) => {
   };
 
   return (
-    <div className="col-span-1 hover:cursor-pointer hover:shadow rounded-md border-1 border-gray-200 overflow-hidden ">
+    <div
+      className="col-span-1 hover:cursor-pointer hover:shadow-md rounded-md border-1 border-gray-200 overflow-hidden "
+      onClick={() => navigate(`/workspace/class/${data?.id}`)}
+    >
       <div
         className="flex items-start justify-between border-b-1 border-gray-200 p-3 bg-cover"
         style={{

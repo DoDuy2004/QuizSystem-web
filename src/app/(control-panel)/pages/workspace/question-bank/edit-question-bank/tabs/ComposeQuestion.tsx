@@ -86,8 +86,6 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
       return;
     }
 
-    // console.log({ index });
-
     setIsActive(index);
     const questionId = questions?.[index]?.id;
 
@@ -206,6 +204,7 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
                 color="error"
                 size="small"
                 variant="contained"
+                disabled={_.isEmpty(question)}
                 sx={{ textTransform: "none" }}
                 onClick={openConfirmDialog}
               >

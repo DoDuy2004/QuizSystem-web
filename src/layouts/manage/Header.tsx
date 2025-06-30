@@ -105,7 +105,9 @@ const Header = () => {
               Tạo đề thi
             </Button>
           )}
-          <IconButton onClick={(e) => handleClick(e)}>
+          <IconButton
+            onClick={(e) => handleClick(e)}
+          >
             <PersonIcon sx={{ fontSize: 26 }} />
           </IconButton>
         </div>

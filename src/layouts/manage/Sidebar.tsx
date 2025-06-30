@@ -23,6 +23,9 @@ import {
   ChevronLeft,
   SupportAgent,
 } from "@mui/icons-material";
+import SubjectOutlinedIcon from "@mui/icons-material/SubjectOutlined";
+import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
@@ -72,6 +75,33 @@ const Sidebar = () => {
       label: "Kết quả thi",
       path: "/exam-result",
       roles: ["STUDENT"],
+    },
+  ];
+
+  const adminItems = [
+    {
+      icon: <AssessmentOutlinedIcon />,
+      label: "Thống kê",
+      path: "/manage/dashboard",
+      roles: ["ADMIN"],
+    },
+    {
+      icon: <School />,
+      label: "Giảng viên",
+      path: "/manage/teacher",
+      roles: ["ADMIN"],
+    },
+    {
+      icon: <Person />,
+      label: "Sinh viên",
+      path: "/manage/student",
+      roles: ["ADMIN"],
+    },
+    {
+      icon: <SubjectOutlinedIcon />,
+      label: "Môn học",
+      path: "/manage/subject",
+      roles: ["ADMIN"],
     },
   ];
 
@@ -140,116 +170,201 @@ const Sidebar = () => {
             </Typography>
           )}
         </div>
-        <List sx={{ paddingX: 1 }}>
-          <ListItem
-            sx={{ paddingRight: 0 }}
-            component="button"
-            onClick={(e) => {
-              if (!collapsed && !isAnimating) setOpenPersonal(!openPersonal);
-              else handleClick(e, personalItems);
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <Person />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <div className="flex items-center justify-between w-full">
-                  {!collapsed && !isAnimating && (
-                    <Typography>Cá nhân</Typography>
-                  )}
-                  {openPersonal ? (
-                    <ExpandMore sx={{ fontSize: 18 }} />
-                  ) : (
-                    <ChevronRight sx={{ fontSize: 18 }} />
-                  )}
-                </div>
-              }
-            />
-          </ListItem>
+        {user?.role !== "ADMIN" ? (
+          <>
+            <List sx={{ paddingX: 1 }}>
+              <ListItem
+                sx={{ paddingRight: 0 }}
+                component="button"
+                onClick={(e) => {
+                  if (!collapsed && !isAnimating)
+                    setOpenPersonal(!openPersonal);
+                  else handleClick(e, personalItems);
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <Person />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <div className="flex items-center justify-between w-full">
+                      {!collapsed && !isAnimating && (
+                        <Typography>Cá nhân</Typography>
+                      )}
+                      {openPersonal ? (
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                      ) : (
+                        <ChevronRight sx={{ fontSize: 18 }} />
+                      )}
+                    </div>
+                  }
+                />
+              </ListItem>
 
-          <Collapse
-            in={!collapsed && !isAnimating && openPersonal}
-            timeout="auto"
-            unmountOnExit
-          >
-            <List component="div" disablePadding>
-              {personalItems
-                .filter((item) => item.roles.includes(user?.role))
-                .map((item, i) => (
-                  <Link to={item.path} key={i}>
-                    <ListItem
-                      component="button"
-                      sx={{ pl: 4 }}
-                      className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        {item.icon}
-                      </ListItemIcon>
-                      <ListItemText primary={item.label} />
-                    </ListItem>
-                  </Link>
-                ))}
+              <Collapse
+                in={!collapsed && !isAnimating && openPersonal}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {personalItems
+                    .filter((item) => item.roles.includes(user?.role))
+                    .map((item, i) => (
+                      <Link to={item.path} key={i}>
+                        <ListItem
+                          component="button"
+                          sx={{
+                            pl: 4,
+                            "&:hover .MuiSvgIcon-root": {
+                              color: "#3E65FE", // Màu khi hover
+                            },
+                          }}
+                          className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 36,
+                            }}
+                          >
+                            {item.icon}
+                          </ListItemIcon>
+                          <ListItemText primary={item.label} />
+                        </ListItem>
+                      </Link>
+                    ))}
+                </List>
+              </Collapse>
             </List>
-          </Collapse>
-        </List>
 
-        <Divider />
+            <Divider />
 
-        <List sx={{ paddingX: 1 }}>
-          <ListItem
-            component="button"
-            sx={{ paddingRight: 0 }}
-            onClick={(e) => {
-              if (!collapsed && !isAnimating) setOpenManage(!openManage);
-              else handleClick(e, managementItems);
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <School />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <div className="flex items-center justify-between w-full">
-                  {!collapsed && !isAnimating && (
-                    <Typography>Lớp học</Typography>
-                  )}
-                  {openManage ? (
-                    <ExpandMore sx={{ fontSize: 18 }} />
-                  ) : (
-                    <ChevronRight sx={{ fontSize: 18 }} />
-                  )}
-                </div>
-              }
-            />
-          </ListItem>
+            <List sx={{ paddingX: 1 }}>
+              <ListItem
+                component="button"
+                sx={{ paddingRight: 0 }}
+                onClick={(e) => {
+                  if (!collapsed && !isAnimating) setOpenManage(!openManage);
+                  else handleClick(e, managementItems);
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <School />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <div className="flex items-center justify-between w-full">
+                      {!collapsed && !isAnimating && (
+                        <Typography>Lớp học</Typography>
+                      )}
+                      {openManage ? (
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                      ) : (
+                        <ChevronRight sx={{ fontSize: 18 }} />
+                      )}
+                    </div>
+                  }
+                />
+              </ListItem>
 
-          <Collapse
-            in={!collapsed && !isAnimating && openManage}
-            timeout="auto"
-            unmountOnExit
-          >
-            <List component="div" disablePadding>
-              {managementItems
-                .filter((item) => item.roles.includes(user?.role))
-                .map((item, i) => (
-                  <Link to={item.path} key={i}>
-                    <ListItem
-                      component="button"
-                      key={i}
-                      sx={{ pl: 4 }}
-                      className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        {item.icon}
-                      </ListItemIcon>
-                      <ListItemText primary={item.label} />
-                    </ListItem>
-                  </Link>
-                ))}
+              <Collapse
+                in={!collapsed && !isAnimating && openManage}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {managementItems
+                    .filter((item) => item.roles.includes(user?.role))
+                    .map((item, i) => (
+                      <Link to={item.path} key={i}>
+                        <ListItem
+                          component="button"
+                          key={i}
+                          sx={{
+                            pl: 4,
+                            "&:hover .MuiSvgIcon-root": {
+                              color: "#3E65FE", // Màu khi hover
+                            },
+                          }}
+                          className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            {item.icon}
+                          </ListItemIcon>
+                          <ListItemText primary={item.label} />
+                        </ListItem>
+                      </Link>
+                    ))}
+                </List>
+              </Collapse>
             </List>
-          </Collapse>
-        </List>
+          </>
+        ) : (
+          <>
+            <List sx={{ paddingX: 1 }}>
+              <ListItem
+                sx={{ paddingRight: 0 }}
+                component="button"
+                onClick={(e) => {
+                  if (!collapsed && !isAnimating)
+                    setOpenPersonal(!openPersonal);
+                  else handleClick(e, personalItems);
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <ManageSearchOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <div className="flex items-center justify-between w-full">
+                      {!collapsed && !isAnimating && (
+                        <Typography>Quản lý</Typography>
+                      )}
+                      {openPersonal ? (
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                      ) : (
+                        <ChevronRight sx={{ fontSize: 18 }} />
+                      )}
+                    </div>
+                  }
+                />
+              </ListItem>
+
+              <Collapse
+                in={!collapsed && !isAnimating && openPersonal}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {adminItems
+                    .filter((item) => item.roles.includes(user?.role))
+                    .map((item, i) => (
+                      <Link to={item.path} key={i}>
+                        <ListItem
+                          component="button"
+                          sx={{
+                            pl: 4,
+                            "&:hover .MuiSvgIcon-root": {
+                              color: "#3E65FE", // Màu khi hover
+                            },
+                          }}
+                          className="hover:bg-[#f0f3ff] hover:text-[#3E65FE]"
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 36,
+                            }}
+                          >
+                            {item.icon}
+                          </ListItemIcon>
+                          <ListItemText primary={item.label} />
+                        </ListItem>
+                      </Link>
+                    ))}
+                </List>
+              </Collapse>
+            </List>
+          </>
+        )}
 
         <Box flexGrow={1} />
         <Divider />
@@ -314,7 +429,20 @@ const Sidebar = () => {
       >
         {menuItems.map((item: any, index) => (
           <Link to={item.path} key={index}>
-            <MenuItem sx={{ paddingY: 1.5 }} onClick={handleClose} key={index}>
+            <MenuItem
+              sx={{
+                paddingY: 1.5,
+                "&:hover": {
+                  color: "#3E65FE",
+                  backgroundColor: "rgba(62, 101, 254, 0.04)",
+                  "& .MuiListItemIcon-root": {
+                    color: "#3E65FE",
+                  },
+                },
+              }}
+              onClick={handleClose}
+              key={index}
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText>{item.label}</ListItemText>
             </MenuItem>

@@ -18,6 +18,7 @@ import { openConfirmationDialog } from "../../../../../../store/slices/confirmat
 import {
   deleteExam,
   getExambyId,
+  getQuestionsByExam,
   selectExam,
 } from "../../../../../../store/slices/examSlice";
 
@@ -28,17 +29,18 @@ const ExamDetail = () => {
   const hasFetched = useRef(false);
   const navigate = useNavigate();
   const exam = useSelector(selectExam);
+
   useDeepCompareEffect(() => {
     if (hasFetched.current) return;
 
-    hasFetched.current = true;
-
-    setLoading(true);
     const fetchData = async () => {
+      hasFetched.current = true;
       setLoading(true);
-
       try {
-        dispatch(getExambyId({ id: routeParams?.id }));
+        await Promise.all([
+          dispatch(getQuestionsByExam(routeParams?.id as string)),
+          dispatch(getExambyId({ id: routeParams?.id })),
+        ]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -141,14 +143,11 @@ const ExamDetail = () => {
           </div>
         </div>
         <div className="col-span-4 flex flex-col gap-y-4 bg-white px-6 py-4 shadow rounded-md">
-          {exam?.data?.examQuestions &&
-          exam?.data?.examQuestions?.length === 0 ? (
-            <Typography>
-              Không có câu hỏi nào trong đề thi
-            </Typography>
+          {exam?.questions && exam?.questions?.length === 0 ? (
+            <Typography>Không có câu hỏi nào trong đề thi</Typography>
           ) : (
-            exam?.data?.examQuestions?.map((item: any, index: number) => (
-              <QuestionItem data={item?.question} key={index} />
+            exam?.questions?.map((item: any, index: number) => (
+              <QuestionItem data={item} key={index} />
             ))
           )}
         </div>

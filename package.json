@@ -40,6 +40,7 @@
     "react-toastify": "^11.0.5",
     "react-typed": "^2.0.12",
     "slick-carousel": "^1.8.1",
+    "tailwind-scrollbar-hide": "^4.0.0",
     "tailwindcss": "^4.1.7",
     "yup": "^1.6.1"
   },

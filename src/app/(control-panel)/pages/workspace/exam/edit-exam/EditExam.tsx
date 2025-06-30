@@ -8,6 +8,7 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ComposeQuestion from "./tabs/ComposeQuestion";
 import { selectExam } from "../../../../../../store/slices/examSlice";
 import ExamForm from "./tabs/ExamForm";
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -107,7 +108,7 @@ const CreateExam = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
             <ComposeQuestion
-              questions={exam?.data?.examQuestions}
+              questions={exam?.questions}
             />
           </CustomTabPanel>
         </div>

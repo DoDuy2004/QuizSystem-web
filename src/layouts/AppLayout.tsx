@@ -10,6 +10,7 @@ import withReducer from "../store/withReducer";
 import reducer from "../store/slices/globalSlice";
 import AddClassDialog from "../dialogs/add-class-dialog/AddClassDialog";
 import AddMultiQuestionsDialog from "../dialogs/add-multi-questions-dialog/AddMultiQuestionsDialog";
+import AddQuestionToExamDialog from "../dialogs/add-question-exam-dialog/AddQuestionToExamDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -44,6 +45,7 @@ const AppLayout = () => {
         <ConfirmationDialog />
         <AddClassDialog />
         <AddMultiQuestionsDialog />
+        <AddQuestionToExamDialog />
       </div>
     );
   }
