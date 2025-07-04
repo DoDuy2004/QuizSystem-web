@@ -92,7 +92,7 @@ const Signin = () => {
   return (
     <div className="lg:w-1/4 sm:w-1/2 w-full rounded-xl m-auto sm:h-fit h-full shodow bg-white px-8 py-16 flex flex-col gap-y-6">
       <Typography sx={{ fontSize: 24 }}>Đăng nhập</Typography>
-      <div
+      {/* <div
         className="flex items-center gap-x-4 px-8 rounded-md py-2 w-full cursor-pointer bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
         onClick={() => console.log("Đăng nhập với Google")}
       >
@@ -109,7 +109,7 @@ const Signin = () => {
         <Divider sx={{ flexGrow: 1 }} />
         <span className="mx-4 text-lg">hoặc tiếp tục với</span>
         <Divider sx={{ flexGrow: 1 }} />
-      </div>
+      </div> */}
       <form
         action=""
         onSubmit={handleSubmit(onSubmit)}

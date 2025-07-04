@@ -8,7 +8,6 @@ function UserModel(data?: any) {
     username: null,
     fullName: "",
     email: "",
-    phoneNumber: "",
     gender: true ? "MALE" : "FEMALE",
     dateOfBirth: null,
     avatarUrl: "",
@@ -19,6 +18,6 @@ function UserModel(data?: any) {
     // isFirstTimeLogin: null,
     // facutly: "",
   });
-}
+} 
 
 export default UserModel;

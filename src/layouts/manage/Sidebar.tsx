@@ -26,6 +26,8 @@ import {
 import SubjectOutlinedIcon from "@mui/icons-material/SubjectOutlined";
 import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
+import ClassIcon from "@mui/icons-material/Class";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
@@ -78,34 +80,13 @@ const Sidebar = () => {
     },
   ];
 
-  const adminItems = [
-    {
-      icon: <AssessmentOutlinedIcon />,
-      label: "Thống kê",
-      path: "/manage/dashboard",
-      roles: ["ADMIN"],
-    },
-    {
-      icon: <School />,
-      label: "Giảng viên",
-      path: "/manage/teacher",
-      roles: ["ADMIN"],
-    },
-    {
-      icon: <Person />,
-      label: "Sinh viên",
-      path: "/manage/student",
-      roles: ["ADMIN"],
-    },
-    {
-      icon: <SubjectOutlinedIcon />,
-      label: "Môn học",
-      path: "/manage/subject",
-      roles: ["ADMIN"],
-    },
-  ];
-
   const managementItems = [
+    // {
+    //   icon: <AssessmentOutlinedIcon />,
+    //   label: "Thống kê",
+    //   path: "/workspace/dashboard",
+    //   roles: ["ADMIN"],
+    // },
     {
       icon: <Description />,
       label: "Đề thi",
@@ -119,9 +100,15 @@ const Sidebar = () => {
       roles: ["TEACHER", "STUDENT"],
     },
     {
-      icon: <Home />,
-      label: "Phòng thi",
-      path: "/workspace/exam-room",
+      icon: <MeetingRoomIcon />,
+      label: "Kỳ thi",
+      path: "/workspace/room-exam",
+      roles: ["TEACHER", "STUDENT"],
+    },
+    {
+      icon: <AssignmentTurnedIn />,
+      label: "Kết quả thi",
+      path: "/workspace/exam-result",
       roles: ["TEACHER", "STUDENT"],
     },
     // { icon: <Category />, label: "Môn học" },
@@ -132,6 +119,24 @@ const Sidebar = () => {
       roles: ["TEACHER"],
     },
     // { icon: <Settings />, label: "Cài đặt" },
+    {
+      icon: <School />,
+      label: "Giảng viên",
+      path: "/workspace/teacher",
+      roles: ["ADMIN"],
+    },
+    {
+      icon: <Person />,
+      label: "Sinh viên",
+      path: "/workspace/student",
+      roles: ["ADMIN"],
+    },
+    {
+      icon: <SubjectOutlinedIcon />,
+      label: "Môn học",
+      path: "/workspace/subject",
+      roles: ["ADMIN"],
+    },
   ];
 
   if (isMobile) return;
@@ -335,7 +340,7 @@ const Sidebar = () => {
                 unmountOnExit
               >
                 <List component="div" disablePadding>
-                  {adminItems
+                  {managementItems
                     .filter((item) => item.roles.includes(user?.role))
                     .map((item, i) => (
                       <Link to={item.path} key={i}>

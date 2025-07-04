@@ -19,8 +19,8 @@ const initialState: QuestionBankStateProps = {
 
 export const getClasses = createAsyncThunk(
   "class/getClasses",
-  async (id: string) => {
-    const response: any = await CourseClassService.getClassesByTeacher(id);
+  async () => {
+    const response: any = await CourseClassService.getClasses();
 
     const data = response.data;
 

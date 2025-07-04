@@ -39,24 +39,24 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-export const updateUser = createAsyncThunk(
-  "user/update",
-  async (params: any, { dispatch, getState }: any) => {
-    const user = getState().user.data;
-    const userId = user?.id;
-    console.log({ params: params?.form });
-    // delete params?.avatar;
-    console.log("Call");
-    params = _.pick(params, _.keys(UserModel({})));
-    const response = (await userService.updateUser({
-      userId,
-      form: params?.form,
-    })) as any;
-    const data = await response.data;
+// export const updateUser = createAsyncThunk(
+//   "user/update",
+//   async (params: any, { dispatch, getState }: any) => {
+//     const user = getState().user.data;
+//     const userId = user?.id;
+//     console.log({ params: params?.form });
+//     // delete params?.avatar;
+//     console.log("Call");
+//     params = _.pick(params, _.keys(UserModel({})));
+//     const response = (await userService.updateUser({
+//       userId,
+//       form: params?.form,
+//     })) as any;
+//     const data = await response.data;
 
-    return data;
-  }
-);
+//     return data;
+//   }
+// );
 
 export const userSlice = createSlice({
   name: "userSlice",

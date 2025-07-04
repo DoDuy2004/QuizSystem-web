@@ -4,7 +4,7 @@ import { useThemeMediaQuery } from "../../hooks";
 
 const FeatureSectionItem = ({ data, margin, index }: any) => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
-
+  
   return (
     <div className={`${index % 2 ? "bg-white" : "bg-[#f6f8ff]"}`}>
       <div

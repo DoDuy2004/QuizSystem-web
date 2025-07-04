@@ -4,11 +4,12 @@ import CourseClassService from "../../services/course-class/CourseClassService";
 import { create } from "lodash";
 
 export interface QuestionBankStateProps {
-  data: [];
+  data: any[];
   questionBankDetail: {
     data: {};
     questions: any[];
   };
+  importStatus: string;
   totalElements: number;
   totalPages: number;
   pagination: {
@@ -30,6 +31,7 @@ const initialState: QuestionBankStateProps = {
     data: {},
     questions: [],
   },
+  importStatus: "",
   totalElements: 0,
   totalPages: 0,
   pagination: {
@@ -82,6 +84,17 @@ export const getQuestionsByQuestionBank = createAsyncThunk(
   }
 );
 
+export const getQuestions = createAsyncThunk(
+  "questionBank/getQuestions",
+  async () => {
+    const response: any = await QuestionBankService.getQuestions();
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const deleteQuestionBank = createAsyncThunk(
   "questionBank/deleteQuestionBank",
   async (params: any) => {
@@ -115,17 +128,6 @@ export const editQuestionBank = createAsyncThunk(
     });
 
     const data = response.data;
-    return data;
-  }
-);
-
-export const getSujects = createAsyncThunk(
-  "questionBank/getSubjects",
-  async () => {
-    const response: any = await CourseClassService.getSubjects();
-
-    const data = response.data;
-
     return data;
   }
 );
@@ -183,11 +185,38 @@ export const deleteQuestion = createAsyncThunk(
   }
 );
 
+export const importQuestions = createAsyncThunk(
+  "questions/import",
+  async ({ file }: { file: File }, { rejectWithValue }) => {
+    try {
+      const response: any = await QuestionBankService.importQuestions(file);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const addListQuestions = createAsyncThunk(
+  "questionBank/addListQuestions",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await QuestionBankService.addListQuestions({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const questionBankSlice = createSlice({
   name: "questionBankSlice",
   initialState,
   reducers: {
     resetQuestionBankState: () => initialState,
+    setImportStatus: (state, action) => {
+      state.importStatus = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getQuestionBanks.fulfilled, (state, action) => {
@@ -239,6 +268,20 @@ export const questionBankSlice = createSlice({
         action.payload.data,
       ];
     });
+    builder.addCase(importQuestions.fulfilled, (state, action) => {
+      state.questionBankDetail.questions = [
+        ...state.questionBankDetail.questions,
+        ...action.payload.data.map((item: any) => ({
+          ...item,
+        })),
+      ];
+    });
+
+    builder.addCase(getQuestions.fulfilled, (state, action) => {
+      //   console.log({ data: action.payload });
+
+      state.questionBankDetail.questions = action.payload.data;
+    });
   },
 });
 
@@ -246,7 +289,10 @@ export const selectQuestionBanks = ({ questionBank }: any) =>
   questionBank?.questionBank?.data;
 export const selectQuestionBank = ({ questionBank }: any) =>
   questionBank?.questionBank?.questionBankDetail;
+export const selectImportStatus = ({ questionBank }: any) =>
+  questionBank?.questionBank?.importStatus;
 
-export const { resetQuestionBankState } = questionBankSlice.actions;
+export const { resetQuestionBankState, setImportStatus } =
+  questionBankSlice.actions;
 
 export default questionBankSlice.reducer;

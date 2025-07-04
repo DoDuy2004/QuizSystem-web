@@ -26,7 +26,6 @@ import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import CourseClassModel from "../../models/CourseClassModel";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getSujects } from "../../store/slices/questionBankSlice";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import _ from "lodash";
@@ -40,6 +39,7 @@ import CircularLoading from "../../components/CircularLoading";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../constants/confirm";
 import { selectUser } from "../../store/slices/userSlice";
+import { getSubjects } from "../../store/slices/subjectSlice";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -64,8 +64,7 @@ const AddClassDialog = () => {
   );
   const dispatch = useDispatch<AppDispatch>();
   const addClassDialog = useSelector(selectAddClassDialog);
-  const hasFetchedSubject = useRef(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [subjects, setSubjects] = useState([]);
   const routeParams = useParams();
   const courseClass = useSelector(selectClass);
@@ -87,7 +86,7 @@ const AddClassDialog = () => {
 
   useDeepCompareEffect(() => {
     if (addClassDialog?.isOpen && routeParams?.id) {
-      setLoading(true);
+      // setLoading(true);
       if (routeParams?.id && addClassDialog?.isOpen) {
         dispatch(getClassById(routeParams?.id))
           .unwrap()
@@ -99,19 +98,19 @@ const AddClassDialog = () => {
   }, [dispatch, routeParams?.id, addClassDialog?.isOpen]);
 
   useDeepCompareEffect(() => {
-    if (hasFetchedSubject.current) return;
-
-    setLoading(true);
-    hasFetchedSubject.current = true;
-    dispatch(getSujects())
-      .then((res: any) => {
-        // console.log({ res });
-        setSubjects(res.payload.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [dispatch, routeParams?.id]);
+    if (addClassDialog?.isOpen) {
+      // setLoading(true);
+      setLoading(false);
+      dispatch(getSubjects())
+        .then((res: any) => {
+          // console.log({ res });
+          setSubjects(res.payload.data);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [dispatch, addClassDialog?.isOpen]);
 
   const handleClose = () => {
     navigate("/workspace/class/list");

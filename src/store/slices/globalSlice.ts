@@ -12,6 +12,15 @@ export interface GlobalSliceState {
   addQuestionToExamDialog: {
     isOpen: boolean;
   };
+  addSubjectDialog: {
+    isOpen: boolean;
+  };
+  addStudentsDialog: {
+    isOpen: boolean;
+  };
+  addRoomExamDialog: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: GlobalSliceState = {
@@ -24,6 +33,15 @@ const initialState: GlobalSliceState = {
     isOpen: false,
   },
   addQuestionToExamDialog: {
+    isOpen: false,
+  },
+  addSubjectDialog: {
+    isOpen: false,
+  },
+  addStudentsDialog: {
+    isOpen: false,
+  },
+  addRoomExamDialog: {
     isOpen: false,
   },
 };
@@ -58,6 +76,30 @@ const globalSlice = createSlice({
     closeAddQuestionToExamDialog: (state) => {
       state.addQuestionToExamDialog.isOpen = false;
     },
+
+    //subject
+    openAddSubjectDialog: (state) => {
+      state.addSubjectDialog.isOpen = true;
+    },
+    closeAddSubjectDialog: (state) => {
+      state.addSubjectDialog.isOpen = false;
+    },
+
+    //student
+    openAddStudentsDialog: (state) => {
+      state.addStudentsDialog.isOpen = true;
+    },
+    closeAddStudentsDialog: (state) => {
+      state.addStudentsDialog.isOpen = false;
+    },
+
+    //room exam
+    openAddRoomExamDialog: (state) => {
+      state.addRoomExamDialog.isOpen = true;
+    },
+    closeAddRoomExamDialog: (state) => {
+      state.addRoomExamDialog.isOpen = false;
+    },
   },
 });
 
@@ -68,6 +110,12 @@ export const {
   closeAddMultiQuestionsDialog,
   openAddQuestionToExamDialog,
   closeAddQuestionToExamDialog,
+  openAddSubjectDialog,
+  closeAddSubjectDialog,
+  openAddStudentsDialog,
+  closeAddStudentsDialog,
+  openAddRoomExamDialog,
+  closeAddRoomExamDialog,
 } = globalSlice.actions;
 
 export const selectAddClassDialog = ({ globalSlice }: any) =>
@@ -76,5 +124,14 @@ export const selectAddMultiQuestionsDialog = ({ globalSlice }: any) =>
   globalSlice.addMultiQuestionsDialog;
 export const selectAddQuestionToExamDialog = ({ globalSlice }: any) =>
   globalSlice.addQuestionToExamDialog;
+
+export const selectAddSubjectDialog = ({ globalSlice }: any) =>
+  globalSlice.addSubjectDialog;
+
+export const selectAddStudentsDialog = ({ globalSlice }: any) =>
+  globalSlice.addStudentsDialog;
+
+export const selectAddRoomExamDialog = ({ globalSlice }: any) =>
+  globalSlice.addRoomExamDialog;
 
 export default globalSlice.reducer;

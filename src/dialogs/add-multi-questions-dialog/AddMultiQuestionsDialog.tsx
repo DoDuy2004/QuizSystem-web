@@ -22,6 +22,7 @@ import {
   ListItemText,
   Divider,
   CircularProgress,
+  LinearProgress,
 } from "@mui/material";
 import { useThemeMediaQuery } from "../../hooks";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,6 +31,13 @@ import {
   closeAddMultiQuestionsDialog,
   selectAddMultiQuestionsDialog,
 } from "../../store/slices/globalSlice";
+import {
+  addListQuestions,
+  importQuestions,
+  setImportStatus,
+} from "../../store/slices/questionBankSlice";
+import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
+import { errorAnchor, successAnchor } from "../../constants/confirm";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -62,22 +70,81 @@ const AddMultiQuestionsDialog = () => {
 
   const handleDownloadTemplate = () => {
     setLoading(true);
-    // Simulate download
-    setTimeout(() => {
+
+    try {
+      const link = document.createElement("a");
+      link.href = `/assets/templates/import_question.xlsx`;
+      link.download = "mau_nhap_lieu.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Lỗi khi tải file:", error);
+    } finally {
       setLoading(false);
-      alert("File mẫu đang được tải xuống...");
-    }, 1000);
+    }
   };
 
-  const handleSubmit = () => {
-    if (selectedFile) {
+  const handleSubmit = async () => {
+    if (selectedFile && !loading) {
       setLoading(true);
-      // Simulate upload
-      setTimeout(() => {
-        setLoading(false);
-        alert(`File ${selectedFile.name} đã được tải lên thành công!`);
+      try {
+        const response = await dispatch(
+          importQuestions({
+            file: selectedFile,
+          })
+        ).unwrap();
+
+        const validQuestions = response?.data?.filter(
+          (item: any) => item.isValid
+        );
+        if (validQuestions.length > 0) {
+          dispatch(addListQuestions({ form: validQuestions })).then(() => {
+            dispatch(setImportStatus("succeeded"));
+          });
+        }
+
+        console.log({ validQuestions });
+
+        // Hiển thị thông báo thành công
+        dispatch(
+          showMessage({
+            message: `Import thành công ${validQuestions.length} câu hỏi`,
+            ...successAnchor,
+          })
+        );
+
+        const invalidQuestions = response?.data?.filter(
+          (item: any) => !item.isValid || item.errorMessages.length > 0
+        );
+        if (invalidQuestions.length > 0) {
+          const errorMessage =
+            `Có ${invalidQuestions.length} câu hỏi không hợp lệ:\n` +
+            invalidQuestions
+              .map(
+                (item: any) =>
+                  `Dòng ${item.rowIndex}: ${item.content} - Lỗi: ${
+                    item.errorMessages.join(", ") || "Dữ liệu không hợp lệ"
+                  }`
+              )
+              .join("\n");
+          dispatch(
+            showMessage({
+              message: errorMessage,
+              ...errorAnchor,
+            })
+          );
+        }
+
         handleClose();
-      }, 1500);
+      } catch (error: any) {
+        // Xử lý lỗi chung (nếu API thất bại)
+        dispatch(
+          showMessage({ message: "Import câu hỏi thất bại", ...errorAnchor })
+        );
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -86,6 +153,8 @@ const AddMultiQuestionsDialog = () => {
       setSelectedFile(null);
     }
   }, [addMultiQuestionsDialog?.isOpen]);
+
+  if (loading) return <CircularProgress />;
 
   return (
     <Dialog
@@ -170,23 +239,17 @@ const AddMultiQuestionsDialog = () => {
               <ListItemIcon className="min-w-6">
                 <DescriptionIcon fontSize="small" className="text-blue-500" />
               </ListItemIcon>
-              <ListItemText primary="Các câu hỏi phải nằm trong cột đầu tiên (cột A)" />
-            </ListItem>
-            <ListItem className="p-0">
-              <ListItemIcon className="min-w-6">
-                <DescriptionIcon fontSize="small" className="text-blue-500" />
-              </ListItemIcon>
               <ListItemText primary="Mỗi câu hỏi nằm trên một dòng riêng" />
             </ListItem>
             <ListItem className="p-0">
               <ListItemIcon className="min-w-6">
                 <DescriptionIcon fontSize="small" className="text-blue-500" />
               </ListItemIcon>
-              <ListItemText primary="Tối đa 100 câu hỏi mỗi lần tải lên" />
+              <ListItemText primary="Tối đa 1000 câu hỏi mỗi lần tải lên" />
             </ListItem>
           </List>
 
-          <Typography variant="body2" className="text-gray-600 pb-2">
+          {/* <Typography variant="body2" className="text-gray-600 pb-2">
             <strong>Ví dụ:</strong>
           </Typography>
 
@@ -212,7 +275,7 @@ const AddMultiQuestionsDialog = () => {
                 </tr>
               </tbody>
             </table>
-          </Box>
+          </Box> */}
         </Paper>
 
         {/* Step 3: Upload File */}

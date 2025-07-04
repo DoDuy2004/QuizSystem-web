@@ -7,42 +7,44 @@ import {
   Typography,
   Autocomplete,
   TextField,
-  Checkbox,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  // ListItemText,
   Button,
   Divider,
-  Chip,
   CircularProgress,
+  Table,
+  TableHead,
+  TableCell,
+  TableRow,
+  TableBody,
 } from "@mui/material";
 import type { TransitionProps } from "@mui/material/transitions";
 import React, { useState, forwardRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useDeepCompareEffect, useThemeMediaQuery } from "../../hooks";
 import CloseIcon from "@mui/icons-material/Close";
-// import AddIcon from "@mui/icons-material/Add";
 import type { AppDispatch } from "../../store/store";
 import {
   closeAddQuestionToExamDialog,
   selectAddQuestionToExamDialog,
 } from "../../store/slices/globalSlice";
 import {
-  // getQuestionBanks,
-  getQuestionsByQuestionBank,
-  selectQuestionBanks,
+  // getQuestionsByQuestionBank,
+  getQuestionBanks,
+  // selectQuestionBanks,
 } from "../../store/slices/questionBankSlice";
-import _ from "lodash";
 import {
   addQuestionToExam,
-  getQuestionsByExam,
+  createMatrix,
   selectExam,
+  setImportStatus,
 } from "../../store/slices/examSlice";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../constants/confirm";
 import { useParams } from "react-router-dom";
+import { getChapters } from "../../store/slices/subjectSlice";
+import * as yup from "yup";
+import { useForm, Controller, useFieldArray, type Path } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import _ from "lodash";
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -51,6 +53,65 @@ const Transition = forwardRef(function Transition(
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
+});
+
+// type Difficulty = "EASY" | "MEDIUM" | "HARD";
+
+type MatrixRow = {
+  chapterId: string;
+  difficultyMap: {
+    EASY: number;
+    MEDIUM: number;
+    HARD: number;
+  };
+};
+
+type FormValues = {
+  numberOfQuestions: number;
+  matrix: MatrixRow[];
+};
+
+// Định nghĩa schema Yup
+const schema: any = yup.object().shape({
+  matrix: yup
+    .array()
+    .of(
+      yup.object().shape({
+        chapterId: yup.string().required(),
+        difficultyMap: yup.object().shape({
+          EASY: yup
+            .number()
+            .integer()
+            .min(0, "Số câu phải không âm")
+            .required(),
+          MEDIUM: yup
+            .number()
+            .integer()
+            .min(0, "Số câu phải không âm")
+            .required(),
+          HARD: yup
+            .number()
+            .integer()
+            .min(0, "Số câu phải không âm")
+            .required(),
+        }),
+      })
+    )
+    .test(
+      "at-least-one-nonzero",
+      "Bạn phải nhập ít nhất 1 câu hỏi ở bất kỳ chương nào",
+      function (matrix) {
+        const total: any = matrix?.reduce((sum: number, row: any) => {
+          return (
+            sum +
+            row.difficultyMap.EASY +
+            row.difficultyMap.MEDIUM +
+            row.difficultyMap.HARD
+          );
+        }, 0);
+        return total > 0;
+      }
+    ),
 });
 
 const AddQuestionToExamDialog = () => {
@@ -62,33 +123,85 @@ const AddQuestionToExamDialog = () => {
   const [loading, setLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [questions, setQuestions] = useState([]);
-  const [selectedQuestions, setSelectedQuestions] = useState<any>([]);
+  const [chapters, setChapters] = useState([]);
   const routeParams = useParams();
-  // const [showNewQuestionForm, setShowNewQuestionForm] = useState(false);
   const exam = useSelector(selectExam);
   const addQuestionToExamDialog = useSelector(selectAddQuestionToExamDialog);
-  const questionBanks = useSelector(selectQuestionBanks);
+  // const questionBanks = useSelector(selectQuestionBanks);
+
+  // Khởi tạo react-hook-form
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid, dirtyFields },
+    setValue,
+    reset,
+  } = useForm<FormValues>({
+    mode: "onChange",
+    resolver: yupResolver(schema),
+    defaultValues: {
+      matrix: [],
+    },
+  });
+
+  // Tính số lượng câu hỏi có sẵn
+  // const getAvailableQuestions = () => {
+  //   const available: { [chapterId: string]: { [difficulty: string]: number } } =
+  //     {};
+
+  //   questions?.forEach((q: any) => {
+  //     if (!exam?.questions?.some((eq: any) => eq.id === q.id)) {
+  //       if (!available[q.chapter?.id]) {
+  //         available[q.chapter?.id] = { EASY: 0, MEDIUM: 0, HARD: 0 };
+  //       }
+  //       available[q.chapter?.id][q.difficulty] =
+  //         (available[q.chapter?.id][q.difficulty] || 0) + 1;
+  //     }
+  //   });
+  //   return available;
+  // };
 
   useDeepCompareEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        if (addQuestionToExamDialog?.isOpen && !_.isEmpty(selectedBank)) {
-          const bankRes = await dispatch(
-            getQuestionsByQuestionBank({ id: selectedBank?.id })
-          ).unwrap();
-
-          if (routeParams?.id) {
-            dispatch(getQuestionsByExam(routeParams.id)).unwrap();
+        if (addQuestionToExamDialog?.isOpen) {
+          // Tải danh sách questionBanks
+          const banksRes = await dispatch(getQuestionBanks()).unwrap();
+          const banks = banksRes?.data || [];
+          // Tự động chọn questionBank đầu tiên
+          if (banks.length > 0 && !selectedBank) {
+            setSelectedBank(banks[0]);
           }
 
-          setQuestions(bankRes?.data || []);
+          // Tải danh sách chương
+          const chaptersRes = await dispatch(
+            getChapters(exam?.data?.subjectId)
+          ).unwrap();
+          setChapters(chaptersRes?.data || []);
 
-          // const existingQuestionIds = exam?.questions?.map((q: any) => q.id);
-          // setSelectedQuestions(existingQuestionIds);
+          // Tải danh sách câu hỏi nếu có selectedBank
+          // if (selectedBank?.id) {
+          //   const bankRes = await dispatch(
+          //     getQuestionsByQuestionBank({ id: selectedBank.id })
+          //   )
+          //     .unwrap()
+          //     .then((res) => {
+          //       setQuestions(res?.data || []);
+          //     });
+          // }
+
+          // Cập nhật matrix trong form
+          setValue(
+            "matrix",
+            chaptersRes?.data.map((chapter: any) => ({
+              chapterId: chapter.id,
+              difficultyMap: { EASY: 0, MEDIUM: 0, HARD: 0 },
+            })) || []
+          );
         }
       } catch (error) {
-        console.error("Error fetching questions:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -98,93 +211,51 @@ const AddQuestionToExamDialog = () => {
 
     return () => {
       if (!addQuestionToExamDialog?.isOpen) {
-        // setSelectedBank(null); 
         setQuestions([]);
-        setSelectedQuestions([]);
+        setChapters([]);
       }
     };
-  }, [
-    dispatch,
-    selectedBank,
-    routeParams?.id,
-    addQuestionToExamDialog?.isOpen,
-  ]);
+  }, [dispatch, routeParams?.id, addQuestionToExamDialog?.isOpen]);
 
-  const handleBankChange = (event: any, newValue: any) => {
-    setSelectedBank(newValue);
-    setSelectedQuestions([]);
-  };
-
-  const handleQuestionToggle = (questionId: any) => () => {
-    if (!exam?.questions?.some((q: any) => q.id === questionId)) {
-      setSelectedQuestions((prev: any) =>
-        prev.includes(questionId)
-          ? prev.filter((id: any) => id !== questionId)
-          : [...prev, questionId]
-      );
-    }
-  };
-
-  const handleSelectAll = () => {
-    const availableQuestions = questions.filter(
-      (q: any) => !exam?.questions?.some((eq: any) => eq.id === q.id)
-    );
-
-    console.log({ availableQuestions });
-
-    if (selectedQuestions.length === availableQuestions.length) {
-      setSelectedQuestions([]);
-    } else {
-      setSelectedQuestions(availableQuestions.map((q: any) => q.id));
-    }
-  };
-
-  const handleAddQuestions = async () => {
+  const onSubmit = async (data: any) => {
     setLoading(true);
+    // console.log({ exam });
     try {
+      // Tạo payload
       const payload = {
-        questionScores: selectedQuestions.map((questionId: string) => {
-          const question: any = questions.find((q: any) => q.id === questionId);
-          return {
-            question: {
-              id: question.id,
-              topic: question.topic,
-              type: question.type,
-              content: question.content.trim(),
-              status: question.status || 0,
-              difficulty: question.difficulty,
-              image: question.image,
-              chapterId: question.chapterId,
-              answers: question.answers,
-              questionBankId: question.questionBankId,
-              createdBy: question.createdBy,
-            },
-            score: 0,
-          };
-        }),
         examId: exam?.data?.id,
+        matrix: data.matrix,
       };
 
-      await dispatch(
-        addQuestionToExam({ id: exam?.data?.id, form: payload })
-      ).unwrap();
+      // console.log("Payload:", JSON.stringify(payload, null, 2));
+
+      // Chọn câu hỏi dựa trên matrix
+      // const selectedQuestions: any[] = [];
+      // const availableQuestions = getAvailableQuestions();
+      // await dispatch(
+      //   addQuestionToExam({ id: exam?.data?.id, form: payload })
+      // ).unwrap();
+
+      dispatch(createMatrix({ form: payload }))
+        .unwrap()
+        .finally(() => {
+          setLoading(false);
+        });
+
+      dispatch(setImportStatus("succeeded"));
 
       dispatch(
         showMessage({
-          message: `Đã thêm ${selectedQuestions.length} câu hỏi vào đề thi`,
+          message: `Đã thêm câu hỏi vào để thi`,
           ...successAnchor,
         })
       );
 
       dispatch(closeAddQuestionToExamDialog());
-
-      // setSelectedQuestions([]);
-
-      dispatch(closeAddQuestionToExamDialog());
-    } catch (error) {
+    } catch (error: any) {
       dispatch(
         showMessage({
-          message: "Có lỗi xảy ra khi thêm câu hỏi",
+          message: "Không đủ câu hỏi để thêm",
           autoHideDuration: 6000,
           anchorOrigin: {
             vertical: "top",
@@ -193,12 +264,22 @@ const AddQuestionToExamDialog = () => {
           variant: "error",
         })
       );
-
       console.error("Error adding questions to exam:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // const totalSelectedQuestions = (matrix: any[]) =>
+  //   matrix.reduce(
+  //     (total, chapter) =>
+  //       total +
+  //       Object.values(chapter.difficultyMap).reduce(
+  //         (sum: any, count) => sum + (count || 0),
+  //         0
+  //       ),
+  //     0
+  //   );
 
   return (
     <Dialog
@@ -229,143 +310,116 @@ const AddQuestionToExamDialog = () => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-
-      <DialogContent className="p-0 flex flex-col">
-        <div className="p-4">
-          <Autocomplete
-            options={questionBanks}
-            getOptionLabel={(option) => option.name}
-            value={selectedBank}
-            onChange={handleBankChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Chọn ngân hàng câu hỏi"
-                variant="outlined"
-                fullWidth
-              />
-            )}
-          />
-        </div>
+      <DialogContent className="p-6">
         <Divider />
-
-        {selectedBank && (
-          <>
-            <div className="p-4 flex justify-between items-center">
-              <Typography variant="subtitle1">
-                {questions?.length} câu hỏi
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex-1 overflow-y-auto p-4">
+            {loading ? (
+              <div className="flex justify-center py-4">
+                <CircularProgress />
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell className="font-semibold">Chương</TableCell>
+                      <TableCell className="font-semibold text-center">
+                        Dễ
+                      </TableCell>
+                      <TableCell className="font-semibold text-center">
+                        Trung bình
+                      </TableCell>
+                      <TableCell className="font-semibold text-center">
+                        Khó
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {chapters.map((chapter: any, index: number) => (
+                      <TableRow key={chapter.id}>
+                        <TableCell>{chapter.name}</TableCell>
+                        {["EASY", "MEDIUM", "HARD"].map((difficulty: any) => {
+                          // const available =
+                          //   getAvailableQuestions()[chapter.id]?.[difficulty] ||
+                          //   0;
+                          return (
+                            <TableCell
+                              key={difficulty}
+                              className="text-center"
+                              padding="none"
+                            >
+                              <Controller
+                                name={
+                                  `matrix.${index}.difficultyMap.${difficulty}` as Path<FormValues>
+                                }
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                  <TextField
+                                    {...field}
+                                    type="number"
+                                    size="small"
+                                    inputProps={{ min: 0 }}
+                                    sx={{ width: 80 }}
+                                    placeholder="0"
+                                    onChange={(e) => {
+                                      const value =
+                                        parseInt(e.target.value) || 0;
+                                      field.onChange(Math.min(value));
+                                    }}
+                                    error={!!error}
+                                    helperText={error?.message}
+                                  />
+                                )}
+                              />
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
+            )}
+            {errors.matrix && (
+              <Typography color="error" variant="caption" className="mt-2">
+                {errors.matrix.message}
               </Typography>
-              <Button
-                size="small"
-                onClick={handleSelectAll}
-                sx={{ textTransform: "none" }}
-                className="text-blue-600"
-              >
-                {selectedQuestions.length ===
-                questions.filter(
-                  (q: any) =>
-                    !exam?.questions?.some((eq: any) => eq.id === q.id)
-                ).length
-                  ? "Bỏ chọn tất cả"
-                  : "Chọn tất cả"}
-              </Button>
-            </div>
-            <Divider />
-            <div className="flex-1 overflow-y-auto">
-              <List dense className="w-full">
-                {questions?.map((question: any) => {
-                  const isInExam = exam?.questions?.some(
-                    (q: any) => q.id === question.id
-                  );
-                  const isSelected =
-                    selectedQuestions.includes(question.id) || isInExam;
-
-                  return (
-                    <ListItem
-                      key={question.id}
-                      disablePadding
-                      secondaryAction={
-                        <Chip
-                          label={question.difficulty}
-                          size="small"
-                          sx={{ fontSize: 12 }}
-                          color={
-                            question.difficulty === "HARD"
-                              ? "error"
-                              : question.difficulty === "MEDIUM"
-                              ? "warning"
-                              : "success"
-                          }
-                        />
-                      }
-                    >
-                      <ListItemButton
-                        role={undefined}
-                        onClick={handleQuestionToggle(question.id)}
-                        dense
-                        disabled={isInExam}
-                      >
-                        <ListItemIcon>
-                          <Checkbox
-                            edge="start"
-                            checked={isSelected}
-                            tabIndex={-1}
-                            disableRipple
-                            disabled={isInExam}
-                          />
-                        </ListItemIcon>
-                        <Typography
-                          fontSize={14}
-                          fontWeight={500}
-                          component="div"
-                          dangerouslySetInnerHTML={{
-                            __html: question?.content || "",
-                          }}
-                          sx={{
-                            opacity: isInExam ? 0.7 : 1,
-                            fontStyle: isInExam ? "italic" : "normal",
-                          }}
-                        />
-                        {isInExam && (
-                          <Chip
-                            label="Đã có trong đề"
-                            size="small"
-                            color="info"
-                            sx={{ ml: 1, fontSize: 11 }}
-                          />
-                        )}
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </div>
-          </>
-        )}
+            )}
+          </div>
+          <Divider />
+          <div className="p-4 flex justify-end gap-x-2">
+            <Button
+              onClick={() => dispatch(closeAddQuestionToExamDialog())}
+              sx={{ textTransform: "none" }}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={_.isEmpty(dirtyFields) || !isValid || loading}
+              sx={{
+                textTransform: "none",
+                background:
+                  !isValid || _.isEmpty(dirtyFields) || loading
+                    ? "gray"
+                    : "linear-gradient(to right, #3b82f6, #a855f7)",
+                color: "white",
+                px: 4,
+                py: 1.5,
+                borderRadius: 999,
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                `Thêm câu hỏi`
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
-      <Divider />
-      <div className="p-4 flex justify-end gap-x-2">
-        <Button
-          onClick={() => dispatch(closeAddQuestionToExamDialog())}
-          className="mr-2"
-          sx={{ textTransform: "none" }}
-        >
-          Hủy
-        </Button>
-        <Button
-          variant="contained"
-          disabled={selectedQuestions.length === 0 || loading}
-          onClick={handleAddQuestions}
-          sx={{ textTransform: "none" }}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          {loading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            `Thêm ${selectedQuestions.length} câu hỏi`
-          )}
-        </Button>
-      </div>
     </Dialog>
   );
 };
