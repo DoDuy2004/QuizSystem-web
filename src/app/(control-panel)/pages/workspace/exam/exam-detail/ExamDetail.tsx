@@ -100,7 +100,7 @@ const ExamDetail = () => {
             fontSize={14}
             className="truncate max-w-full"
           >
-            Môn: {exam?.data?.subject}
+            Môn: {exam?.data?.subject?.name}
           </Typography>
           <Typography
             component={"p"}
@@ -147,7 +147,7 @@ const ExamDetail = () => {
             <Typography>Không có câu hỏi nào trong đề thi</Typography>
           ) : (
             exam?.questions?.map((item: any, index: number) => (
-              <QuestionItem data={item} key={index} />
+              <QuestionItem data={item} index={index + 1} key={index} />
             ))
           )}
         </div>

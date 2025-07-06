@@ -12,7 +12,7 @@ function ExamModel(data?: any) {
     noOfQuestions: 0,
     status: 0,
     roomExamId: "",
-    subject: "",
+    subjectId: null,
   });
 }
 

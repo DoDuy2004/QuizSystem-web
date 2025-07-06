@@ -10,7 +10,6 @@ import {
   addQuestionBank,
   editQuestionBank,
   getQuestionBankById,
-  getSujects,
   // selectQuestionBank,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { useParams } from "react-router-dom";
@@ -22,7 +21,6 @@ import CircularLoading from "../../../../../../../components/CircularLoading";
 const schema: any = yup.object().shape({
   name: yup.string().required("Tên ngân hàng là bắt buộc"),
   description: yup.string(),
-  subject: yup.string().required("Môn học là bắt buộc"),
 });
 
 const QuestionBankForm = ({
@@ -33,10 +31,7 @@ const QuestionBankForm = ({
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
   const hasFetched = useRef(false);
-  const hasFetchedSubject = useRef(false);
   const [loading, setLoading] = useState(false);
-  const [subjects, setSubjects] = useState([]);
-  const user = useSelector(selectUser);
   const {
     handleSubmit,
     watch,
@@ -72,28 +67,28 @@ const QuestionBankForm = ({
     }
   }, [data, reset]);
 
-  useDeepCompareEffect(() => {
-    if (hasFetchedSubject.current) return;
+  // useDeepCompareEffect(() => {
+  //   if (hasFetchedSubject.current) return;
 
-    setLoading(true);
-    hasFetchedSubject.current = true;
-    dispatch(getSujects())
-      .then((res: any) => {
-        // console.log({ res });
-        setSubjects(res.payload.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [dispatch, routeParams?.id]);
+  //   setLoading(true);
+  //   hasFetchedSubject.current = true;
+  //   dispatch(getSujects())
+  //     .then((res: any) => {
+  //       // console.log({ res });
+  //       setSubjects(res.payload.data);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // }, [dispatch, routeParams?.id]);
 
   const onSubmit = (data: any) => {
     setLoading(true);
     const payload = {
       name: data.name,
       description: data.description,
-      subject: data.subject,
-      teacherId: user?.id,
+      // subject: data.subject,
+      // teacherId: user?.id,
       status: 0,
     };
 
@@ -147,7 +142,7 @@ const QuestionBankForm = ({
             )}
           />
 
-          {/* Môn học */}
+          {/* Môn học
           <Controller
             name="subject"
             control={control}
@@ -192,7 +187,7 @@ const QuestionBankForm = ({
                 )}
               />
             )}
-          />
+          /> */}
 
           {/* Mô tả */}
           <Controller

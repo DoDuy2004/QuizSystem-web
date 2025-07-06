@@ -8,6 +8,7 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ComposeQuestion from "./tabs/ComposeQuestion";
 import { selectExam } from "../../../../../../store/slices/examSlice";
 import ExamForm from "./tabs/ExamForm";
+import ExamPDFViewer from "./components/ExamPDFViewer";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -26,7 +27,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box>{children}</Box>}
+      {value === index && <Box className="h-full">{children}</Box>}
     </div>
   );
 }
@@ -72,9 +73,7 @@ const CreateExam = () => {
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBackOutlinedIcon />
         </IconButton>
-        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-          Đề thi
-        </Typography>
+        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>Đề thi</Typography>
       </div>
       <div className="flex flex-col gap-y-4">
         <Box
@@ -97,9 +96,15 @@ const CreateExam = () => {
               {...a11yProps(1)}
               disabled={!isQuestionTabEnabled}
             />
+            <Tab
+              sx={{ textTransform: "none", fontSize: 14 }}
+              label="Xem trước đề thi"
+              {...a11yProps(2)}
+              disabled={!isQuestionTabEnabled}
+            />
           </Tabs>
         </Box>
-        <div className="">
+        <div className="h-full">
           <CustomTabPanel value={value} index={0}>
             <ExamForm
               setIsQuestionTabEnabled={setIsQuestionTabEnabled}
@@ -107,9 +112,10 @@ const CreateExam = () => {
             />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            <ComposeQuestion
-              questions={exam?.questions}
-            />
+            <ComposeQuestion questions={exam?.questions} />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={2}>
+            <ExamPDFViewer />
           </CustomTabPanel>
         </div>
       </div>

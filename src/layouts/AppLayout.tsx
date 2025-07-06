@@ -11,12 +11,16 @@ import reducer from "../store/slices/globalSlice";
 import AddClassDialog from "../dialogs/add-class-dialog/AddClassDialog";
 import AddMultiQuestionsDialog from "../dialogs/add-multi-questions-dialog/AddMultiQuestionsDialog";
 import AddQuestionToExamDialog from "../dialogs/add-question-exam-dialog/AddQuestionToExamDialog";
+import AddSubjectDialog from "../dialogs/add-subject-dialog/AddSubjectDialog";
+import AddMultiStudentsDialog from "../dialogs/add-multi-students-dialog/AddMultiStudentsDialog";
+import AddRoomExamDialog from "../dialogs/add-room-exam-dialog/AddRoomExamDialog";
+import AddStudentsToClassDialog from "../dialogs/add-student-dialog/AddStudentsDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
-  const isManage = ["/my-account", "/workspace", "/personal"].some((prefix) =>
-    pathname.startsWith(prefix)
+  const isManage = ["/my-account", "/workspace", "/personal", "/manage"].some(
+    (prefix) => pathname.startsWith(prefix)
   );
   const isAuth = pathname.startsWith("/auth");
 
@@ -46,6 +50,10 @@ const AppLayout = () => {
         <AddClassDialog />
         <AddMultiQuestionsDialog />
         <AddQuestionToExamDialog />
+        <AddSubjectDialog />
+        <AddMultiStudentsDialog />
+        <AddRoomExamDialog />
+        <AddStudentsToClassDialog />
       </div>
     );
   }

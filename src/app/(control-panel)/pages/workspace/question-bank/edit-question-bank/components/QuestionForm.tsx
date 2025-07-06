@@ -21,14 +21,19 @@ import QuestionModel from "../../../../../../../models/QuestionModel";
 import RichTextEditor from "../../../../../../../components/RichTextEditor/RichTextEditor";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import { useDeepCompareEffect } from "../../../../../../../hooks";
+// import { useDeepCompareEffect } from "../../../../../../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../../store/store";
-import { getChapters } from "../../../../../../../store/slices/subjectSlice";
+import {
+  getChapters,
+  getSubjects,
+  selectSubjects,
+} from "../../../../../../../store/slices/subjectSlice";
 import {
   addQuestionToQuestionBank,
   editQuestion,
   selectQuestionBank,
+  setImportStatus,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
@@ -48,6 +53,7 @@ const schema = yup.object().shape({
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
   chapterId: yup.string().required("Chương là bắt buộc"),
+  subjectId: yup.string().required("Chương là bắt buộc"),
   answers: yup
     .array()
     .of(
@@ -61,10 +67,13 @@ const schema = yup.object().shape({
 });
 
 const QuestionForm = ({ questionData }: any) => {
-  const [selectedValue, setSelectedValue] = useState("SINGLE"); // Mặc định là "Một đáp án"
+  const [selectedValue, setSelectedValue] = useState("SingleChoice"); // Mặc định là "Một đáp án"
   const [loading, setLoading] = useState(false);
   const [chapters, setChapters] = useState([]);
-  const hasFetchedChapters = useRef(false);
+  // const subjects = useSelector(selectSubjects);
+  const [subjects, setSubjects] = useState([]);
+  const [isSubjectOpen, setIsSubjectOpen] = useState(false);
+  const [isChapterOpen, setIsChapterOpen] = useState(false);
   const questionBank = useSelector(selectQuestionBank);
   const [question, setQuestion] = useState(questionData || {});
   const dispatch = useDispatch<AppDispatch>();
@@ -90,21 +99,6 @@ const QuestionForm = ({ questionData }: any) => {
 
   // Theo dõi giá trị type để điều chỉnh logic
   const watchType = watch("type");
-
-  const handleChangeType = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedValue(event.target.value);
-    setValue("type", event.target.value);
-    if (event.target.value === "SINGLE") {
-      const answers = watch("answers") || [];
-      const updatedAnswers = answers.map((answer: any, index: number) => ({
-        ...answer,
-        isCorrect: index === 0 ? true : false,
-      }));
-      updatedAnswers.forEach((answer: any, index: number) =>
-        setValue(`answers.${index}.isCorrect`, answer.isCorrect)
-      );
-    }
-  };
 
   const handleAddAnswer = () => {
     append({
@@ -139,31 +133,47 @@ const QuestionForm = ({ questionData }: any) => {
       const transformedData = {
         ...questionData,
         chapterId: questionData?.chapter?.id,
+        // subjectId: questionData?.chapter?.subject?.id,
         difficulty: questionData.difficulty,
       };
-
+      setValue("subjectId", questionData?.chapter?.subject?.id, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       reset(QuestionModel(transformedData));
     }
   }, [reset, questionData]);
 
-  useDeepCompareEffect(() => {
-    if (hasFetchedChapters.current || chapters.length > 0) return;
+  useEffect(() => {
+    if (isSubjectOpen && subjects?.length === 0) {
+      setLoading(true);
+      dispatch(getSubjects())
+        .unwrap()
+        .then((res) => {
+          console.log({ res });
+          setSubjects(res.data);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [isSubjectOpen, dispatch]);
 
-    setLoading(true);
-    hasFetchedChapters.current = true;
-    dispatch(getChapters())
-      .then((res) => {
-        // console.log({ res });
-        setChapters(res.payload.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [dispatch]);
+  useEffect(() => {
+    const subjectId = watch("subjectId");
+    if (isChapterOpen && subjectId) {
+      dispatch(getChapters(subjectId))
+        .unwrap()
+        .then((res: any) => {
+          console.log({ res });
+          setChapters(res.data);
+        });
+    }
+  }, [isChapterOpen, watch("subjectId"), dispatch]);
+
+  // console.log({ subjects });
 
   const handleAnswerChange =
     (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (watchType === "SINGLE") {
+      if (watchType === "SingleChoice") {
         const newAnswers = fields.map((_, i) => ({
           ...watch(`answers.${i}`),
           isCorrect: i === index,
@@ -199,7 +209,6 @@ const QuestionForm = ({ questionData }: any) => {
       image: data.image,
       chapterId: data.chapterId,
       answers: data.answers,
-      questionBankId: questionBank?.data?.id,
       createdBy: user?.id,
     };
 
@@ -214,6 +223,7 @@ const QuestionForm = ({ questionData }: any) => {
       .then((res) => {
         setQuestion(res.payload.data);
         reset(QuestionModel(payload));
+        dispatch(setImportStatus("succeeded"));
         dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {
@@ -249,7 +259,7 @@ const QuestionForm = ({ questionData }: any) => {
                   id="select-type"
                   value={field.value || ""} // đảm bảo không bị undefined
                 >
-                  <MenuItem value="SINGLE">
+                  <MenuItem value="SingleChoice">
                     <div className="flex items-center gap-x-2">
                       <RadioButtonCheckedOutlinedIcon
                         fontSize="small"
@@ -258,7 +268,7 @@ const QuestionForm = ({ questionData }: any) => {
                       <span>Một đáp án</span>
                     </div>
                   </MenuItem>
-                  <MenuItem value="MULTIPLE">
+                  <MenuItem value="MultipleChoice">
                     <div className="flex items-center gap-x-2">
                       <ChecklistOutlinedIcon fontSize="small" color="success" />
                       <span>Nhiều đáp án</span>
@@ -276,17 +286,23 @@ const QuestionForm = ({ questionData }: any) => {
           rules={{ required: "Bạn chưa nhập nội dung câu hỏi" }}
           render={({ field }) => (
             <div>
-              <RichTextEditor value={field.value} onChange={field.onChange} />
+              <RichTextEditor
+                value={field.value}
+                onChange={field.onChange}
+                label="Soạn câu hỏi tại đây..."
+              />
             </div>
           )}
         />
         <Controller
-          name="chapterId"
+          name="subjectId"
           control={control}
           render={({ field }) => (
             <Autocomplete
-              options={chapters}
-              freeSolo={false}
+              open={isSubjectOpen}
+              onOpen={() => setIsSubjectOpen(true)}
+              onClose={() => setIsSubjectOpen(false)}
+              options={subjects}
               getOptionLabel={(option: any) =>
                 typeof option === "string" ? option : option?.name || ""
               }
@@ -295,7 +311,56 @@ const QuestionForm = ({ questionData }: any) => {
                   ? option.id === value
                   : option?.name === value
               }
-              value={chapters.find((c: any) => c.id === field.value) || null}
+              value={
+                subjects?.find((c: any) => c.id === field.value) ||
+                questionData?.chapter?.subject?.name ||
+                null
+              }
+              onChange={(event, newValue: any) => {
+                field.onChange(newValue?.id || "");
+                setValue("chapterId", ""); // reset chapter khi đổi môn
+                setChapters([]);
+              }}
+              renderInput={(params: any) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  label={
+                    <>
+                      Môn học <span className="text-red-500">*</span>
+                    </>
+                  }
+                  variant="outlined"
+                  error={!!errors.subjectId}
+                  helperText={errors.subjectId?.message}
+                />
+              )}
+            />
+          )}
+        />
+        <Controller
+          name="chapterId"
+          control={control}
+          render={({ field }) => (
+            <Autocomplete
+              disabled={!question || !watch("subjectId")}
+              open={isChapterOpen}
+              onOpen={() => setIsChapterOpen(true)}
+              onClose={() => setIsChapterOpen(false)}
+              options={chapters}
+              getOptionLabel={(option: any) =>
+                typeof option === "string" ? option : option?.name || ""
+              }
+              isOptionEqualToValue={(option, value: any) =>
+                typeof option === "object" && typeof value === "string"
+                  ? option.id === value
+                  : option?.name === value
+              }
+              value={
+                chapters?.find((c: any) => c.id === field.value) ||
+                questionData?.chapter?.name ||
+                null
+              }
               onChange={(event, newValue: any) => {
                 field.onChange(newValue?.id || "");
               }}
@@ -316,6 +381,7 @@ const QuestionForm = ({ questionData }: any) => {
             />
           )}
         />
+
         <div className="flex gap-x-4">
           <Controller
             control={control}
@@ -375,7 +441,7 @@ const QuestionForm = ({ questionData }: any) => {
                     render={({ field }) => (
                       <FormControlLabel
                         control={
-                          watch("type") === "SINGLE" ? (
+                          watch("type") === "SingleChoice" ? (
                             <Radio
                               checked={watch(`answers.${index}.isCorrect`)}
                               onChange={handleAnswerChange(index)}

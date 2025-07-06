@@ -21,14 +21,13 @@ import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
 import RadioButtonCheckedOutlinedIcon from "@mui/icons-material/RadioButtonCheckedOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import { useDeepCompareEffect } from "../../../../../../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../../store/store";
-import { getChapters } from "../../../../../../../store/slices/subjectSlice";
 import {
-  editQuestion,
-  getQuestionBanks,
-} from "../../../../../../../store/slices/questionBankSlice";
+  getChapters,
+  getSubjects,
+} from "../../../../../../../store/slices/subjectSlice";
+import { editQuestion } from "../../../../../../../store/slices/questionBankSlice";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import {
   addQuestionToExam,
@@ -67,7 +66,7 @@ const schema = yup.object().shape({
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
   chapterId: yup.string().required("Chương là bắt buộc"),
-  questionBankId: yup.string().required("Ngân hàng câu hỏi là bắt buộc"),
+  subjectId: yup.string().required("Chương là bắt buộc"),
   answers: yup
     .array()
     .of(
@@ -84,11 +83,13 @@ const schema = yup.object().shape({
 });
 
 const QuestionForm = ({ questionData }: any) => {
-  const [selectedValue, setSelectedValue] = useState("SINGLE"); // Mặc định là "Một đáp án"
+  const [selectedValue, setSelectedValue] = useState("SingleChoice"); // Mặc định là "Một đáp án"
   const [loading, setLoading] = useState(false);
   const [chapters, setChapters] = useState([]);
-  const [questionBanks, setQuestionBanks] = useState([]);
-  const hasFetchedChapters = useRef(false);
+  // const subjects = useSelector(selectSubjects);
+  const [subjects, setSubjects] = useState([]);
+  const [isSubjectOpen, setIsSubjectOpen] = useState(false);
+  const [isChapterOpen, setIsChapterOpen] = useState(false);
   const [question, setQuestion] = useState(questionData || {});
   const exam = useSelector(selectExam);
   const dispatch = useDispatch<AppDispatch>();
@@ -114,21 +115,6 @@ const QuestionForm = ({ questionData }: any) => {
 
   const watchType = watch("type");
 
-  // const handleChangeType = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSelectedValue(event.target.value);
-  //   setValue("type", event.target.value);
-  //   if (event.target.value === "SINGLE") {
-  //     const answers = watch("answers") || [];
-  //     const updatedAnswers = answers.map((answer: any, index: number) => ({
-  //       ...answer,
-  //       isCorrect: index === 0 ? true : false,
-  //     }));
-  //     updatedAnswers.forEach((answer: any, index: number) =>
-  //       setValue(`answers.${index}.isCorrect`, answer.isCorrect)
-  //     );
-  //   }
-  // };
-
   const handleAddAnswer = () => {
     append({
       isCorrect: false,
@@ -143,6 +129,31 @@ const QuestionForm = ({ questionData }: any) => {
   };
 
   // console.log({ empty: _.isEmpty(questionData) });
+
+  useEffect(() => {
+    if (isSubjectOpen && subjects?.length === 0) {
+      setLoading(true);
+      dispatch(getSubjects())
+        .unwrap()
+        .then((res) => {
+          console.log({ res });
+          setSubjects(res.data);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [isSubjectOpen, dispatch]);
+
+  useEffect(() => {
+    const subjectId = watch("subjectId");
+    if (isChapterOpen && subjectId) {
+      dispatch(getChapters(subjectId))
+        .unwrap()
+        .then((res: any) => {
+          console.log({ res });
+          setChapters(res.data);
+        });
+    }
+  }, [isChapterOpen, watch("subjectId"), dispatch]);
 
   useEffect(() => {
     if (_.isEmpty(questionData)) {
@@ -162,45 +173,25 @@ const QuestionForm = ({ questionData }: any) => {
       const transformedData = {
         ...questionData,
         chapterId: questionData?.chapter?.id,
-        questionBankId: questionData?.questionBank?.id,
+        // subjectId: questionData?.chapter?.subject?.id,
         difficulty: questionData.difficulty,
       };
 
-      console.log({ transformedData });
+      // console.log({ transformedData });
 
       reset(QuestionModel(transformedData));
+      setValue("subjectId", questionData?.chapter?.subject?.id, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
   }, [reset, questionData]);
 
-  useDeepCompareEffect(() => {
-    if (hasFetchedChapters.current || chapters.length > 0) return;
-
-    const fetchData = async () => {
-      setLoading(true);
-      hasFetchedChapters.current = true;
-      try {
-        await Promise.all([
-          dispatch(getChapters()).then((res) => {
-            // console.log({ res });
-            setChapters(res.payload.data);
-          }),
-          dispatch(getQuestionBanks()).then((res) => {
-            setQuestionBanks(res.payload.data);
-          }),
-        ]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
+  //
 
   const handleAnswerChange =
     (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (watchType === "SINGLE") {
+      if (watchType === "SingleChoice") {
         const newAnswers = fields.map((_, i) => ({
           ...watch(`answers.${i}`),
           isCorrect: i === index,
@@ -225,7 +216,7 @@ const QuestionForm = ({ questionData }: any) => {
     // console.log({ data });
     // setLoading(true);
 
-    const payload = {
+    const payload1 = {
       questionScores: [
         {
           question: {
@@ -239,7 +230,6 @@ const QuestionForm = ({ questionData }: any) => {
             image: data.image,
             chapterId: data.chapterId,
             answers: data.answers,
-            questionBankId: data.questionBankId,
             createdBy: user?.id,
           },
           score: 0,
@@ -248,19 +238,33 @@ const QuestionForm = ({ questionData }: any) => {
       examId: exam?.data?.id,
     };
 
+    const payload2 = {
+      topic: data.topic,
+      type: data.type,
+      content: data.content,
+      status: 0,
+      difficulty: difficultyOptions.findIndex(
+        (item) => item.value == data.difficulty
+      ),
+      image: data.image,
+      chapterId: data.chapterId,
+      answers: data.answers,
+
+      createdBy: user?.id,
+    };
     // console.log({ payload });
 
     const action = !_.isEmpty(questionData)
       ? editQuestion({
           id: question.id,
-          form: { id: question.id, ...payload },
+          form: { id: question.id, ...payload2 },
         })
-      : addQuestionToExam({ id: exam?.data?.id, form: payload });
+      : addQuestionToExam({ id: exam?.data?.id, form: payload1 });
     // console.log({ payload });
     dispatch(action)
       .then((res) => {
         setQuestion(res.payload.data);
-        reset(QuestionModel(payload));
+        reset(QuestionModel(res.payload.data));
         dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {
@@ -296,7 +300,7 @@ const QuestionForm = ({ questionData }: any) => {
                   id="select-type"
                   value={field.value || ""} // đảm bảo không bị undefined
                 >
-                  <MenuItem value="SINGLE">
+                  <MenuItem value="SingleChoice">
                     <div className="flex items-center gap-x-2">
                       <RadioButtonCheckedOutlinedIcon
                         fontSize="small"
@@ -305,7 +309,7 @@ const QuestionForm = ({ questionData }: any) => {
                       <span>Một đáp án</span>
                     </div>
                   </MenuItem>
-                  <MenuItem value="MULTIPLE">
+                  <MenuItem value="MultipleChoice">
                     <div className="flex items-center gap-x-2">
                       <ChecklistOutlinedIcon fontSize="small" color="success" />
                       <span>Nhiều đáp án</span>
@@ -323,17 +327,24 @@ const QuestionForm = ({ questionData }: any) => {
           rules={{ required: "Bạn chưa nhập nội dung câu hỏi" }}
           render={({ field }) => (
             <div>
-              <RichTextEditor value={field.value} onChange={field.onChange} />
+              <RichTextEditor
+                value={field.value}
+                onChange={field.onChange}
+                label="Soạn câu hỏi tại đây..."
+              />
             </div>
           )}
         />
+
         <Controller
-          name="questionBankId"
+          name="subjectId"
           control={control}
           render={({ field }) => (
             <Autocomplete
-              options={questionBanks}
-              freeSolo={false}
+              open={isSubjectOpen}
+              onOpen={() => setIsSubjectOpen(true)}
+              onClose={() => setIsSubjectOpen(false)}
+              options={subjects}
               getOptionLabel={(option: any) =>
                 typeof option === "string" ? option : option?.name || ""
               }
@@ -343,10 +354,14 @@ const QuestionForm = ({ questionData }: any) => {
                   : option?.name === value
               }
               value={
-                questionBanks.find((c: any) => c.id === field.value) || null
+                subjects?.find((c: any) => c.id === field.value) ||
+                questionData?.chapter?.subject?.name ||
+                null
               }
               onChange={(event, newValue: any) => {
                 field.onChange(newValue?.id || "");
+                setValue("chapterId", ""); // reset chapter khi đổi môn
+                setChapters([]);
               }}
               renderInput={(params: any) => (
                 <TextField
@@ -354,12 +369,12 @@ const QuestionForm = ({ questionData }: any) => {
                   fullWidth
                   label={
                     <>
-                      Lưu vào ngân hàng <span className="text-red-500">*</span>
+                      Môn học <span className="text-red-500">*</span>
                     </>
                   }
                   variant="outlined"
-                  error={!!errors.questionBankId}
-                  helperText={errors.questionBankId?.message}
+                  error={!!errors.subjectId}
+                  helperText={errors.subjectId?.message}
                 />
               )}
             />
@@ -370,8 +385,11 @@ const QuestionForm = ({ questionData }: any) => {
           control={control}
           render={({ field }) => (
             <Autocomplete
+              disabled={!watch("subjectId")}
+              open={isChapterOpen}
+              onOpen={() => setIsChapterOpen(true)}
+              onClose={() => setIsChapterOpen(false)}
               options={chapters}
-              freeSolo={false}
               getOptionLabel={(option: any) =>
                 typeof option === "string" ? option : option?.name || ""
               }
@@ -380,7 +398,11 @@ const QuestionForm = ({ questionData }: any) => {
                   ? option.id === value
                   : option?.name === value
               }
-              value={chapters.find((c: any) => c.id === field.value) || null}
+              value={
+                chapters?.find((c: any) => c.id === field.value) ||
+                questionData?.chapter?.name ||
+                null
+              }
               onChange={(event, newValue: any) => {
                 field.onChange(newValue?.id || "");
               }}
@@ -460,7 +482,7 @@ const QuestionForm = ({ questionData }: any) => {
                     render={({ field }) => (
                       <FormControlLabel
                         control={
-                          watch("type") === "SINGLE" ? (
+                          watch("type") === "SingleChoice" ? (
                             <Radio
                               checked={watch(`answers.${index}.isCorrect`)}
                               onChange={handleAnswerChange(index)}

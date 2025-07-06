@@ -26,7 +26,7 @@ const ClassList = () => {
     if (!user?.id) return;
 
     setLoading(true);
-    dispatch(getClasses(user.id))
+    dispatch(getClasses())
       .unwrap()
       .finally(() => {
         setLoading(false);
@@ -42,18 +42,18 @@ const ClassList = () => {
   return (
     <div className="px-8 py-4">
       <div className="flex items-center justify-between pr-10">
-        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-          Lớp học của tôi
-        </Typography>
+        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>Lớp học</Typography>
 
-        <Button
-          startIcon={<AddIcon />}
-          sx={{ textTransform: "none" }}
-          variant="outlined"
-          onClick={handleAddClass}
-        >
-          Thêm lớp học
-        </Button>
+        {user?.role !== "STUDENT" && (
+          <Button
+            startIcon={<AddIcon />}
+            sx={{ textTransform: "none" }}
+            variant="outlined"
+            onClick={handleAddClass}
+          >
+            Thêm lớp học
+          </Button>
+        )}
       </div>
 
       {loading && !hasFetched ? (

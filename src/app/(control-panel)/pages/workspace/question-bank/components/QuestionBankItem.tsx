@@ -57,14 +57,21 @@ const QuestionBankItem = ({ data }: any) => {
       >
         {data?.name}
       </Typography>
-
+      <Typography
+        component={"h6"}
+        fontSize={14}
+        color="primary"
+        className="truncate max-w-ful"
+      >
+        Môn: {data?.subject}
+      </Typography>
       <Tooltip title={data?.subject}>
         <Typography
           component={"p"}
           fontSize={12}
           className="truncate max-w-full"
         >
-          Môn: {data?.subject}
+          {data?.description}
         </Typography>
       </Tooltip>
       <Typography
@@ -88,14 +95,14 @@ const QuestionBankItem = ({ data }: any) => {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Xóa">
+        {/* <Tooltip title="Xóa">
           <IconButton onClick={(e) => openConfirmDialog(data?.id, e)}>
             <DeleteForeverOutlinedIcon
               fontSize={"small"}
               className="text-red-500"
             />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </div>
   );

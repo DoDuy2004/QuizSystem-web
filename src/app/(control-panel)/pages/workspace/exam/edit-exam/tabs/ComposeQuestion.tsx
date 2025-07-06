@@ -7,20 +7,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { type AppDispatch } from "../../../../../../../store/store";
 import {
-  deleteQuestion,
+  // deleteQuestion,
   getQuestionById,
 } from "../../../../../../../store/slices/questionBankSlice";
 import { useDeepCompareEffect } from "../../../../../../../hooks";
 import CircularLoading from "../../../../../../../components/CircularLoading";
-import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+// import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import _ from "lodash";
 import {
-  openAddMultiQuestionsDialog,
+  // openAddMultiQuestionsDialog,
   openAddQuestionToExamDialog,
 } from "../../../../../../../store/slices/globalSlice";
 import { openConfirmationDialog } from "../../../../../../../store/slices/confirmationSlice";
 import QuestionForm from "../components/QuestionForm";
-import { getQuestionsByExam } from "../../../../../../../store/slices/examSlice";
+import {
+  deleteQuestionFromExam,
+  getQuestionsByExam,
+  selectImportStatus,
+  setImportStatus,
+} from "../../../../../../../store/slices/examSlice";
 
 const ComposeQuestion = ({ questions }: any) => {
   const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
@@ -31,6 +36,31 @@ const ComposeQuestion = ({ questions }: any) => {
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
   const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
   const [questionsData, setQuestionsData] = useState(questions || []);
+  const importStatus = useSelector(selectImportStatus);
+
+  useEffect(() => {
+    const fetchAfterImport = async () => {
+      if (importStatus === "succeeded") {
+        setLoading(true);
+        try {
+          const res = await dispatch(
+            // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
+            getQuestionsByExam(routeParams?.id as string)
+          ).unwrap();
+
+          const data = Array.isArray(res?.data) ? res.data : [];
+          setNoOfQuestions(data.length || 1);
+          setQuestionsData(data);
+        } catch {
+          setNoOfQuestions(0);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAfterImport();
+  }, [importStatus]);
 
   useDeepCompareEffect(() => {
     const fetchData = async () => {
@@ -45,7 +75,6 @@ const ComposeQuestion = ({ questions }: any) => {
         ).unwrap();
 
         // console.log({ res });
-
         const data = Array.isArray(res?.data) ? res.data : [];
         setNoOfQuestions(data.length || 1);
         setQuestionsData(data);
@@ -57,7 +86,7 @@ const ComposeQuestion = ({ questions }: any) => {
     };
 
     fetchData();
-  }, [dispatch, routeParams?.id, questions]);
+  }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
     if (routeParams.id && questionsData?.length > 0) {
@@ -104,40 +133,18 @@ const ComposeQuestion = ({ questions }: any) => {
     }
   };
 
-  const handleDeleteQuestion = async () => {
-    if (!question?.id) return;
-
-    try {
-      await dispatch(deleteQuestion(question.id)).unwrap();
-
-      // Cập nhật state ngay lập tức
-      const newQuestionsData = questionsData.filter(
-        (q: any) => q.id !== question.id
-      );
-      setQuestionsData(newQuestionsData);
-      setNoOfQuestions(newQuestionsData.length);
-
-      // Reset active question
-      if (newQuestionsData.length > 0) {
-        setIsActive(0);
-        await dispatch(getQuestionById(newQuestionsData[0].id)).then((res) =>
-          setQuestion(res.payload.data)
-        );
-      } else {
-        setIsActive(null);
-        setQuestion({});
-      }
-    } catch (error) {
-      console.error("Lỗi khi xóa câu hỏi:", error);
-    }
-  };
-
   const openConfirmDialog = () => {
     dispatch(
       openConfirmationDialog({
         data: {
           onAgree: () => {
-            handleDeleteQuestion();
+            dispatch(
+              deleteQuestionFromExam({
+                examId: routeParams?.id,
+                questionId: question?.id,
+              })
+            );
+            dispatch(setImportStatus("succeeded"));
           },
           dialogContent: "Bạn có chắc muốn xóa câu hỏi này",
           titleContent: "Xóa câu hỏi",
@@ -187,7 +194,7 @@ const ComposeQuestion = ({ questions }: any) => {
               >
                 Thêm từ ngân hàng
               </Button>
-              <Button
+              {/* <Button
                 startIcon={<AttachFileOutlinedIcon />}
                 color="primary"
                 size="small"
@@ -196,7 +203,7 @@ const ComposeQuestion = ({ questions }: any) => {
                 onClick={() => dispatch(openAddMultiQuestionsDialog())}
               >
                 Thêm hàng loạt
-              </Button>
+              </Button> */}
               <Button
                 startIcon={<DeleteIcon />}
                 color="error"
@@ -204,7 +211,7 @@ const ComposeQuestion = ({ questions }: any) => {
                 disabled={_.isEmpty(question)}
                 variant="contained"
                 sx={{ textTransform: "none" }}
-                onClick={openConfirmDialog}
+                onClick={() => openConfirmDialog()}
               >
                 Xóa câu hỏi
               </Button>

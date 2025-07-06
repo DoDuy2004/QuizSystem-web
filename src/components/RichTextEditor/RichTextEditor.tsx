@@ -6,9 +6,11 @@ import "react-quill-new/dist/quill.snow.css";
 function RichTextEditor({
   value,
   onChange,
+  label,
 }: {
   value: string;
   onChange: (v: string) => void;
+  label: string;
 }) {
   const quillRef = useRef<any>(null);
 
@@ -54,7 +56,7 @@ function RichTextEditor({
       onChange={onChange}
       modules={modules}
       formats={formats}
-      placeholder="Soạn câu hỏi tại đây..."
+      placeholder={label}
       style={{
         minHeight: "150px",
         width: "100%",

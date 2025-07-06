@@ -8,6 +8,7 @@ export interface ExamStateProps {
     data: {};
     questions: any[];
   };
+  importStatus: string;
   totalElements: number;
   totalPages: number;
   pagination: {
@@ -29,6 +30,7 @@ const initialState: ExamStateProps = {
     data: {},
     questions: [],
   },
+  importStatus: "",
   totalElements: 0,
   totalPages: 0,
   pagination: {
@@ -125,11 +127,58 @@ export const addQuestionToExam = createAsyncThunk(
   }
 );
 
+export const deleteQuestionFromExam = createAsyncThunk(
+  "exam/deleteQuestionFromExam",
+  async (params: any) => {
+    const examId = params?.examId;
+    const questionId = params?.questionId;
+    const response: any = await ExamService.deleteQuestionFromExam({
+      examId,
+      questionId,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const createMatrix = createAsyncThunk(
+  "exam/create-matrix",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await ExamService.createExamMatrix({
+      form,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const searchExams = createAsyncThunk(
+  "student/searchClasses",
+  async (params: any) => {
+    const response: any = await ExamService.searchExams({
+      key: params?.key,
+      limit: params?.limit,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,
   reducers: {
     resetExamState: () => initialState,
+    setImportStatus: (state, action) => {
+      state.importStatus = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getExams.fulfilled, (state, action) => {
@@ -170,12 +219,27 @@ export const examSlice = createSlice({
         ...addedQuestions,
       ];
     });
+
+    builder.addCase(deleteQuestionFromExam.fulfilled, (state, action) => {
+      const { questionId } = action.meta.arg;
+      console.log({ questionId });
+      const index = state.examDetail.questions.findIndex(
+        (item: any) => item.id === questionId
+      );
+      console.log({ index });
+      console.log({ questionId });
+      if (index !== -1) {
+        state.examDetail.questions.splice(index, 1);
+      }
+    });
   },
 });
 
 export const selectExams = ({ exams }: any) => exams?.exams?.data;
 export const selectExam = ({ exams }: any) => exams?.exams?.examDetail;
+export const selectImportStatus = ({ exams }: any) =>
+  exams?.exams?.importStatus;
 
-export const { resetExamState } = examSlice.actions;
+export const { resetExamState, setImportStatus } = examSlice.actions;
 
 export default examSlice.reducer;

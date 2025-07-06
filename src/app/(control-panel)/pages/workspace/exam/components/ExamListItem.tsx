@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { type AppDispatch } from "../../../../../../store/store";
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
 import { deleteExam } from "../../../../../../store/slices/examSlice";
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 const ExamListItem = ({ data }: any) => {
   const navigate = useNavigate();
@@ -59,13 +59,13 @@ const ExamListItem = ({ data }: any) => {
         {data?.name}
       </Typography>
 
-      <Tooltip title={data?.subject}>
+      <Tooltip title={data?.subject?.name}>
         <Typography
           component={"p"}
           fontSize={12}
           className="truncate max-w-full"
         >
-          Môn: {data?.subject}
+          Môn: {data?.subject?.name}
         </Typography>
       </Tooltip>
       <Typography

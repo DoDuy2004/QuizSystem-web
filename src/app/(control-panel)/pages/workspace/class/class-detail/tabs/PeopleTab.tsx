@@ -5,8 +5,18 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
+import { useDispatch, useSelector } from "react-redux";
+import { type AppDispatch } from "../../../../../../../store/store";
+import { openAddStudentsToClassDialog } from "../../../../../../../store/slices/globalSlice";
+import { selectUser } from "../../../../../../../store/slices/userSlice";
+import { useDeepCompareEffect } from "../../../../../../../hooks";
+import { useParams } from "react-router-dom";
+import {
+  getStudentsByClass,
+  selectClass,
+} from "../../../../../../../store/slices/classSlice";
 
 const UserItem = ({ name }: { name: string }) => (
   <>
@@ -18,8 +28,22 @@ const UserItem = ({ name }: { name: string }) => (
 );
 
 const PeopleTab = () => {
-  const teacher = { name: "Nguyễn Đức Duy" };
   const students = Array(20).fill({ name: "Nguyễn Đức Duy" });
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector(selectUser);
+  const routeParams = useParams();
+  const [loading, setLoading] = useState(true);
+  const courseClass = useSelector(selectClass);
+
+  useDeepCompareEffect(() => {
+    if (routeParams?.id) {
+      dispatch(getStudentsByClass(routeParams?.id))
+        .unwrap()
+        .finally(() => {
+          setLoading(true);
+        });
+    }
+  }, [dispatch, routeParams?.id]);
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-y-10">
@@ -29,14 +53,9 @@ const PeopleTab = () => {
           <Typography variant="h5" fontSize={32}>
             Giảng viên
           </Typography>
-          <Tooltip title="Mời giáo viên">
-            <IconButton>
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
         </div>
         <Divider />
-        <UserItem name={teacher.name} />
+        <UserItem name={user?.fullName} />
       </div>
 
       {/* Sinh viên */}
@@ -46,18 +65,26 @@ const PeopleTab = () => {
             Sinh viên
           </Typography>
           <Tooltip title="Mời sinh viên">
-            <IconButton>
+            <IconButton
+              onClick={() => dispatch(openAddStudentsToClassDialog())}
+            >
               <AddIcon />
             </IconButton>
           </Tooltip>
         </div>
         <Divider />
-        {students.map((student, index) => (
+        {courseClass?.students?.length === 0 ? (
+          <Typography>Không có sinh viên nào trong lớp</Typography>
+        ) : (
           <>
-            <UserItem key={index} name={student.name} />
-            <Divider />
+            {courseClass?.students?.map((student: any, index: number) => (
+              <>
+                <UserItem key={index} name={student?.fullName} />
+                {index < courseClass?.students?.length - 1 && <Divider />}
+              </>
+            ))}
           </>
-        ))}
+        )}
       </div>
     </div>
   );

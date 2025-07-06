@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Button,
   Divider,
   IconButton,
   TextField,
@@ -8,6 +9,12 @@ import {
 } from "@mui/material";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import { useState } from "react";
+import RichTextEditor from "../../../../../../../components/RichTextEditor/RichTextEditor";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../../../../../store/slices/userSlice";
 
 const backgrounds = [
   "/assets/images/backgrounds/Honors.jpg",
@@ -18,10 +25,27 @@ const backgrounds = [
   "/assets/images/backgrounds/img_read.jpg",
 ];
 
+const schema = yup.object().shape({
+  content: yup.string().required("Nội dung là bắt buộc"),
+});
+
 const NewsBoard = ({ data }: any) => {
+  const [isNewNoti, setIsNewNoti] = useState(false);
   const [randomBackground, setRandomBackground] = useState(
     backgrounds[Math.floor(Math.random() * backgrounds.length)]
   );
+  const user = useSelector(selectUser);
+
+  const { watch, control } = useForm({
+    mode: "onChange",
+    defaultValues: {
+      content: "",
+    },
+    resolver: yupResolver(schema),
+  });
+
+  const handlePost = () => {};
+
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-y-6">
       <div
@@ -47,11 +71,56 @@ const NewsBoard = ({ data }: any) => {
       <div
         className="flex items-center gap-x-4 px-6 py-4 rounded-lg"
         style={{ boxShadow: "0 0 6px rgba(3, 3, 3, 0.2)" }}
+        onClick={() => setIsNewNoti(true)}
       >
-        <Avatar sx={{ width: 40, height: 40 }}>N</Avatar>
-        <Typography className="text-gray-500" fontSize={14}>
-          Thông báo nội dung nào đó cho lớp học của bạn
-        </Typography>
+        {!isNewNoti && user?.role === "TEACHER" ? (
+          <>
+            <Avatar sx={{ width: 40, height: 40 }}>N</Avatar>
+            <Typography className="text-gray-500" fontSize={14}>
+              Thông báo nội dung nào đó cho lớp học của bạn
+            </Typography>
+          </>
+        ) : (
+          <div className="w-full flex flex-col gap-y-1">
+            <Typography color="primary" fontSize={14}>
+              Thông báo nội dung nào đó cho lớp học của bạn
+            </Typography>
+            <Controller
+              name="content"
+              control={control}
+              rules={{ required: "Bạn chưa nhập nội dung" }}
+              render={({ field }) => (
+                <div>
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    label={""}
+                  />
+                </div>
+              )}
+            />
+            <div className="w-fit ml-auto flex items-center gap-1">
+              <Button
+                variant="text"
+                sx={{ textTransform: "none" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsNewNoti(false);
+                }}
+              >
+                Hủy
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ textTransform: "none" }}
+                onClick={handlePost}
+                disabled={watch("content").length < 1}
+              >
+                Đăng
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-y-3 py-4 rounded-lg border-1 border-gray-200">
         <div className="flex items-center gap-x-4 px-6">

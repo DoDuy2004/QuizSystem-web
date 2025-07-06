@@ -13,6 +13,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import {
   deleteQuestionBank,
   getQuestionBankById,
+  getQuestions,
   getQuestionsByQuestionBank,
   selectQuestionBank,
 } from "../../../../../../store/slices/questionBankSlice";
@@ -40,7 +41,7 @@ const QuestionBankDetail = () => {
 
       try {
         await Promise.all([
-          dispatch(getQuestionsByQuestionBank({ id: routeParams?.id })),
+          dispatch(getQuestions()),
           dispatch(getQuestionBankById({ id: routeParams?.id })),
         ]);
       } catch (error) {
@@ -150,7 +151,7 @@ const QuestionBankDetail = () => {
             </Typography>
           ) : (
             questionBank?.questions?.map((item: any, index: number) => (
-              <QuestionItem data={item} key={index} />
+              <QuestionItem data={item} key={index} index={index + 1} />
             ))
           )}
         </div>

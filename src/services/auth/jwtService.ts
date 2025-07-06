@@ -178,9 +178,7 @@ class JwtService {
             this.emit("onNoAccessToken");
           }
           if (response.data.data && response.data.data.user) {
-            const user = await this.getCurrentSession(
-              response?.data?.data
-            );
+            const user = await this.getCurrentSession(response?.data?.data);
             resolve(user);
             this.emit("onLogin", user);
           } else {

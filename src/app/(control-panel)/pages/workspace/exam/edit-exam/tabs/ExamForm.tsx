@@ -6,10 +6,6 @@ import * as yup from "yup";
 import { useDeepCompareEffect } from "../../../../../../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../../store/store";
-import {
-  getSujects,
-  // selectQuestionBank,
-} from "../../../../../../../store/slices/questionBankSlice";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
 import CircularLoading from "../../../../../../../components/CircularLoading";
@@ -20,12 +16,14 @@ import {
   selectExam,
 } from "../../../../../../../store/slices/examSlice";
 import ExamModel from "../../../../../../../models/ExamModel";
+import { selectUser } from "../../../../../../../store/slices/userSlice";
+import { getSubjects } from "../../../../../../../store/slices/subjectSlice";
 
 const schema: any = yup.object().shape({
   name: yup.string().required("Tên đề thi là bắt buộc"),
   durationMinutes: yup.string(),
-  subject: yup.string().required("Môn học là bắt buộc"),
-  examCode: yup.string().required("Mã đề là bắt buộc"),
+  subjectId: yup.string().required("Môn học là bắt buộc"),
+  noOfQuestions: yup.string().required("Mã đề là bắt buộc"),
 });
 
 const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
@@ -36,6 +34,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const exam = useSelector(selectExam);
+  const user = useSelector(selectUser);
   const {
     handleSubmit,
     watch,
@@ -78,7 +77,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
 
     setLoading(true);
     hasFetchedSubject.current = true;
-    dispatch(getSujects())
+    dispatch(getSubjects())
       .then((res: any) => {
         // console.log({ res });
         setSubjects(res.payload.data);
@@ -88,25 +87,34 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
       });
   }, [dispatch, routeParams?.id]);
 
+  function generateExamCode(length = 4) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < length; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
   const onSubmit = (data: any) => {
     setLoading(true);
     const payload = {
       name: data.name,
-      subject: data.subject,
+      subjectId: data.subjectId,
       durationMinutes: data?.durationMinutes,
       status: 0,
-      examCode: data.examCode,
+      examCode: generateExamCode(),
       // startDate: new Date(),
-      noOfQuestions: 0
+      userId: user?.id,
+      noOfQuestions: data?.noOfQuestions,
     };
 
-    const action =
-      routeParams.id
-        ? editExam({
-            id: routeParams.id,
-            form: { id: routeParams.id, ...payload },
-          })
-        : addExam({ form: payload });
+    const action = routeParams.id
+      ? editExam({
+          id: routeParams.id,
+          form: { id: routeParams.id, ...payload },
+        })
+      : addExam({ form: payload });
 
     dispatch(action)
       .then(() => {
@@ -151,16 +159,17 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
               )}
             />
             <Controller
-              name="examCode"
+              name="noOfQuestions"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
                   fullWidth
                   className="col-span-1"
+                  type="number"
                   label={
                     <>
-                      Mã đề thi <span className="text-red-500">*</span>
+                      Số lượng câu hỏi <span className="text-red-500">*</span>
                     </>
                   }
                   variant="outlined"
@@ -173,13 +182,13 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
 
           {/* Môn học */}
           <Controller
-            name="subject"
+            name="subjectId"
             control={control}
             render={({ field }) => (
               <Autocomplete
                 options={subjects}
-                freeSolo
-                getOptionLabel={(option) => {
+                // freeSolo
+                getOptionLabel={(option: any) => {
                   if (typeof option === "string") {
                     return option;
                   }
@@ -191,12 +200,15 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                   }
                   return option?.name === value?.name;
                 }}
-                value={field.value || null}
+                value={
+                  subjects.find((subject: any) => subject.id === field.value) ||
+                  null
+                }
                 onChange={(event, newValue) => {
                   if (typeof newValue === "string") {
                     field.onChange(newValue);
                   } else {
-                    field.onChange(newValue.name);
+                    field.onChange(newValue.id);
                   }
                 }}
                 onInputChange={(event, newInputValue) => {}}

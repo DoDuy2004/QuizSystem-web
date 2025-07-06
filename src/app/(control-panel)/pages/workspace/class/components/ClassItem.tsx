@@ -79,17 +79,17 @@ const ClassItem = ({ data }: any) => {
       onClick={() => navigate(`/workspace/class/${data?.id}`)}
     >
       <div
-        className="flex items-start justify-between border-b-1 border-gray-200 p-3 bg-cover"
+        className="flex items-start justify-between border-b-1 min-h-22 border-gray-200 p-3 bg-cover"
         style={{
           backgroundImage: `url(${randomBackground})`,
         }}
       >
-        <div className="flex flex-col gap-y-0.5">
+        <div className="flex flex-col gap-y-0.5 w-3/4">
           <Tooltip title={data?.name}>
             <Typography
               component={"h6"}
               fontSize={14}
-              className="truncate max-w-full text-white"
+              className="truncate text-white"
             >
               {data?.name}
             </Typography>
@@ -110,13 +110,15 @@ const ClassItem = ({ data }: any) => {
             {data?.teacher?.fullName}
           </Typography>
         </div>
-        <IconButton
-          onClick={handleClick}
-          size="small"
-          sx={{ padding: 0, color: "white" }}
-        >
-          <MoreVertIcon />
-        </IconButton>
+        {data?.teacher?.role !== "STUDENT" && (
+          <IconButton
+            onClick={handleClick}
+            size="small"
+            sx={{ padding: 0, color: "white" }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        )}
 
         <Menu
           id="basic-menu"

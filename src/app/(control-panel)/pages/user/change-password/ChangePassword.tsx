@@ -6,8 +6,20 @@ import { Controller, useForm } from "react-hook-form";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useDispatch, useSelector } from "react-redux";
+import { type AppDispatch } from "../../../../../store/store";
+import {
+  changePassword,
+  selectUser,
+} from "../../../../../store/slices/userSlice";
+import { showMessage } from "../../../../../components/FuseMessage/fuseMessageSlice";
+import { errorAnchor, successAnchor } from "../../../../../constants/confirm";
 
-const defaultValues = {};
+const defaultValues = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
 
 const schema: any = yup.object().shape({
   currentPassword: yup.string().required("Vui lòng nhập mật khẩu hiện tại"),
@@ -34,18 +46,49 @@ const ChangePassword = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector(selectUser);
 
-  const { handleSubmit, formState, watch, control, setValue, getValues }: any =
-    useForm({
-      mode: "onChange",
-      defaultValues,
-      resolver: yupResolver(schema),
-    });
+  const {
+    handleSubmit,
+    reset,
+    formState,
+    watch,
+    control,
+    setValue,
+    getValues,
+  }: any = useForm({
+    mode: "onChange",
+    defaultValues,
+    resolver: yupResolver(schema),
+  });
 
   const { isValid, errors, dirtyFields } = formState;
 
   const onSubmit = (data: any) => {
-    console.log({ data });
+    setLoading(true);
+    try {
+      dispatch(changePassword({ userId: user?.id, form: data }))
+        .unwrap()
+        .then((res) => {
+          // console.log({ res });
+          reset(defaultValues);
+          dispatch(
+            showMessage({
+              message: "Đổi mật khẩu thành công",
+              ...successAnchor,
+            })
+          );
+          setLoading(false);
+        });
+    } catch (error: any) {
+      dispatch(
+        showMessage({
+          message: "Mật khẩu cũ không đúng vui lòng thử lại",
+          ...errorAnchor,
+        })
+      );
+    }
   };
 
   return (

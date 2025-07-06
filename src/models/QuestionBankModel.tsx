@@ -8,9 +8,9 @@ function QuestionBankModel(data?: any) {
     name: "",
     description: "",
     status: 0,
-    teacherId: null,
+    // teacherId: null,
     noOfQuestions: null,
-    subject: "",
+    // subject: "",
   });
 }
 
