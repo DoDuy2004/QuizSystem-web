@@ -15,6 +15,8 @@ import AddSubjectDialog from "../dialogs/add-subject-dialog/AddSubjectDialog";
 import AddMultiStudentsDialog from "../dialogs/add-multi-students-dialog/AddMultiStudentsDialog";
 import AddRoomExamDialog from "../dialogs/add-room-exam-dialog/AddRoomExamDialog";
 import AddStudentsToClassDialog from "../dialogs/add-student-dialog/AddStudentsDialog";
+import AdminAddStudentDialog from "../dialogs/admin-add-student-dialog/AdminAddStudentDialog";
+import AddTeacherDialog from "../dialogs/add-teacher-dialog/AddTeacherDialog";
 // import Sidebar from "./admin/Sidebar";
 
 const AppLayout = () => {
@@ -54,6 +56,8 @@ const AppLayout = () => {
         <AddMultiStudentsDialog />
         <AddRoomExamDialog />
         <AddStudentsToClassDialog />
+        <AdminAddStudentDialog />
+        <AddTeacherDialog />
       </div>
     );
   }

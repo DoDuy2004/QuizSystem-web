@@ -36,9 +36,10 @@ import { successAnchor } from "../../constants/confirm";
 import { selectUser } from "../../store/slices/userSlice";
 import reducer from "./store";
 import {
+  createSubject,
   getSubjectById,
-  getSubjects,
   selectSubject,
+  updateSubject,
 } from "../../store/slices/subjectSlice";
 
 const Transition = React.forwardRef(function Transition(
@@ -52,9 +53,9 @@ const Transition = React.forwardRef(function Transition(
 
 const schema = yup.object().shape({
   name: yup.string().required("Tên môn học là bắt buộc"),
-  major: yup.string().required("Chuyên ngành là bắt buộc"),
+  // major: yup.string().required("Chuyên ngành là bắt buộc"),
   description: yup.string().optional(),
-  status: yup.boolean().required(),
+  // status: yup.boolean().required(),
   chapters: yup
     .array()
     .of(
@@ -70,7 +71,6 @@ const AddSubjectDialog = () => {
     theme.breakpoints.between("sm", "md")
   );
   const dispatch = useDispatch<AppDispatch>();
-  const addClassDialog = useSelector(selectAddClassDialog);
   const addSubjectDialog = useSelector(selectAddSubjectDialog);
   const [loading, setLoading] = useState(true);
   const routeParams = useParams();
@@ -88,7 +88,7 @@ const AddSubjectDialog = () => {
       name: "",
       // major: "",
       description: "",
-      // status: true,
+      // status: false,
       chapters: [{ name: "" }],
     },
     resolver: yupResolver(schema),
@@ -100,7 +100,10 @@ const AddSubjectDialog = () => {
   });
 
   useDeepCompareEffect(() => {
-    setLoading(false);
+    if (!routeParams?.id) {
+      setLoading(false);
+    }
+
     if (routeParams?.id && addSubjectDialog?.isOpen) {
       dispatch(getSubjectById(routeParams?.id))
         .unwrap()
@@ -108,7 +111,27 @@ const AddSubjectDialog = () => {
           setLoading(false);
         });
     }
-  }, [dispatch, routeParams?.id, addClassDialog?.isOpen]);
+  }, [dispatch, routeParams?.id, addSubjectDialog?.isOpen]);
+
+  useEffect(() => {
+    if (routeParams?.id && !_.isEmpty(subject)) {
+      reset({
+        name: subject.name,
+        // major: "",
+        description: subject.description,
+        // status: false,
+        chapters: subject.chapters,
+      });
+    } else {
+      reset({
+        name: "",
+        // major: "",
+        description: "",
+        // status: false,
+        chapters: [{ name: "" }],
+      });
+    }
+  }, [routeParams?.id, subject]);
 
   const handleClose = () => {
     navigate("/workspace/subject/list");
@@ -116,7 +139,24 @@ const AddSubjectDialog = () => {
   };
 
   const onSubmit = (data: any) => {
-    console.log({ data });
+    const payload = {
+      name: data?.name,
+      // major: "",
+      description: data?.description,
+      // status: data?.,
+      chapters: data?.chapters,
+    };
+    console.log({ payload });
+
+    const action = routeParams?.id
+      ? updateSubject({ id: subject?.id, form: payload })
+      : createSubject({ form: payload });
+
+    dispatch(action)
+      .unwrap()
+      .finally(() => {
+        setLoading(true);
+      });
   };
 
   return (
@@ -150,7 +190,9 @@ const AddSubjectDialog = () => {
           className="flex items-center justify-between bg-blue-50"
           sx={{ paddingY: 1.5 }}
         >
-          <Typography>Thêm môn học</Typography>
+          <Typography>
+            {routeParams?.id ? "Cập nhập môn học" : "Thêm môn học"}
+          </Typography>
           <IconButton onClick={() => handleClose()}>
             <CloseIcon />
           </IconButton>
@@ -176,7 +218,7 @@ const AddSubjectDialog = () => {
                   />
                 )}
               />
-              <Controller
+              {/* <Controller
                 name="major"
                 control={control}
                 render={({ field }: any) => (
@@ -188,8 +230,8 @@ const AddSubjectDialog = () => {
                     fullWidth
                   />
                 )}
-              />
-              <Controller
+              /> */}
+              {/* <Controller
                 name="description"
                 control={control}
                 render={({ field }) => (
@@ -201,8 +243,8 @@ const AddSubjectDialog = () => {
                     fullWidth
                   />
                 )}
-              />
-              <Controller
+              /> */}
+              {/* <Controller
                 name="status"
                 control={control}
                 render={({ field }) => (
@@ -211,7 +253,7 @@ const AddSubjectDialog = () => {
                     label="Trạng thái"
                   />
                 )}
-              />
+              /> */}
               <Typography variant="subtitle1">Danh sách chương</Typography>
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2">
@@ -221,7 +263,7 @@ const AddSubjectDialog = () => {
                     render={({ field: chapterField }) => (
                       <TextField
                         {...chapterField}
-                        label={`Chương ${index + 1}`}
+                        label="Chương"
                         error={!!errors.chapters?.[index]?.name}
                         helperText={errors.chapters?.[index]?.name?.message}
                         fullWidth

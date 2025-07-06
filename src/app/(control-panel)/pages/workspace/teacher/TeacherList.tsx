@@ -34,8 +34,14 @@ import {
   getStudents,
   selectStudents,
 } from "../../../../../store/slices/studentSlice";
-import { openAddStudentsDialog } from "../../../../../store/slices/globalSlice";
-import { getTeachers, selectTeachers } from "../../../../../store/slices/teacherSlice";
+import {
+  openAddStudentsDialog,
+  openAddTeacherDialog,
+} from "../../../../../store/slices/globalSlice";
+import {
+  getTeachers,
+  selectTeachers,
+} from "../../../../../store/slices/teacherSlice";
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -43,7 +49,7 @@ const TeacherList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-    const teachers = useSelector(selectTeachers);
+  const teachers = useSelector(selectTeachers);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -92,20 +98,36 @@ const TeacherList = () => {
               <FilterAltOutlinedIcon />
             </IconButton>
           </div>
-          <Button
-            onClick={() => dispatch(openAddStudentsDialog())}
-            sx={{
-              marginLeft: "auto",
-              padding: "6px 10px",
-              background: "linear-gradient(to right, #3b82f6, #a855f7)",
-              borderRadius: "4px",
-              textTransform: "none",
-              color: "white",
-              fontSize: "14px",
-            }}
-          >
-            Thêm mới
-          </Button>
+          <div className="flex items-center gap-x-4">
+            <Button
+              onClick={() => dispatch(openAddStudentsDialog())}
+              sx={{
+                marginLeft: "auto",
+                padding: "6px 10px",
+                background: "linear-gradient(to right, #3b82f6, #a855f7)",
+                borderRadius: "4px",
+                textTransform: "none",
+                color: "white",
+                fontSize: "14px",
+              }}
+            >
+              Thêm hàng loạt
+            </Button>
+            <Button
+              onClick={() => dispatch(openAddTeacherDialog())}
+              sx={{
+                marginLeft: "auto",
+                padding: "6px 10px",
+                background: "linear-gradient(to right, #3b82f6, #a855f7)",
+                borderRadius: "4px",
+                textTransform: "none",
+                color: "white",
+                fontSize: "14px",
+              }}
+            >
+              Thêm mới
+            </Button>
+          </div>
         </div>
         <TableContainer
           component={Paper}
@@ -161,7 +183,10 @@ const TeacherList = () => {
               {teachers?.map((row: any) => (
                 <TableRow
                   key={row?.fullName}
-                  // onClick={() => dispatch(openAddSubjectDialog())}
+                  onClick={() => {
+                    dispatch(openAddTeacherDialog());
+                    navigate(`/workspace/teacher/${row.id}/edit`);
+                  }}
                   sx={{
                     "&:last-child td": {
                       borderBottom: "none", // Bỏ border bottom cho hàng cuối

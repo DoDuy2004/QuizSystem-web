@@ -32,6 +32,7 @@ import { selectUser } from "../../../../../../../store/slices/userSlice";
 import {
   addQuestionToExam,
   selectExam,
+  setImportStatus,
 } from "../../../../../../../store/slices/examSlice";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../../../../../../constants/confirm";
@@ -39,7 +40,6 @@ import { successAnchor } from "../../../../../../../constants/confirm";
 const difficultyOptions = [
   { label: "Dễ", value: "EASY" },
   { label: "Trung bình", value: "MEDIUM" },
-  { label: "Vừa", value: "MODERATE" },
   { label: "Khó", value: "HARD" },
 ];
 // Payload create question
@@ -262,9 +262,28 @@ const QuestionForm = ({ questionData }: any) => {
       : addQuestionToExam({ id: exam?.data?.id, form: payload1 });
     // console.log({ payload });
     dispatch(action)
+      .unwrap()
       .then((res) => {
-        setQuestion(res.payload.data);
-        reset(QuestionModel(res.payload.data));
+        if (!_.isEmpty(questionData)) {
+          setQuestion(res.data);
+          reset(QuestionModel(res.data));
+          setValue("subjectId", res?.data?.chapter?.subject?.id, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        } else {
+          setQuestion(res.data?.questionScores?.[0]?.question);
+          reset(QuestionModel(res.data?.questionScores?.[0]?.question));
+          setValue(
+            "subjectId",
+            res?.data?.questionScores?.[0]?.question.chapter?.subject?.id,
+            {
+              shouldDirty: true,
+              shouldValidate: true,
+            }
+          );
+        }
+        dispatch(setImportStatus("succeeded"));
         dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {

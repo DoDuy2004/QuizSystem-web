@@ -172,7 +172,7 @@ export const searchExams = createAsyncThunk(
 );
 
 export const examSlice = createSlice({
-  name: "questionBankSlice",
+  name: "examSlice",
   initialState,
   reducers: {
     resetExamState: () => initialState,

@@ -201,7 +201,8 @@ export const addListQuestions = createAsyncThunk(
   "questionBank/addListQuestions",
   async (params: any) => {
     const form = params?.form;
-    const response: any = await QuestionBankService.addListQuestions({ form });
+    const id = params?.id;
+    const response: any = await QuestionBankService.addListQuestions({ id, form });
 
     const data = response.data;
 

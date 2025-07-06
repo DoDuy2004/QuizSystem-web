@@ -41,6 +41,31 @@ export const getSubjectById = createAsyncThunk(
   }
 );
 
+export const createSubject = createAsyncThunk(
+  "subject/createSubject",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await SubjectService.createSubject({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const updateSubject = createAsyncThunk(
+  "subject/updateSubject",
+  async (params: any) => {
+    const form = params?.form;
+    const id = params?.id;
+    const response: any = await SubjectService.updateSubject({ id, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const subjectSlice = createSlice({
   name: "subjectSlice",
   initialState,
@@ -53,6 +78,16 @@ export const subjectSlice = createSlice({
       state.data = action.payload.data;
     });
     builder.addCase(getSubjectById.fulfilled, (state, action) => {
+      state.subjectDetail = action.payload.data;
+    });
+    builder.addCase(createSubject.fulfilled, (state, action) => {
+      console.log({ data: action.payload.data });
+      state.data = [...state.data, action.payload.data];
+    });
+    builder.addCase(updateSubject.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = action.payload.data;
       state.subjectDetail = action.payload.data;
     });
   },

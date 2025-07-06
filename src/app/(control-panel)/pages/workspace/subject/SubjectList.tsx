@@ -148,7 +148,7 @@ const SubjectList = () => {
                   Tên môn học
                 </TableCell>
                 <TableCell align="left">Chuyên ngành</TableCell>
-                <TableCell align="left">Mô tả</TableCell>
+                {/* <TableCell align="left">Mô tả</TableCell> */}
                 <TableCell align="left">Trạng thái</TableCell>
                 <TableCell
                   align="left"
@@ -165,7 +165,10 @@ const SubjectList = () => {
               {subjects?.map((row: any) => (
                 <TableRow
                   key={row.name}
-                  onClick={() => dispatch(openAddSubjectDialog())}
+                  onClick={() => {
+                    navigate(`/workspace/subject/${row?.id}/edit`);
+                    dispatch(openAddSubjectDialog());
+                  }}
                   sx={{
                     "&:last-child td": {
                       borderBottom: "none", // Bỏ border bottom cho hàng cuối
@@ -188,7 +191,7 @@ const SubjectList = () => {
                   <TableCell align="left">
                     {row.major || "Công nghệ thông tin"}
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     align="left"
                     sx={{
                       maxWidth: "300px",
@@ -198,7 +201,7 @@ const SubjectList = () => {
                     }}
                   >
                     {row.description}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell align="left">
                     <Chip
                       label={row.status ? "Active" : "Inactive"}
@@ -238,6 +241,10 @@ const SubjectList = () => {
                       <MenuItem
                         sx={{ paddingY: 0 }}
                         // onClick={(e) => handleUpdate(e)}
+                        onClick={() => {
+                          navigate(`/workspace/subject/${row?.id}/edit`);
+                          dispatch(openAddSubjectDialog());
+                        }}
                       >
                         <ListItemText
                           primaryTypographyProps={{ fontSize: "12px" }}
@@ -245,7 +252,7 @@ const SubjectList = () => {
                           Cập nhập
                         </ListItemText>
                       </MenuItem>
-                      <Divider />
+                      {/* <Divider />
                       <MenuItem
                         sx={{ paddingY: 0 }}
                         // onClick={(e) => openConfirmDialog(e, data?.id)}
@@ -255,7 +262,7 @@ const SubjectList = () => {
                         >
                           Xóa
                         </ListItemText>
-                      </MenuItem>
+                      </MenuItem> */}
                     </Menu>
                   </TableCell>
                 </TableRow>

@@ -17,9 +17,14 @@ import QuestionBankModel from "../../../../../../../models/QuestionBankModel";
 import _ from "lodash";
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import CircularLoading from "../../../../../../../components/CircularLoading";
+import {
+  getSubjects,
+  selectSubjects,
+} from "../../../../../../../store/slices/subjectSlice";
 
 const schema: any = yup.object().shape({
   name: yup.string().required("Tên ngân hàng là bắt buộc"),
+  subjectId: yup.string().required("Môn học là bắt buộc"),
   description: yup.string(),
 });
 
@@ -32,6 +37,8 @@ const QuestionBankForm = ({
   const routeParams = useParams();
   const hasFetched = useRef(false);
   const [loading, setLoading] = useState(false);
+  const [subjects, setSubjects] = useState([]);
+  const user = useSelector(selectUser);
   const {
     handleSubmit,
     watch,
@@ -67,28 +74,25 @@ const QuestionBankForm = ({
     }
   }, [data, reset]);
 
-  // useDeepCompareEffect(() => {
-  //   if (hasFetchedSubject.current) return;
-
-  //   setLoading(true);
-  //   hasFetchedSubject.current = true;
-  //   dispatch(getSujects())
-  //     .then((res: any) => {
-  //       // console.log({ res });
-  //       setSubjects(res.payload.data);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // }, [dispatch, routeParams?.id]);
+  useDeepCompareEffect(() => {
+    setLoading(true);
+    dispatch(getSubjects())
+      .then((res: any) => {
+        // console.log({ res });
+        setSubjects(res.payload.data);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [dispatch, routeParams?.id]);
 
   const onSubmit = (data: any) => {
     setLoading(true);
     const payload = {
       name: data.name,
       description: data.description,
-      // subject: data.subject,
-      // teacherId: user?.id,
+      subjectId: data.subjectId,
+      userId: user?.id,
       status: 0,
     };
 
@@ -141,37 +145,26 @@ const QuestionBankForm = ({
               />
             )}
           />
-
-          {/* Môn học
+          {/* Môn học */}
           <Controller
-            name="subject"
+            name="subjectId"
             control={control}
             render={({ field }) => (
               <Autocomplete
                 options={subjects}
-                freeSolo
-                getOptionLabel={(option) => {
-                  if (typeof option === "string") {
-                    return option;
-                  }
-                  return option?.name || "";
+                getOptionLabel={(option: any) =>
+                  typeof option === "string" ? option : option?.name || ""
+                }
+                isOptionEqualToValue={(option, value: any) =>
+                  typeof option === "object" && typeof value === "string"
+                    ? option.id === value
+                    : option?.name === value
+                }
+                value={subjects?.find((c: any) => c.id === field.value) || null}
+                onChange={(event, newValue: any) => {
+                  field.onChange(newValue?.id || "");
                 }}
-                isOptionEqualToValue={(option, value) => {
-                  if (typeof option === "object" && typeof value === "object") {
-                    return option.id === value.id;
-                  }
-                  return option?.name === value?.name;
-                }}
-                value={field.value || null}
-                onChange={(event, newValue) => {
-                  if (typeof newValue === "string") {
-                    field.onChange(newValue);
-                  } else {
-                    field.onChange(newValue.name);
-                  }
-                }}
-                onInputChange={(event, newInputValue) => {}}
-                renderInput={(params) => (
+                renderInput={(params: any) => (
                   <TextField
                     {...params}
                     fullWidth
@@ -181,14 +174,13 @@ const QuestionBankForm = ({
                       </>
                     }
                     variant="outlined"
-                    error={!!errors.subject}
-                    helperText={errors.subject?.message}
+                    error={!!errors.subjectId}
+                    helperText={errors.subjectId?.message}
                   />
                 )}
               />
             )}
-          /> */}
-
+          />
           {/* Mô tả */}
           <Controller
             name="description"
@@ -206,7 +198,6 @@ const QuestionBankForm = ({
               />
             )}
           />
-
           <div className="flex justify-end pt-4">
             <Button
               loading={loading}

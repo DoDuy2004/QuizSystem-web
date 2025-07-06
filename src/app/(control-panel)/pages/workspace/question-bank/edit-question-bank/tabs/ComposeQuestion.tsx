@@ -1,7 +1,7 @@
 import { Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+// import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -9,7 +9,7 @@ import { type AppDispatch } from "../../../../../../../store/store";
 import {
   deleteQuestion,
   getQuestionById,
-  getQuestions,
+  // getQuestions,
   getQuestionsByQuestionBank,
   selectImportStatus,
   selectQuestionBank,
@@ -21,9 +21,9 @@ import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import _ from "lodash";
 import { openAddMultiQuestionsDialog } from "../../../../../../../store/slices/globalSlice";
 import { openConfirmationDialog } from "../../../../../../../store/slices/confirmationSlice";
-import type { RootState } from "@reduxjs/toolkit/query";
 
-const ComposeQuestion = ({ questions, questionBankId }: any) => {
+const ComposeQuestion = () => {
+  const questionBank = useSelector(selectQuestionBank);
   const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
   const routeParams = useParams();
   const dispatch = useDispatch<AppDispatch>();
@@ -31,10 +31,13 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
   // const questionBank = useSelector(selectQuestionBank);
   const [questionLoading, setQuestionLoading] = useState(true);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
-  const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
-  const [questionsData, setQuestionsData] = useState(questions || []);
+  const [noOfQuestions, setNoOfQuestions] = useState(
+    questionBank?.questions?.length || 1
+  );
+  const [questionsData, setQuestionsData] = useState(
+    questionBank?.questions || []
+  );
   const hasFetched = useRef(false);
-  // const questionBank = useSelector(selectQuestionBank);
   const importStatus = useSelector(selectImportStatus);
 
   useEffect(() => {
@@ -43,8 +46,8 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
         setLoading(true);
         try {
           const res = await dispatch(
-            // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-            getQuestions()
+            getQuestionsByQuestionBank({ id: routeParams.id })
+            // getQuestions()
           ).unwrap();
 
           const data = Array.isArray(res?.data) ? res.data : [];
@@ -73,8 +76,8 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
 
       try {
         const res = await dispatch(
-          // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-          getQuestions()
+          getQuestionsByQuestionBank({ id: routeParams.id })
+          // getQuestions()
         ).unwrap();
 
         // console.log({ res });
@@ -91,11 +94,11 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
     };
 
     fetchData();
-  }, [dispatch, routeParams?.id, importStatus]);
+  }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && questionsData?.length > 0) {
-      dispatch(getQuestionById(questionsData[0]?.id))
+    if (routeParams.id && questionsData.length > 0) {
+      dispatch(getQuestionById(questionsData.questions[0]?.id))
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -109,16 +112,16 @@ const ComposeQuestion = ({ questions, questionBankId }: any) => {
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, questionsData]);
+  }, [dispatch, routeParams?.id]);
 
   const handleGetQuestion = (index: number) => {
-    // if (index === isActive) {
-    //   setQuestionLoading(false);
-    //   return;
-    // }
+    if (index === isActive) {
+      setQuestionLoading(false);
+      return;
+    }
 
     setIsActive(index);
-    const questionId = questionsData?.[index]?.id;
+    const questionId = questionBank?.questions?.[index]?.id;
 
     console.log({ questionId });
 

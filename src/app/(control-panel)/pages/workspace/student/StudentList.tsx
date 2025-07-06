@@ -34,7 +34,10 @@ import {
   getStudents,
   selectStudents,
 } from "../../../../../store/slices/studentSlice";
-import { openAddStudentsDialog } from "../../../../../store/slices/globalSlice";
+import {
+  openAddStudentDialog,
+  openAddStudentsDialog,
+} from "../../../../../store/slices/globalSlice";
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -91,20 +94,36 @@ const StudentList = () => {
               <FilterAltOutlinedIcon />
             </IconButton>
           </div>
-          <Button
-            onClick={() => dispatch(openAddStudentsDialog())}
-            sx={{
-              marginLeft: "auto",
-              padding: "6px 10px",
-              background: "linear-gradient(to right, #3b82f6, #a855f7)",
-              borderRadius: "4px",
-              textTransform: "none",
-              color: "white",
-              fontSize: "14px",
-            }}
-          >
-            Thêm mới
-          </Button>
+          <div className="flex items-center gap-x-4">
+            <Button
+              onClick={() => dispatch(openAddStudentsDialog())}
+              sx={{
+                marginLeft: "auto",
+                padding: "6px 10px",
+                background: "linear-gradient(to right, #3b82f6, #a855f7)",
+                borderRadius: "4px",
+                textTransform: "none",
+                color: "white",
+                fontSize: "14px",
+              }}
+            >
+              Thêm hàng loạt
+            </Button>
+            <Button
+              onClick={() => dispatch(openAddStudentDialog())}
+              sx={{
+                marginLeft: "auto",
+                padding: "6px 10px",
+                background: "linear-gradient(to right, #3b82f6, #a855f7)",
+                borderRadius: "4px",
+                textTransform: "none",
+                color: "white",
+                fontSize: "14px",
+              }}
+            >
+              Thêm mới
+            </Button>
+          </div>
         </div>
         <TableContainer
           component={Paper}
@@ -160,7 +179,10 @@ const StudentList = () => {
               {students?.map((row: any) => (
                 <TableRow
                   key={row?.fullName}
-                  // onClick={() => dispatch(openAddSubjectDialog())}
+                  onClick={() => {
+                    dispatch(openAddStudentDialog());
+                    navigate(`/workspace/student/${row.id}/edit`);
+                  }}
                   sx={{
                     "&:last-child td": {
                       borderBottom: "none", // Bỏ border bottom cho hàng cuối

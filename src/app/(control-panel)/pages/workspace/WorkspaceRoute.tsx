@@ -132,6 +132,14 @@ const WorkspaceRoute = {
           path: "list",
           element: <TeacherList />,
         },
+        {
+          path: ":id/edit",
+          element: <TeacherList />,
+        },
+        {
+          path: "new",
+          element: <TeacherList />,
+        },
       ],
     },
     {
@@ -144,6 +152,14 @@ const WorkspaceRoute = {
         },
         {
           path: "list",
+          element: <StudentList />,
+        },
+        {
+          path: ":id/edit",
+          element: <StudentList />,
+        },
+        {
+          path: "new",
           element: <StudentList />,
         },
       ],
