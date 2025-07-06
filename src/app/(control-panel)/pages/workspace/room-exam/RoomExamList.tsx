@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import RoomExamListItem from "./components/RoomExamListItem";
 import {
   getRoomExams,
+  getRoomExamsByStudent,
   selectRoomExam,
   selectRoomExams,
 } from "../../../../../store/slices/roomExamSlice";
@@ -34,9 +35,15 @@ const RoomExamList = () => {
 
     hasFetched.current = true;
 
-    dispatch(getRoomExams()).finally(() => {
-      setLoading(false);
-    });
+    if (user?.role === "TEACHER") {
+      dispatch(getRoomExams()).finally(() => {
+        setLoading(false);
+      });
+    } else {
+      dispatch(getRoomExamsByStudent(user?.id)).finally(() => {
+        setLoading(false);
+      });
+    }
   }, [dispatch]);
 
   if (loading || (!roomExams?.length && !hasFetched.current)) {

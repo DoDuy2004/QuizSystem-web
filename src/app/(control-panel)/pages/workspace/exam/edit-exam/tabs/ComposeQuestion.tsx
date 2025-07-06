@@ -49,7 +49,7 @@ const ComposeQuestion = () => {
         try {
           const res = await dispatch(
             // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-            getQuestionsByExam(routeParams?.id as string)
+            getQuestionsByExam(exam?.data?.id || (routeParams?.id as string))
           ).unwrap();
 
           const data = Array.isArray(res?.data) ? res.data : [];
@@ -117,7 +117,7 @@ const ComposeQuestion = () => {
     }
 
     setIsActive(index);
-    const questionId = questionsData?.[index]?.id;
+    const questionId = exam?.questions?.[index]?.id;
 
     if (questionId) {
       setQuestionLoading(true);

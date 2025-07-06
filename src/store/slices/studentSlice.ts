@@ -93,6 +93,34 @@ export const updateStudent = createAsyncThunk(
   }
 );
 
+export const submitExam = createAsyncThunk(
+  "student/submitExam",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await StudentService.submitExam({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const isSubmitted = createAsyncThunk(
+  "student/submitExam",
+  async (params: any) => {
+    const roomId = params?.roomId;
+    const studentId = params?.studentId;
+    const response: any = await StudentService.checkIfSubmitted({
+      roomId,
+      studentId,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const studentSlice = createSlice({
   name: "studentSlice",
   initialState,

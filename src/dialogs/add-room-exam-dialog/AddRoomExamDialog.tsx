@@ -83,6 +83,14 @@ const AddRoomExamDialog = () => {
   const addRoomExamDialog = useSelector(selectAddRoomExamDialog);
   const navigate = useNavigate();
 
+  const toLocalISOString = (date: Date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000; // phút → ms
+    const localISOTime = new Date(date.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 19);
+    return localISOTime;
+  };
+
   const {
     handleSubmit,
     watch,
@@ -139,10 +147,9 @@ const AddRoomExamDialog = () => {
       courseClassId: data.class.id,
       subjectId: data.subjectId,
       examId: data?.exam.id,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      startDate: toLocalISOString(data.startDate), // 👈 giữ giờ Việt Nam
+      endDate: toLocalISOString(data.endDate),
     };
-
 
     setLoading(true);
 

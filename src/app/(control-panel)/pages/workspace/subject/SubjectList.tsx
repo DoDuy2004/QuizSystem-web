@@ -148,7 +148,7 @@ const SubjectList = () => {
                   Tên môn học
                 </TableCell>
                 <TableCell align="left">Chuyên ngành</TableCell>
-                {/* <TableCell align="left">Mô tả</TableCell> */}
+                <TableCell align="left">Mô tả</TableCell>
                 <TableCell align="left">Trạng thái</TableCell>
                 <TableCell
                   align="left"
@@ -166,8 +166,8 @@ const SubjectList = () => {
                 <TableRow
                   key={row.name}
                   onClick={() => {
-                    navigate(`/workspace/subject/${row?.id}/edit`);
-                    dispatch(openAddSubjectDialog());
+                    navigate(`/workspace/subject/${row?.id}`);
+                    // dispatch(openAddSubjectDialog());
                   }}
                   sx={{
                     "&:last-child td": {
@@ -191,7 +191,7 @@ const SubjectList = () => {
                   <TableCell align="left">
                     {row.major || "Công nghệ thông tin"}
                   </TableCell>
-                  {/* <TableCell
+                  <TableCell
                     align="left"
                     sx={{
                       maxWidth: "300px",
@@ -201,7 +201,7 @@ const SubjectList = () => {
                     }}
                   >
                     {row.description}
-                  </TableCell> */}
+                  </TableCell>
                   <TableCell align="left">
                     <Chip
                       label={row.status ? "Active" : "Inactive"}

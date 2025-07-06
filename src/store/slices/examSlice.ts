@@ -211,7 +211,8 @@ export const examSlice = createSlice({
       state.examDetail.questions = action.payload.data;
     });
     builder.addCase(addQuestionToExam.fulfilled, (state, action) => {
-      const addedQuestions = action.payload.data.questionScores.map(
+      console.log({ data: action.payload });
+      const addedQuestions = action.payload.examQuestions.map(
         (item: any) => item.question
       );
       state.examDetail.questions = [
@@ -237,6 +238,7 @@ export const examSlice = createSlice({
 
 export const selectExams = ({ exams }: any) => exams?.exams?.data;
 export const selectExam = ({ exams }: any) => exams?.exams?.examDetail;
+export const selectExamDetail = (state: any) => state.exams?.examDetail || {};
 export const selectImportStatus = ({ exams }: any) =>
   exams?.exams?.importStatus;
 

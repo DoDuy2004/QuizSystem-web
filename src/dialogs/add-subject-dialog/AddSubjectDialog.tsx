@@ -53,7 +53,7 @@ const Transition = React.forwardRef(function Transition(
 
 const schema = yup.object().shape({
   name: yup.string().required("Tên môn học là bắt buộc"),
-  // major: yup.string().required("Chuyên ngành là bắt buộc"),
+  major: yup.string().required("Chuyên ngành là bắt buộc"),
   description: yup.string().optional(),
   // status: yup.boolean().required(),
   chapters: yup
@@ -72,10 +72,10 @@ const AddSubjectDialog = () => {
   );
   const dispatch = useDispatch<AppDispatch>();
   const addSubjectDialog = useSelector(selectAddSubjectDialog);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const routeParams = useParams();
   const navigate = useNavigate();
-  const user = useSelector(selectUser);
+  // const user = useSelector(selectUser);
   const subject = useSelector(selectSubject);
 
   const {
@@ -99,30 +99,22 @@ const AddSubjectDialog = () => {
     name: "chapters",
   });
 
-  useDeepCompareEffect(() => {
-    if (!routeParams?.id) {
-      setLoading(false);
-    }
+  // useDeepCompareEffect(() => {
+  //   if (!routeParams?.id) {
+  //     setLoading(false);
+  //   }
 
-    if (routeParams?.id && addSubjectDialog?.isOpen) {
-      dispatch(getSubjectById(routeParams?.id))
-        .unwrap()
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [dispatch, routeParams?.id, addSubjectDialog?.isOpen]);
+  //   if (routeParams?.id && addSubjectDialog?.isOpen) {
+  //     dispatch(getSubjectById(routeParams?.id))
+  //       .unwrap()
+  //       .finally(() => {
+  //         setLoading(false);
+  //       });
+  //   }
+  // }, [dispatch, routeParams?.id, addSubjectDialog?.isOpen]);
 
   useEffect(() => {
-    if (routeParams?.id && !_.isEmpty(subject)) {
-      reset({
-        name: subject.name,
-        // major: "",
-        description: subject.description,
-        // status: false,
-        chapters: subject.chapters,
-      });
-    } else {
+    if (!addSubjectDialog?.isOpen) {
       reset({
         name: "",
         // major: "",
@@ -131,7 +123,7 @@ const AddSubjectDialog = () => {
         chapters: [{ name: "" }],
       });
     }
-  }, [routeParams?.id, subject]);
+  }, [addSubjectDialog?.isOpen]);
 
   const handleClose = () => {
     navigate("/workspace/subject/list");
@@ -141,7 +133,7 @@ const AddSubjectDialog = () => {
   const onSubmit = (data: any) => {
     const payload = {
       name: data?.name,
-      // major: "",
+      major: data?.major,
       description: data?.description,
       // status: data?.,
       chapters: data?.chapters,
@@ -156,7 +148,12 @@ const AddSubjectDialog = () => {
       .unwrap()
       .finally(() => {
         setLoading(true);
+        handleClose();
       });
+
+    dispatch(
+      showMessage({ message: "Thêm môn học thành công", ...successAnchor })
+    );
   };
 
   return (
@@ -198,53 +195,50 @@ const AddSubjectDialog = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          {loading && addSubjectDialog?.isOpen ? (
-            <CircularLoading />
-          ) : (
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-4 p-4"
-            >
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }: any) => (
-                  <TextField
-                    {...field}
-                    label="Tên môn học *"
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
-                    fullWidth
-                  />
-                )}
-              />
-              {/* <Controller
-                name="major"
-                control={control}
-                render={({ field }: any) => (
-                  <TextField
-                    {...field}
-                    label="Chuyên ngành *"
-                    error={!!errors.major}
-                    helperText={errors.major?.message}
-                    fullWidth
-                  />
-                )}
-              /> */}
-              {/* <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Mô tả"
-                    multiline
-                    rows={3}
-                    fullWidth
-                  />
-                )}
-              /> */}
-              {/* <Controller
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 p-4"
+          >
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }: any) => (
+                <TextField
+                  {...field}
+                  label="Tên môn học *"
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                  fullWidth
+                />
+              )}
+            />
+            <Controller
+              name="major"
+              control={control}
+              render={({ field }: any) => (
+                <TextField
+                  {...field}
+                  label="Chuyên ngành *"
+                  error={!!errors.major}
+                  helperText={errors.major?.message}
+                  fullWidth
+                />
+              )}
+            />
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Mô tả"
+                  multiline
+                  rows={3}
+                  fullWidth
+                />
+              )}
+            />
+            {/* <Controller
                 name="status"
                 control={control}
                 render={({ field }) => (
@@ -254,41 +248,44 @@ const AddSubjectDialog = () => {
                   />
                 )}
               /> */}
-              <Typography variant="subtitle1">Danh sách chương</Typography>
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex items-center gap-2">
-                  <Controller
-                    name={`chapters.${index}.name`}
-                    control={control}
-                    render={({ field: chapterField }) => (
-                      <TextField
-                        {...chapterField}
-                        label="Chương"
-                        error={!!errors.chapters?.[index]?.name}
-                        helperText={errors.chapters?.[index]?.name?.message}
-                        fullWidth
-                      />
-                    )}
-                  />
-                  <IconButton onClick={() => remove(index)} color="error">
-                    <DeleteIcon />
-                  </IconButton>
-                </div>
-              ))}
-              <Button
-                startIcon={<AddIcon />}
-                onClick={() => append({ name: "" })}
-                variant="outlined"
-                sx={{ textTransform: "none" }}
-                className="w-fit"
-              >
-                Thêm chương
-              </Button>
-              <Button type="submit" variant="contained" disabled={!isValid}>
-                Lưu
-              </Button>
-            </form>
-          )}
+            <Typography variant="subtitle1">Danh sách chương</Typography>
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <Controller
+                  name={`chapters.${index}.name`}
+                  control={control}
+                  render={({ field: chapterField }) => (
+                    <TextField
+                      {...chapterField}
+                      label="Chương"
+                      error={!!errors.chapters?.[index]?.name}
+                      helperText={errors.chapters?.[index]?.name?.message}
+                      fullWidth
+                    />
+                  )}
+                />
+                <IconButton onClick={() => remove(index)} color="error">
+                  <DeleteIcon />
+                </IconButton>
+              </div>
+            ))}
+            <Button
+              startIcon={<AddIcon />}
+              onClick={() => append({ name: "" })}
+              variant="outlined"
+              sx={{ textTransform: "none" }}
+              className="w-fit"
+            >
+              Thêm chương
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!isValid || loading}
+            >
+              Lưu
+            </Button>
+          </form>
         </DialogContent>
         {/* <DialogActions>
           <Button onClick={handleClose}>Disagree</Button>
