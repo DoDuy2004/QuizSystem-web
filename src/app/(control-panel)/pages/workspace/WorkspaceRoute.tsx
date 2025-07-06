@@ -30,6 +30,9 @@ const RoomExamDetail = lazy(
 );
 const ExamResult = lazy(() => import("./exam-result/ExamResult"));
 const ExamResultList = lazy(() => import("./exam-result/ExamResultList"));
+const SubjectDetail = lazy(
+  () => import("./subject/subject-detail/SubjectDetail")
+);
 
 const WorkspaceRoute = {
   path: "workspace",
@@ -132,6 +135,14 @@ const WorkspaceRoute = {
           path: "list",
           element: <TeacherList />,
         },
+        {
+          path: ":id/edit",
+          element: <TeacherList />,
+        },
+        {
+          path: "new",
+          element: <TeacherList />,
+        },
       ],
     },
     {
@@ -144,6 +155,14 @@ const WorkspaceRoute = {
         },
         {
           path: "list",
+          element: <StudentList />,
+        },
+        {
+          path: ":id/edit",
+          element: <StudentList />,
+        },
+        {
+          path: "new",
           element: <StudentList />,
         },
       ],
@@ -160,13 +179,16 @@ const WorkspaceRoute = {
           path: "list",
           element: <SubjectList />,
         },
-        {
-          path: ":id/edit",
-          element: <SubjectList />,
-        },
+
         {
           path: ":id",
-          element: <SubjectList />,
+          element: <SubjectDetail />,
+          children: [
+            {
+              path: "edit",
+              element: <SubjectDetail />,
+            },
+          ],
         },
         {
           path: "new",

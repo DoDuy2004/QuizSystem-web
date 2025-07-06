@@ -34,10 +34,12 @@ import {
 import {
   addListQuestions,
   importQuestions,
+  selectQuestionBank,
   setImportStatus,
 } from "../../store/slices/questionBankSlice";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { errorAnchor, successAnchor } from "../../constants/confirm";
+import { useParams } from "react-router-dom";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -55,6 +57,8 @@ const AddMultiQuestionsDialog = () => {
   const isTablet = useThemeMediaQuery((theme) =>
     theme.breakpoints.between("sm", "md")
   );
+  const routeParams = useParams();
+  // const questionBank = useSelector(selectQuestionBank);
   const addMultiQuestionsDialog = useSelector(selectAddMultiQuestionsDialog);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -99,7 +103,9 @@ const AddMultiQuestionsDialog = () => {
           (item: any) => item.isValid
         );
         if (validQuestions.length > 0) {
-          dispatch(addListQuestions({ form: validQuestions })).then(() => {
+          dispatch(
+            addListQuestions({ id: routeParams?.id, form: validQuestions })
+          ).then(() => {
             dispatch(setImportStatus("succeeded"));
           });
         }

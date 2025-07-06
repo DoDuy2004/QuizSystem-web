@@ -48,6 +48,8 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
         .then((user: any) => {
           success(user);
           shouldRedirect = false;
+
+          // console.log({ user: user?.role });
         })
         .catch((error: any) => {
           pass(error.message);
@@ -55,7 +57,7 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
       if (shouldNavigateToClass(location.pathname) && shouldRedirect) {
         user?.role !== "ADMIN"
           ? navigate("/workspace/class")
-          : navigate("/manage/dashboard");
+          : navigate("/workspace/teacher");
       }
     });
 
@@ -98,11 +100,18 @@ function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
         dispatch(showMessage({ message }));
       }
 
-      // console.log("user: ", user);
-
       Promise.all([dispatch(setUser(user))]).then(() => {
         setWaitAuthCheck(false);
         setIsAuthenticated(true);
+        console.log(user);
+
+        // if (shouldNavigateToClass(location.pathname)) {
+        //   if (user?.role !== "ADMIN") {
+        //     navigate("/workspace/class");
+        //   } else {
+        //     navigate("/workspace/teacher");
+        //   }
+        // }
       });
     }
 

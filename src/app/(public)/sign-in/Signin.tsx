@@ -67,9 +67,12 @@ const Signin = () => {
         //   localStorage.setItem("username", "");
         // }
         // console.log({ user })
-        if (user?.data) {
+        if (user?.data && user?.data?.role !== "ADMIN") {
           navigate("/workspace/class");
+        } else {
+          navigate("/workspace/teacher");
         }
+
         dispatch(
           showMessage({ message: "Đăng nhập thành công", ...successAnchor })
         );

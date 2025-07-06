@@ -19,11 +19,47 @@ export const getTeachers = createAsyncThunk("teacher/getTeachers", async () => {
   return data;
 });
 
+export const getTeacher = createAsyncThunk(
+  "teacher/getTeacher",
+  async (id: string) => {
+    const response: any = await TeacherService.getTeacher(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const addTeacher = createAsyncThunk(
+  "teacher/addTeacher",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await TeacherService.createTeacher({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const updateTeacher = createAsyncThunk(
+  "teacher/updateTeacher",
+  async (params: any) => {
+    const id = params?.id;
+    const form = params?.form;
+    const response: any = await TeacherService.updateTeacher({ id, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 // export const importStudents = createAsyncThunk(
 //   "student/import",
 //   async ({ file }: { file: File }, { rejectWithValue }) => {
 //     try {
-//       const response: any = await StudentService.importStudents(file);
+//       const response: any = await TeacherService.importStudents(file);
 //       return response.data;
 //     } catch (error: any) {
 //       return rejectWithValue(error.response?.data || error.message);
@@ -52,7 +88,7 @@ export const teacherSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(getTeachers.fulfilled, (state, action) => {
       // console.log({ data: action.payload.data });
-      state.data = action.payload;
+      state.data = action.payload.data;
     });
     // builder.addCase(addListStudents.fulfilled, (state, action) => {
     //   state.data = [
@@ -62,6 +98,20 @@ export const teacherSlice = createSlice({
     //     })),
     //   ];
     // });
+    builder.addCase(getTeacher.fulfilled, (state, action) => {
+      state.teacherDetail = action.payload.data;
+    });
+
+    builder.addCase(addTeacher.fulfilled, (state, action) => {
+      console.log({ data: action.payload.data });
+      state.data = [...state.data, action.payload.data];
+    });
+    builder.addCase(updateTeacher.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = action.payload.data;
+      state.teacherDetail = action.payload.data;
+    });
   },
 });
 
@@ -69,6 +119,6 @@ export const teacherSlice = createSlice({
 
 export const selectTeachers = ({ teachers }: any) => teachers?.teachers?.data;
 export const selectTeacher = ({ teachers }: any) =>
-  teachers?.teachers?.studentDetail;
+  teachers?.teachers?.teacherDetail;
 
 export default teacherSlice.reducer;

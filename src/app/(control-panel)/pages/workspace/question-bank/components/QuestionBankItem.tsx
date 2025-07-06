@@ -95,14 +95,14 @@ const QuestionBankItem = ({ data }: any) => {
           </IconButton>
         </Tooltip>
 
-        {/* <Tooltip title="Xóa">
+        <Tooltip title="Xóa">
           <IconButton onClick={(e) => openConfirmDialog(data?.id, e)}>
             <DeleteForeverOutlinedIcon
               fontSize={"small"}
               className="text-red-500"
             />
           </IconButton>
-        </Tooltip> */}
+        </Tooltip>
       </div>
     </div>
   );

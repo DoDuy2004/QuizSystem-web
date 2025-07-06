@@ -57,6 +57,70 @@ export const addListStudents = createAsyncThunk(
   }
 );
 
+export const getStudent = createAsyncThunk(
+  "student/getStudent",
+  async (id: string) => {
+    const response: any = await StudentService.getStudent(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const addStudent = createAsyncThunk(
+  "student/addStudent",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await StudentService.createStudent({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const updateStudent = createAsyncThunk(
+  "student/updateStudent",
+  async (params: any) => {
+    const id = params?.id;
+    const form = params?.form;
+    const response: any = await StudentService.updateStudent({ id, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const submitExam = createAsyncThunk(
+  "student/submitExam",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await StudentService.submitExam({ form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const isSubmitted = createAsyncThunk(
+  "student/submitExam",
+  async (params: any) => {
+    const roomId = params?.roomId;
+    const studentId = params?.studentId;
+    const response: any = await StudentService.checkIfSubmitted({
+      roomId,
+      studentId,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const studentSlice = createSlice({
   name: "studentSlice",
   initialState,
@@ -75,6 +139,21 @@ export const studentSlice = createSlice({
           ...item,
         })),
       ];
+    });
+
+    builder.addCase(getStudent.fulfilled, (state, action) => {
+      state.studentDetail = action.payload.data;
+    });
+
+    builder.addCase(addStudent.fulfilled, (state, action) => {
+      console.log({ data: action.payload.data });
+      state.data = [...state.data, action.payload.data];
+    });
+    builder.addCase(updateStudent.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = action.payload.data;
+      state.studentDetail = action.payload.data;
     });
   },
 });

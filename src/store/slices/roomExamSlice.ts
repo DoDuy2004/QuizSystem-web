@@ -79,6 +79,17 @@ export const createRoomExam = createAsyncThunk(
   }
 );
 
+export const getRoomExamsByStudent = createAsyncThunk(
+  "student/getRoomExams",
+  async (id: string) => {
+    const response: any = await RoomExamService.getRoomExamsByStudent(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,
@@ -87,6 +98,10 @@ export const examSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getRoomExams.fulfilled, (state, action) => {
+      //   console.log({ data: action.payload });
+      state.data = action.payload.data;
+    });
+    builder.addCase(getRoomExamsByStudent.fulfilled, (state, action) => {
       //   console.log({ data: action.payload });
       state.data = action.payload.data;
     });

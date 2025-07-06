@@ -105,10 +105,7 @@ const CreateQuestionBank = () => {
             />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            <ComposeQuestion
-              questions={questionBank?.questions}
-              questionBankId={questionBank?.data?.id}
-            />
+            <ComposeQuestion />
           </CustomTabPanel>
         </div>
       </div>

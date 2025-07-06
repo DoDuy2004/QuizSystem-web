@@ -23,19 +23,23 @@ import QuestionForm from "../components/QuestionForm";
 import {
   deleteQuestionFromExam,
   getQuestionsByExam,
+  selectExam,
   selectImportStatus,
   setImportStatus,
 } from "../../../../../../../store/slices/examSlice";
 
-const ComposeQuestion = ({ questions }: any) => {
+const ComposeQuestion = () => {
   const [isActive, setIsActive] = useState<number | null>(0); // Sử dụng null khi chưa chọn
   const routeParams = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
   const [questionLoading, setQuestionLoading] = useState(true);
+  const exam = useSelector(selectExam);
   const [question, setQuestion] = useState<any>({}); // Dữ liệu câu hỏi
-  const [noOfQuestions, setNoOfQuestions] = useState(questions?.length || 1);
-  const [questionsData, setQuestionsData] = useState(questions || []);
+  const [noOfQuestions, setNoOfQuestions] = useState(
+    exam?.questions.length || 1
+  );
+  const [questionsData, setQuestionsData] = useState(exam?.questions || []);
   const importStatus = useSelector(selectImportStatus);
 
   useEffect(() => {
@@ -45,12 +49,12 @@ const ComposeQuestion = ({ questions }: any) => {
         try {
           const res = await dispatch(
             // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
-            getQuestionsByExam(routeParams?.id as string)
+            getQuestionsByExam(exam?.data?.id || (routeParams?.id as string))
           ).unwrap();
 
           const data = Array.isArray(res?.data) ? res.data : [];
           setNoOfQuestions(data.length || 1);
-          setQuestionsData(data);
+          // setQuestionsData(data);
         } catch {
           setNoOfQuestions(0);
         } finally {
@@ -86,11 +90,11 @@ const ComposeQuestion = ({ questions }: any) => {
     };
 
     fetchData();
-  }, [dispatch, routeParams?.id]);
+  }, [dispatch, routeParams?.id, questionsData]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && questionsData?.length > 0) {
-      dispatch(getQuestionById(questionsData[0]?.id))
+    if (routeParams.id && exam?.questions?.length > 0) {
+      dispatch(getQuestionById(exam?.questions[0]?.id))
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -104,7 +108,7 @@ const ComposeQuestion = ({ questions }: any) => {
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, questionsData]);
+  }, [dispatch, routeParams?.id, exam?.questions]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {
@@ -113,7 +117,7 @@ const ComposeQuestion = ({ questions }: any) => {
     }
 
     setIsActive(index);
-    const questionId = questionsData?.[index]?.id;
+    const questionId = exam?.questions?.[index]?.id;
 
     if (questionId) {
       setQuestionLoading(true);
@@ -181,6 +185,7 @@ const ComposeQuestion = ({ questions }: any) => {
                 size="small"
                 sx={{ textTransform: "none" }}
                 onClick={handleAddQuestion}
+                // disabled={questionsData.length >= noOfQuestions}
               >
                 Thêm câu hỏi
               </Button>

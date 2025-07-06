@@ -311,9 +311,12 @@ class QuestionBankService {
   addListQuestions = (params: any) => {
     return new Promise((resolve, reject) => {
       const form = params?.form;
+      const id = params?.id;
       axios
         .post(
-          `${import.meta.env.VITE_DOMAIN}/api/questionbanks/add-list-questions`,
+          `${
+            import.meta.env.VITE_DOMAIN
+          }/api/questionbanks/${id}/add-list-questions`,
           form
         )
         .then((response) => resolve(response))

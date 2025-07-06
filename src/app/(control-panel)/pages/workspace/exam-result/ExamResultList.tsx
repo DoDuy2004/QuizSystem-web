@@ -7,7 +7,19 @@ import { useDeepCompareEffect } from "../../../../../hooks";
 import { useRef } from "react";
 // import reducer from "./store";
 import CircularLoading from "../../../../../components/CircularLoading";
-import { Button, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Chip,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
@@ -66,13 +78,89 @@ const ExamResult = () => {
             </IconButton>
           </div>
         </div>
-        <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 p-6 grid-cols-1 lg:gap-4">
-          {/* {exams &&
-            exams?.length > 0 &&
-            exams?.map((item: any, index: number) => {
-              return <ExamResultItem data={item} key={index} />;
-            })} */}
-          Chưa có kết quá của kỳ thi nào
+        <div className="w-full">
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: "8px",
+              boxShadow: "none",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <Table
+              sx={{
+                minWidth: 650,
+                "& .MuiTableCell-root": {
+                  padding: "16px 24px", // Tăng padding cho các cell
+                  fontSize: "0.875rem",
+                  borderColor: "#f0f0f0",
+                },
+                "& .MuiTableHead-root .MuiTableCell-root": {
+                  fontWeight: 600,
+                  backgroundColor: "#f9fafb",
+                  color: "#374151",
+                },
+                "& .MuiTableRow-root:hover": {
+                  backgroundColor: "#f9fafb",
+                },
+              }}
+              size="medium"
+              aria-label="subject table"
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      paddingLeft: "32px", // Thêm padding left cho ô đầu tiên
+                    }}
+                  >
+                    Kỳ thi
+                  </TableCell>
+                  <TableCell align="left">Môn học</TableCell>
+                  <TableCell align="left">Thời gian bắt đầu</TableCell>
+                  <TableCell align="left">Thời gian làm bài</TableCell>
+                  <TableCell>Điểm số</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* {students?.map((row: any) => ( */}
+                <TableRow
+                  // key={row?.fullName}
+                  // onClick={() => {
+                  //   dispatch(openAddStudentDialog());
+                  //   navigate(`/workspace/student/${row.id}/edit`);
+                  // }}
+                  sx={{
+                    "&:last-child td": {
+                      borderBottom: "none", // Bỏ border bottom cho hàng cuối
+                    },
+                    // "&:last-child td:first-of-type": {
+                    //   borderBottomLeftRadius: "8px", // Bo góc trái dưới
+                    // },
+                    // "&:last-child td:last-child": {
+                    //   borderBottomRightRadius: "8px", // Bo góc phải dưới
+                    // },
+                  }}
+                >
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{ paddingLeft: "32px" }}
+                  ></TableCell>
+                  <TableCell align="left"></TableCell>
+                  <TableCell
+                    align="left"
+                    sx={{
+                      maxWidth: "300px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  ></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </div>
       </div>
     </>

@@ -112,7 +112,7 @@ const CreateExam = () => {
             />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
-            <ComposeQuestion questions={exam?.questions} />
+            <ComposeQuestion />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
             <ExamPDFViewer />

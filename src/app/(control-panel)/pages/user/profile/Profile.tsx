@@ -26,7 +26,13 @@ import type { AppDispatch } from "../../../../../store/store";
 
 const schema: any = yup.object().shape({
   email: yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
-  phoneNumber: yup.string().required("Số điện thoại là bắt buộc"),
+  phoneNumber: yup
+    .string()
+    .required("Số điện thoại là bắt buộc")
+    .matches(
+      /^0\d{9}$/,
+      "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)"
+    ) ,
   fullName: yup.string().required("Họ tên là bắt buộc"),
   gender: yup.string(),
   birthday: yup.date().nullable(),
@@ -76,12 +82,14 @@ const Profile = () => {
       dispatch(updateUser({ userId: user?.id, form: payload }))
         .unwrap()
         .then((res: any) => {
-          // console.log({ res });
+          console.log({ res });
 
           const newUser = {
-            ...UserModel(user),
-            gender: user.gender ? "MALE" : "FEMALE",
-            birthday: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
+            ...UserModel(res.data),
+            gender: res.data.gender ? "MALE" : "FEMALE",
+            birthday: res.data.dateOfBirth
+              ? new Date(res.data.dateOfBirth)
+              : null,
           };
 
           reset(newUser);

@@ -14,10 +14,11 @@ function UserModel(data?: any) {
     status: null,
     createdAt: "",
     role: null,
+    phoneNumber: "",
     // code: "",
     // isFirstTimeLogin: null,
     // facutly: "",
   });
-} 
+}
 
 export default UserModel;

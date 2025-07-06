@@ -27,7 +27,7 @@ import { type AppDispatch } from "../../../../../../../store/store";
 import {
   getChapters,
   getSubjects,
-  selectSubjects,
+  // selectSubjects,
 } from "../../../../../../../store/slices/subjectSlice";
 import {
   addQuestionToQuestionBank,
@@ -42,7 +42,6 @@ import { successAnchor } from "../../../../../../../constants/confirm";
 const difficultyOptions = [
   { label: "Dễ", value: "EASY" },
   { label: "Trung bình", value: "MEDIUM" },
-  { label: "Vừa", value: "MODERATE" },
   { label: "Khó", value: "HARD" },
 ];
 
@@ -113,7 +112,7 @@ const QuestionForm = ({ questionData }: any) => {
     remove(index);
   };
 
-  // console.log({ empty: _.isEmpty(questionData) });
+  // console.log({ questionBank });
 
   useEffect(() => {
     if (_.isEmpty(questionData)) {
@@ -136,11 +135,11 @@ const QuestionForm = ({ questionData }: any) => {
         // subjectId: questionData?.chapter?.subject?.id,
         difficulty: questionData.difficulty,
       };
+      reset(QuestionModel(transformedData));
       setValue("subjectId", questionData?.chapter?.subject?.id, {
         shouldDirty: true,
         shouldValidate: true,
       });
-      reset(QuestionModel(transformedData));
     }
   }, [reset, questionData]);
 
@@ -210,6 +209,7 @@ const QuestionForm = ({ questionData }: any) => {
       chapterId: data.chapterId,
       answers: data.answers,
       createdBy: user?.id,
+      questionBankId: questionBank?.data?.id,
     };
 
     const action = !_.isEmpty(questionData)
@@ -222,8 +222,12 @@ const QuestionForm = ({ questionData }: any) => {
     dispatch(action)
       .then((res) => {
         setQuestion(res.payload.data);
-        reset(QuestionModel(payload));
-        dispatch(setImportStatus("succeeded"));
+        reset(QuestionModel(res.payload?.data));
+        setValue("subjectId", res.payload?.data?.chapter?.subject?.id, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        // dispatch(setImportStatus("succeeded"));
         dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {
