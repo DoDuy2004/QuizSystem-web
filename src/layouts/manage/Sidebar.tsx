@@ -72,12 +72,6 @@ const Sidebar = () => {
     // { icon: <Home />, label: "Thư viện của tôi" },
     // { icon: <AccessTime />, label: "Truy cập gần đây" },
     // { icon: <Favorite />, label: "Đề thi yêu thích" },
-    {
-      icon: <AssignmentTurnedIn />,
-      label: "Kết quả thi",
-      path: "/exam-result",
-      roles: ["STUDENT"],
-    },
   ];
 
   const managementItems = [

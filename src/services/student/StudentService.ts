@@ -25,6 +25,37 @@ class StudentService {
     });
   };
 
+  searchStudents = (params: any) => {
+    return new Promise((resolve, reject) => {
+      const key = params?.key;
+      const limit = params?.limit;
+      axios
+        .get(`${import.meta.env.VITE_DOMAIN}/api/students/search`, {
+          params: {
+            key,
+            limit,
+          },
+        })
+        .then((response) => resolve(response))
+        .catch(function (error) {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+          } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log("Error", error.message);
+          }
+
+          reject(error.response);
+        });
+    });
+  };
+
   importStudents = (file: File) => {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
@@ -63,7 +94,10 @@ class StudentService {
     return new Promise((resolve, reject) => {
       const form = params?.form;
       axios
-        .post(`${import.meta.env.VITE_DOMAIN}/api/students/import-confirm`, form)
+        .post(
+          `${import.meta.env.VITE_DOMAIN}/api/students/import-confirm`,
+          form
+        )
         .then((response) => resolve(response))
         .catch(function (error) {
           if (error.response) {

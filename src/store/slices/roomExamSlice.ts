@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import RoomExamService from "../../services/room-exam/RoomExamService";
 
 export interface ExamStateProps {
-  data: [];
+  data: any[];
   roomExamDetail: {
     data: {};
     questions: any[];
@@ -43,19 +43,35 @@ const initialState: ExamStateProps = {
   },
 };
 
-export const getRoomExams = createAsyncThunk("exam/getExams", async () => {
-  const response: any = await RoomExamService.getRoomExams();
+export const getRoomExams = createAsyncThunk(
+  "roomExam/getRoomExams",
+  async () => {
+    const response: any = await RoomExamService.getRoomExams();
 
-  const data = response.data;
+    const data = response.data;
 
-  return data;
-});
+    return data;
+  }
+);
 
 export const getRoomExambyId = createAsyncThunk(
-  "exam/getExambyId",
+  "roomExam/getRoomExambyId",
   async (params: any) => {
     const id = params?.id;
     const response: any = await RoomExamService.getRoomExambyId(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const createRoomExam = createAsyncThunk(
+  "roomExam/createRoomExam",
+  async (params: any) => {
+    const form = params?.form;
+
+    const response: any = await RoomExamService.createRoomExam({ form });
 
     const data = response.data;
 
@@ -78,6 +94,10 @@ export const examSlice = createSlice({
       //   console.log({ data: action.payload });
 
       state.roomExamDetail.data = action.payload.data;
+    });
+    builder.addCase(createRoomExam.fulfilled, (state, action) => {
+      console.log({ action: action.payload });
+      state.data = [...state.data, action.payload];
     });
   },
 });

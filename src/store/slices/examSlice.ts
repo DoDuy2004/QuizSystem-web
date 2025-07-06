@@ -157,6 +157,20 @@ export const createMatrix = createAsyncThunk(
   }
 );
 
+export const searchExams = createAsyncThunk(
+  "student/searchClasses",
+  async (params: any) => {
+    const response: any = await ExamService.searchExams({
+      key: params?.key,
+      limit: params?.limit,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,

@@ -5,7 +5,7 @@ export interface QuestionBankStateProps {
   data: any[];
   classDetail: {
     data: {};
-    students: [];
+    students: any[];
   };
 }
 
@@ -17,16 +17,13 @@ const initialState: QuestionBankStateProps = {
   },
 };
 
-export const getClasses = createAsyncThunk(
-  "class/getClasses",
-  async () => {
-    const response: any = await CourseClassService.getClasses();
+export const getClasses = createAsyncThunk("class/getClasses", async () => {
+  const response: any = await CourseClassService.getClasses();
 
-    const data = response.data;
+  const data = response.data;
 
-    return data;
-  }
-);
+  return data;
+});
 
 export const getClassById = createAsyncThunk(
   "class/getClassById",
@@ -80,7 +77,10 @@ export const addStudentToClass = createAsyncThunk(
   "class/addStudent",
   async (params: any) => {
     const form = params?.form;
+
+    const id = params?.id;
     const response: any = await CourseClassService.addStudentToClass({
+      id,
       form,
     });
 
@@ -94,6 +94,20 @@ export const getStudentsByClass = createAsyncThunk(
   "class/getStudents",
   async (id: string) => {
     const response: any = await CourseClassService.getStudentsByClass(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const searchClasses = createAsyncThunk(
+  "student/searchClasses",
+  async (params: any) => {
+    const response: any = await CourseClassService.searchClasses({
+      key: params?.key,
+      limit: params?.limit,
+    });
 
     const data = response.data;
 
@@ -141,6 +155,11 @@ export const classSlice = createSlice({
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = action.payload.data;
       state.classDetail.data = action.payload.data;
+    });
+    builder.addCase(addStudentToClass.fulfilled, (state, action) => {
+      const students = action.payload.data.map((s: any) => s);
+      console.log({ payload: action.payload });
+      state.classDetail.students = [...state.classDetail.students, ...students];
     });
   },
 });

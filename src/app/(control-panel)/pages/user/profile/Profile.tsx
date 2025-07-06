@@ -16,10 +16,13 @@ import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import UserModel from "../../../../../models/UserModel";
-import { useSelector } from "react-redux";
-import { selectUser } from "../../../../../store/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser, updateUser } from "../../../../../store/slices/userSlice";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import _ from "lodash";
+import { errorAnchor, successAnchor } from "../../../../../constants/confirm";
+import { showMessage } from "../../../../../components/FuseMessage/fuseMessageSlice";
+import type { AppDispatch } from "../../../../../store/store";
 
 const schema: any = yup.object().shape({
   email: yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
@@ -34,6 +37,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState(UserModel({}));
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
+  const dispatch = useDispatch<AppDispatch>();
 
   const {
     control,
@@ -59,7 +63,45 @@ const Profile = () => {
   }, [user, reset]);
 
   const onSubmit = (data: any) => {
-    console.log("Submit data:", data);
+    setLoading(true);
+    const payload = {
+      gender: data.gender === "MALE" ? true : false,
+      dateOfBirth: new Date(data.birthday),
+      fullName: data?.fullName,
+      email: data?.email,
+      phoneNumber: data?.phoneNumber,
+    };
+
+    try {
+      dispatch(updateUser({ userId: user?.id, form: payload }))
+        .unwrap()
+        .then((res: any) => {
+          // console.log({ res });
+
+          const newUser = {
+            ...UserModel(user),
+            gender: user.gender ? "MALE" : "FEMALE",
+            birthday: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
+          };
+
+          reset(newUser);
+
+          dispatch(
+            showMessage({
+              message: "Đổi mật khẩu thành công",
+              ...successAnchor,
+            })
+          );
+          setLoading(false);
+        });
+    } catch (error: any) {
+      dispatch(
+        showMessage({
+          message: "Mật khẩu cũ không đúng vui lòng thử lại",
+          ...errorAnchor,
+        })
+      );
+    }
   };
 
   return (

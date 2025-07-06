@@ -8,13 +8,12 @@ import reducer from "./store";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  closeAddClassDialog,
   closeAddRoomExamDialog,
-  selectAddClassDialog,
   selectAddRoomExamDialog,
 } from "../../store/slices/globalSlice";
 import { type AppDispatch } from "../../store/store";
 import {
+  Autocomplete,
   Button,
   FormControlLabel,
   IconButton,
@@ -36,6 +35,10 @@ import { successAnchor } from "../../constants/confirm";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { getSubjects } from "../../store/slices/subjectSlice";
+import ExamSearch from "../../components/exam/ExamSearch";
+import ClassSearch from "../../components/class/ClassSearch";
+import { createRoomExam } from "../../store/slices/roomExamSlice";
 // import { addRoomExam } from "../../store/slices/roomExamSlice"; // Giả định action
 
 const Transition = React.forwardRef(function Transition(
@@ -52,7 +55,10 @@ const currentDate = new Date();
 // Validation schema
 const schema = yup.object().shape({
   name: yup.string().required("Tên phòng thi là bắt buộc"),
-  status: yup.boolean().required("Trạng thái là bắt buộc"),
+  // status: yup.boolean().required("Trạng thái là bắt buộc"),
+  subjectId: yup.string().required("Môn học là bắt buộc"),
+  exam: yup.object().required("Đề thi là bắt buộc"),
+  class: yup.object().required("Lớp học là bắt buộc"),
   startDate: yup
     .date()
     .required("Ngày bắt đầu là bắt buộc")
@@ -70,6 +76,9 @@ const AddRoomExamDialog = () => {
   );
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
+  const [subjectLoading, setSubjectLoading] = useState(false);
+  const [subjects, setSubjects] = useState([]);
+  const [isSubjectOpen, setIsSubjectOpen] = useState(false);
   // const courseClass = useSelector(selectClass);
   const addRoomExamDialog = useSelector(selectAddRoomExamDialog);
   const navigate = useNavigate();
@@ -84,7 +93,7 @@ const AddRoomExamDialog = () => {
     mode: "onChange",
     defaultValues: {
       name: "",
-      status: true,
+      // status: true,
       startDate: undefined,
       endDate: undefined,
     },
@@ -95,38 +104,70 @@ const AddRoomExamDialog = () => {
     if (addRoomExamDialog?.isOpen) {
       setLoading(false); // Không cần load dữ liệu ban đầu cho room exam
     }
+
+    return () => {
+      reset({});
+    };
   }, [dispatch, addRoomExamDialog?.isOpen]);
+
+  useEffect(() => {
+    if (isSubjectOpen && subjects?.length === 0) {
+      setSubjectLoading(true);
+      dispatch(getSubjects())
+        .unwrap()
+        .then((res) => {
+          console.log({ res });
+          setSubjects(res.data);
+        })
+        .finally(() => setSubjectLoading(false));
+    }
+  }, [isSubjectOpen, dispatch]);
 
   const handleClose = () => {
     navigate("/workspace/room-exam/list"); // Giả định route
     dispatch(closeAddRoomExamDialog());
+    setSubjects([]);
+    setIsSubjectOpen(false);
   };
+
+  console.log({ form: watch() });
 
   const onSubmit = (data: any) => {
     const payload = {
       name: data.name,
-      status: data.status,
+      // status: data.status,
+      courseClassId: data.class.id,
+      subjectId: data.subjectId,
+      examId: data?.exam.id,
       startDate: data.startDate,
       endDate: data.endDate,
     };
 
+
     setLoading(true);
-    // dispatch(addRoomExam(payload))
-    //   .then((res) => {
-    //     reset({
-    //       name: "",
-    //       status: true,
-    //       startDate: null,
-    //       endDate: null,
-    //     });
-    //     dispatch(showMessage({ message: "Lưu phòng thi thành công", ...successAnchor }));
-    //   })
-    //   .finally(() => {
-    //     setLoading(false);
-    //     if (!loading) {
-    //       dispatch(closeAddClassDialog());
-    //     }
-    //   });
+
+    // console.log({ payload });
+    dispatch(createRoomExam({ form: payload }))
+      .then((res) => {
+        reset({
+          name: "",
+          // status: true,
+          subjectId: "",
+          class: {},
+          exam: {},
+          startDate: undefined,
+          endDate: undefined,
+        });
+        dispatch(
+          showMessage({ message: "Lưu phòng thi thành công", ...successAnchor })
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+        if (!loading) {
+          dispatch(closeAddRoomExamDialog());
+        }
+      });
   };
 
   return (
@@ -160,7 +201,7 @@ const AddRoomExamDialog = () => {
           className="flex items-center justify-between bg-blue-50"
           sx={{ paddingY: 1.5 }}
         >
-          <Typography>Thêm phòng thi</Typography>
+          <Typography>Thêm kỳ thi</Typography>
           <IconButton onClick={() => dispatch(closeAddRoomExamDialog())}>
             <CloseIcon />
           </IconButton>
@@ -184,7 +225,7 @@ const AddRoomExamDialog = () => {
                       id="name"
                       label={
                         <>
-                          Tên phòng thi <span className="text-red-500">*</span>
+                          Tên kỳ thi <span className="text-red-500">*</span>
                         </>
                       }
                       error={!!errors.name}
@@ -195,6 +236,77 @@ const AddRoomExamDialog = () => {
                   )}
                 />
                 <Controller
+                  name="subjectId"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      open={isSubjectOpen}
+                      onOpen={() => setIsSubjectOpen(true)}
+                      onClose={() => setIsSubjectOpen(false)}
+                      options={subjects}
+                      loading={subjectLoading}
+                      loadingText="Đang tải dữ liệu..."
+                      getOptionLabel={(option: any) =>
+                        typeof option === "string" ? option : option?.name || ""
+                      }
+                      isOptionEqualToValue={(option, value: any) =>
+                        typeof option === "object" && typeof value === "string"
+                          ? option.id === value
+                          : option?.name === value
+                      }
+                      value={
+                        subjects?.find((c: any) => c.id === field.value) || null
+                      }
+                      onChange={(event, newValue: any) => {
+                        field.onChange(newValue?.id || "");
+                      }}
+                      renderInput={(params: any) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          label={
+                            <>
+                              Môn học <span className="text-red-500">*</span>
+                            </>
+                          }
+                          variant="outlined"
+                          error={!!errors.subjectId}
+                          helperText={errors.subjectId?.message}
+                        />
+                      )}
+                    />
+                  )}
+                />
+                <Controller
+                  name="class"
+                  control={control}
+                  render={({ field }: any) => (
+                    <ClassSearch
+                      // key={addRoomExamDialog?.isOpen ? "open" : "closed"}
+                      isOpen={addRoomExamDialog?.isOpen}
+                      fullWidth={true}
+                      onSelectClass={(courseClass) =>
+                        field.onChange(courseClass)
+                      }
+                      disabledClasses={[]}
+                      // isOpen={false}
+                    />
+                  )}
+                />
+                <Controller
+                  name="exam"
+                  control={control}
+                  render={({ field }) => (
+                    <ExamSearch
+                      // key={addRoomExamDialog?.isOpen ? "open" : "closed"}
+                      isOpen={addRoomExamDialog?.isOpen}
+                      onSelectExam={(exam) => field.onChange(exam)}
+                      disabledExams={[]}
+                      // isOpen={false}
+                    />
+                  )}
+                />
+                {/* <Controller
                   name="status"
                   control={control}
                   render={({ field }) => (
@@ -204,7 +316,7 @@ const AddRoomExamDialog = () => {
                       label="Hoạt động"
                     />
                   )}
-                />
+                /> */}
                 <Controller
                   name="startDate"
                   control={control}

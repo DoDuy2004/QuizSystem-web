@@ -31,6 +31,20 @@ export const importStudents = createAsyncThunk(
   }
 );
 
+export const searchStudents = createAsyncThunk(
+  "student/searchStudents",
+  async (params: any) => {
+    const response: any = await StudentService.searchStudents({
+      key: params?.key,
+      limit: params?.limit,
+    });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const addListStudents = createAsyncThunk(
   "student/addListStudents",
   async (params: any) => {

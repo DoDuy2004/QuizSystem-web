@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userService from "../../services/user/UserService";
-import _ from "lodash";
+import _, { create } from "lodash";
 // import jwtService from "@/services/auth/jwtService";
 import UserModel from "../../models/UserModel";
 
@@ -36,6 +36,34 @@ export const logoutUser = createAsyncThunk(
 
     dispatch(userLoggedOut());
     return null;
+  }
+);
+
+export const changePassword = createAsyncThunk(
+  "user/changePassword",
+  async (params: any) => {
+    const userId = params?.userId;
+    const form = params?.form;
+
+    const response: any = await userService.changePassword({ userId, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "user/updateUser",
+  async (params: any) => {
+    const userId = params?.userId;
+    const form = params?.form;
+
+    const response: any = await userService.updateUser({ userId, form });
+
+    const data = response.data;
+
+    return data;
   }
 );
 
