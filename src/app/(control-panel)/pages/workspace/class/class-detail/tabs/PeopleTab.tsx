@@ -15,6 +15,7 @@ import { useDeepCompareEffect } from "../../../../../../../hooks";
 import { useParams } from "react-router-dom";
 import {
   getStudentsByClass,
+  getTeacherByClass,
   selectClass,
 } from "../../../../../../../store/slices/classSlice";
 
@@ -28,7 +29,7 @@ const UserItem = ({ name }: { name: string }) => (
 );
 
 const PeopleTab = () => {
-  const students = Array(20).fill({ name: "Nguyễn Đức Duy" });
+  // const students = Array(20).fill({ name: "Nguyễn Đức Duy" });
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
   const routeParams = useParams();
@@ -36,13 +37,25 @@ const PeopleTab = () => {
   const courseClass = useSelector(selectClass);
 
   useDeepCompareEffect(() => {
-    if (routeParams?.id) {
-      dispatch(getStudentsByClass(routeParams?.id))
-        .unwrap()
-        .finally(() => {
-          setLoading(true);
-        });
-    }
+    const fetchData = async () => {
+      if (!routeParams.id) {
+        setLoading(false);
+        return;
+      }
+      if (routeParams?.id) {
+        try {
+          await Promise.all([
+            dispatch(getStudentsByClass(routeParams?.id)).unwrap(),
+            dispatch(getTeacherByClass(routeParams?.id)).unwrap(),
+          ]);
+        } catch (error) {
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
   }, [dispatch, routeParams?.id]);
 
   return (
@@ -55,7 +68,7 @@ const PeopleTab = () => {
           </Typography>
         </div>
         <Divider />
-        <UserItem name={user?.fullName} />
+        <UserItem name={courseClass?.teacher?.fullName || "N"} />
       </div>
 
       {/* Sinh viên */}
@@ -64,13 +77,15 @@ const PeopleTab = () => {
           <Typography variant="h5" fontSize={32}>
             Sinh viên
           </Typography>
-          <Tooltip title="Mời sinh viên">
-            <IconButton
-              onClick={() => dispatch(openAddStudentsToClassDialog())}
-            >
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
+          {user?.role === "TEACHER" && (
+            <Tooltip title="Mời sinh viên">
+              <IconButton
+                onClick={() => dispatch(openAddStudentsToClassDialog())}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </div>
         <Divider />
         {courseClass?.students?.length === 0 ? (

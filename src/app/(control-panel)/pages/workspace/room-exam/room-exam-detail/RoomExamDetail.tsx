@@ -38,6 +38,8 @@ import {
   submitExam,
 } from "../../../../../../store/slices/studentSlice";
 import CircularLoading from "../../../../../../components/CircularLoading";
+import { showMessage } from "../../../../../../components/FuseMessage/fuseMessageSlice";
+import { errorAnchor } from "../../../../../../constants/confirm";
 
 // Types
 interface Question {
@@ -248,10 +250,10 @@ const RoomExamDetail = () => {
       answers: submissionData,
     };
 
-    // if (submissionData.length === 0) {
-    //   alert("Vui lòng trả lời ít nhất một câu hỏi!");
-    //   return;
-    // }
+    if (submissionData.length === 0) {
+      dispatch(showMessage({ message: "Bạn chưa làm bài", ...errorAnchor }));
+      return;
+    }
 
     console.log({ payload });
 

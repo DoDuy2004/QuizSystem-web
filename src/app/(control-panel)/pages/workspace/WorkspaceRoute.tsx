@@ -33,6 +33,9 @@ const ExamResultList = lazy(() => import("./exam-result/ExamResultList"));
 const SubjectDetail = lazy(
   () => import("./subject/subject-detail/SubjectDetail")
 );
+const ExamResultDetail = lazy(
+  () => import("./exam-result/exam-result-detail/ExamResultDetail")
+);
 
 const WorkspaceRoute = {
   path: "workspace",
@@ -215,6 +218,10 @@ const WorkspaceRoute = {
         {
           path: "new",
           element: <RoomExamList />,
+        },
+        {
+          path: ":id/student-exams",
+          element: <ExamResultDetail />,
         },
         {
           path: ":id",

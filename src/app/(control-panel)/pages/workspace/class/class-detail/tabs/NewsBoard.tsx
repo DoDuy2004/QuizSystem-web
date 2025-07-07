@@ -68,60 +68,62 @@ const NewsBoard = ({ data }: any) => {
           {data?.description || "HKII (24-25)"}
         </Typography>
       </div>
-      <div
-        className="flex items-center gap-x-4 px-6 py-4 rounded-lg"
-        style={{ boxShadow: "0 0 6px rgba(3, 3, 3, 0.2)" }}
-        onClick={() => setIsNewNoti(true)}
-      >
-        {!isNewNoti && user?.role === "TEACHER" ? (
-          <>
-            <Avatar sx={{ width: 40, height: 40 }}>N</Avatar>
-            <Typography className="text-gray-500" fontSize={14}>
-              Thông báo nội dung nào đó cho lớp học của bạn
-            </Typography>
-          </>
-        ) : (
-          <div className="w-full flex flex-col gap-y-1">
-            <Typography color="primary" fontSize={14}>
-              Thông báo nội dung nào đó cho lớp học của bạn
-            </Typography>
-            <Controller
-              name="content"
-              control={control}
-              rules={{ required: "Bạn chưa nhập nội dung" }}
-              render={({ field }) => (
-                <div>
-                  <RichTextEditor
-                    value={field.value}
-                    onChange={field.onChange}
-                    label={""}
-                  />
-                </div>
-              )}
-            />
-            <div className="w-fit ml-auto flex items-center gap-1">
-              <Button
-                variant="text"
-                sx={{ textTransform: "none" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsNewNoti(false);
-                }}
-              >
-                Hủy
-              </Button>
-              <Button
-                variant="contained"
-                sx={{ textTransform: "none" }}
-                onClick={handlePost}
-                disabled={watch("content").length < 1}
-              >
-                Đăng
-              </Button>
+      {user?.role === "TEACHER" && (
+        <div
+          className="flex items-center gap-x-4 px-6 py-4 rounded-lg"
+          style={{ boxShadow: "0 0 6px rgba(3, 3, 3, 0.2)" }}
+          onClick={() => setIsNewNoti(true)}
+        >
+          {!isNewNoti && user?.role === "TEACHER" ? (
+            <>
+              <Avatar sx={{ width: 40, height: 40 }}>N</Avatar>
+              <Typography className="text-gray-500" fontSize={14}>
+                Thông báo nội dung nào đó cho lớp học của bạn
+              </Typography>
+            </>
+          ) : (
+            <div className="w-full flex flex-col gap-y-1">
+              <Typography color="primary" fontSize={14}>
+                Thông báo nội dung nào đó cho lớp học của bạn
+              </Typography>
+              <Controller
+                name="content"
+                control={control}
+                rules={{ required: "Bạn chưa nhập nội dung" }}
+                render={({ field }) => (
+                  <div>
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      label={""}
+                    />
+                  </div>
+                )}
+              />
+              <div className="w-fit ml-auto flex items-center gap-1">
+                <Button
+                  variant="text"
+                  sx={{ textTransform: "none" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsNewNoti(false);
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{ textTransform: "none" }}
+                  onClick={handlePost}
+                  disabled={watch("content").length < 1}
+                >
+                  Đăng
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       <div className="flex flex-col gap-y-3 py-4 rounded-lg border-1 border-gray-200">
         <div className="flex items-center gap-x-4 px-6">
           <Avatar sx={{ width: 40, height: 40 }}>N</Avatar>

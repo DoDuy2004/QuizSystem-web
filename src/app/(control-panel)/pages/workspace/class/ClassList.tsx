@@ -62,7 +62,7 @@ const ClassList = () => {
         <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 grid-cols-1 lg:gap-4 mt-6">
           {classes && classes.length > 0 ? (
             classes.map((item: any, index: number) => (
-              <ClassItem key={index} data={{ ...item, teacher: user }} />
+              <ClassItem key={index} data={{ ...item }} />
             ))
           ) : (
             <Typography

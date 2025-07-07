@@ -246,6 +246,8 @@ class StudentService {
         });
     });
   };
+
+  
 }
 
 const instance = new StudentService();
