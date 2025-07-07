@@ -90,6 +90,28 @@ export const getRoomExamsByStudent = createAsyncThunk(
   }
 );
 
+export const getRoomExamResults = createAsyncThunk(
+  "student/getRoomExamResults",
+  async () => {
+    const response: any = await RoomExamService.getRoomExamResults();
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const getStudentExamsByRoom = createAsyncThunk(
+  "student/getRoomExamResults",
+  async (id: string) => {
+    const response: any = await RoomExamService.getStudentExamsByRoom(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,

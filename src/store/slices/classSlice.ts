@@ -6,6 +6,7 @@ export interface QuestionBankStateProps {
   classDetail: {
     data: {};
     students: any[];
+    teacher: {};
   };
 }
 
@@ -14,6 +15,7 @@ const initialState: QuestionBankStateProps = {
   classDetail: {
     data: {},
     students: [],
+    teacher: {},
   },
 };
 
@@ -101,6 +103,17 @@ export const getStudentsByClass = createAsyncThunk(
   }
 );
 
+export const getTeacherByClass = createAsyncThunk(
+  "class/getTeacher",
+  async (id: string) => {
+    const response: any = await CourseClassService.getTeacherByClass(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const searchClasses = createAsyncThunk(
   "student/searchClasses",
   async (params: any) => {
@@ -160,6 +173,10 @@ export const classSlice = createSlice({
       const students = action.payload.data.map((s: any) => s);
       console.log({ payload: action.payload });
       state.classDetail.students = [...state.classDetail.students, ...students];
+    });
+
+    builder.addCase(getTeacherByClass.fulfilled, (state, action) => {
+      state.classDetail.teacher = action.payload.data;
     });
   },
 });
