@@ -212,12 +212,9 @@ export const examSlice = createSlice({
     });
     builder.addCase(addQuestionToExam.fulfilled, (state, action) => {
       console.log({ data: action.payload });
-      const addedQuestions = action.payload.examQuestions.map(
-        (item: any) => item.question
-      );
       state.examDetail.questions = [
         ...state.examDetail.questions,
-        ...addedQuestions,
+        action.payload.data,
       ];
     });
 
