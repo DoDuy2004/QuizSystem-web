@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import withReducer from "../../store/withReducer";
 import type { TransitionProps } from "@mui/material/transitions";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -27,21 +26,19 @@ import { useThemeMediaQuery } from "../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import {
-  closeAddStudentsDialog,
-  selectAddStudentsDialog,
+  closeAddTeachersDialog,
+  selectAddTeachersDialog,
 } from "../../store/slices/globalSlice";
-import {
-  addListQuestions,
-  importQuestions,
-  setImportStatus,
-} from "../../store/slices/questionBankSlice";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { errorAnchor, successAnchor } from "../../constants/confirm";
-import reducer from "./store";
 import {
   addListStudents,
   importStudents,
 } from "../../store/slices/studentSlice";
+import {
+  addListTeachers,
+  importTeachers,
+} from "../../store/slices/teacherSlice";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -52,18 +49,18 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const AddMultiQuestionsDialog = () => {
+const AddMultiTeachersDialog = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("sm"));
   const isTablet = useThemeMediaQuery((theme) =>
     theme.breakpoints.between("sm", "md")
   );
-  const addStudentsDialog = useSelector(selectAddStudentsDialog);
+  const addTeachersDialog = useSelector(selectAddTeachersDialog);
   const dispatch = useDispatch<AppDispatch>();
 
   const handleClose = () => {
-    dispatch(closeAddStudentsDialog());
+    dispatch(closeAddTeachersDialog());
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,16 +91,16 @@ const AddMultiQuestionsDialog = () => {
       setLoading(true);
       try {
         const response = await dispatch(
-          importStudents({
+          importTeachers({
             file: selectedFile,
           })
         ).unwrap();
 
         console.log({ response });
 
-        const validStudents = response?.filter((item: any) => item.isValid);
-        if (validStudents.length > 0) {
-          dispatch(addListStudents({ form: validStudents }));
+        const validTeachers = response?.filter((item: any) => item.isValid);
+        if (validTeachers.length > 0) {
+          dispatch(addListTeachers({ form: validTeachers }));
           //         .then(() => {
           //             setImportStatus("succeeded");
           //   });
@@ -112,18 +109,18 @@ const AddMultiQuestionsDialog = () => {
         // Hiển thị thông báo thành công
         dispatch(
           showMessage({
-            message: `Import thành công ${validStudents.length} sinh viên`,
+            message: `Import thành công ${validTeachers.length} giảng viên viên`,
             ...successAnchor,
           })
         );
 
-        const invalidStudents = response?.filter(
+        const invalidTeachers = response?.filter(
           (item: any) => !item.isValid || item.errorMessages.length > 0
         );
-        if (invalidStudents.length > 0) {
+        if (invalidTeachers.length > 0) {
           const errorMessage =
-            `Có ${invalidStudents.length} sinh viên không hợp lệ:\n` +
-            invalidStudents
+            `Có ${invalidTeachers.length} giảng viên không hợp lệ:\n` +
+            invalidTeachers
               .map(
                 (item: any) =>
                   `Dòng ${item.rowIndex}: ${item.fullName} - Lỗi: ${
@@ -152,16 +149,16 @@ const AddMultiQuestionsDialog = () => {
   };
 
   useEffect(() => {
-    if (!addStudentsDialog?.isOpen) {
+    if (!addTeachersDialog?.isOpen) {
       setSelectedFile(null);
     }
-  }, [addStudentsDialog?.isOpen]);
+  }, [addTeachersDialog?.isOpen]);
 
   if (loading) return <CircularProgress />;
 
   return (
     <Dialog
-      open={addStudentsDialog?.isOpen}
+      open={addTeachersDialog?.isOpen}
       TransitionComponent={Transition}
       keepMounted
       onClose={handleClose}
@@ -190,7 +187,7 @@ const AddMultiQuestionsDialog = () => {
         sx={{ paddingY: 1.5 }}
       >
         <Typography className="font-bold text-gray-800">
-          Thêm sinh viên hàng loạt
+          Thêm giảng viên hàng loạt
         </Typography>
         <IconButton onClick={handleClose}>
           <CloseIcon />
@@ -242,13 +239,13 @@ const AddMultiQuestionsDialog = () => {
               <ListItemIcon className="min-w-6">
                 <DescriptionIcon fontSize="small" className="text-blue-500" />
               </ListItemIcon>
-              <ListItemText primary="Mỗi sinh viên nằm trên một dòng riêng" />
+              <ListItemText primary="Mỗi giảng viên nằm trên một dòng riêng" />
             </ListItem>
             <ListItem className="p-0">
               <ListItemIcon className="min-w-6">
                 <DescriptionIcon fontSize="small" className="text-blue-500" />
               </ListItemIcon>
-              <ListItemText primary="Tối đa 1000 sinh viên mỗi lần tải lên" />
+              <ListItemText primary="Tối đa 1000 giảng viên mỗi lần tải lên" />
             </ListItem>
           </List>
 
@@ -297,11 +294,11 @@ const AddMultiQuestionsDialog = () => {
             <input
               accept=".xlsx"
               style={{ display: "none" }}
-              id="excel-upload-student"
+              id="excel-upload-teacher"
               type="file"
               onChange={handleFileChange}
             />
-            <label htmlFor="excel-upload-student">
+            <label htmlFor="excel-upload-teacher">
               <Button
                 variant="outlined"
                 sx={{ textTransform: "none" }}
@@ -356,4 +353,4 @@ const AddMultiQuestionsDialog = () => {
   );
 };
 
-export default withReducer("students", reducer)(AddMultiQuestionsDialog);
+export default AddMultiTeachersDialog;

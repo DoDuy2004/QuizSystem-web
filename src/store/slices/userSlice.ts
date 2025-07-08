@@ -97,7 +97,7 @@ export const userSlice = createSlice({
       state.data = action.payload.data;
       state.role = action.payload.role;
     });
-    builder.addCase(logoutUser.fulfilled, (state) => {});
+    builder.addCase(logoutUser.fulfilled, (state) => { });
   },
 });
 

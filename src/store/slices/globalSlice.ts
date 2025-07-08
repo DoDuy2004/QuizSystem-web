@@ -18,6 +18,9 @@ export interface GlobalSliceState {
   addStudentsDialog: {
     isOpen: boolean;
   };
+  addTeachersDialog: {
+    isOpen: boolean;
+  };
   addRoomExamDialog: {
     isOpen: boolean;
   };
@@ -48,6 +51,9 @@ const initialState: GlobalSliceState = {
     isOpen: false,
   },
   addStudentsDialog: {
+    isOpen: false,
+  },
+  addTeachersDialog: {
     isOpen: false,
   },
   addRoomExamDialog: {
@@ -103,7 +109,7 @@ const globalSlice = createSlice({
       state.addSubjectDialog.isOpen = false;
     },
 
-    //student
+    //students
     openAddStudentsDialog: (state) => {
       state.addStudentsDialog.isOpen = true;
     },
@@ -142,6 +148,14 @@ const globalSlice = createSlice({
     closeAddTeacherDialog: (state) => {
       state.addTeacherDialog.isOpen = false;
     },
+
+    // add multi teachers
+    openAddTeachersDialog: (state) => {
+      state.addTeachersDialog.isOpen = true;
+    },
+    closeAddTeachersDialog: (state) => {
+      state.addTeachersDialog.isOpen = false;
+    },
   },
 });
 
@@ -164,6 +178,8 @@ export const {
   closeAddStudentDialog,
   openAddTeacherDialog,
   closeAddTeacherDialog,
+  openAddTeachersDialog,
+  closeAddTeachersDialog,
 } = globalSlice.actions;
 
 export const selectAddClassDialog = ({ globalSlice }: any) =>
@@ -190,5 +206,8 @@ export const selectAddStudentDialog = ({ globalSlice }: any) =>
 
 export const selectAddTeacherDialog = ({ globalSlice }: any) =>
   globalSlice.addTeacherDialog;
+
+export const selectAddTeachersDialog = ({ globalSlice }: any) =>
+  globalSlice.addTeachersDialog;
 
 export default globalSlice.reducer;

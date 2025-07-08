@@ -3,12 +3,18 @@ import SubjectService from "../../services/subject/SubjectService";
 
 export interface SubjectStateProps {
   data: any[];
-  subjectDetail: {};
+  subjectDetail: {
+    data: {};
+    chapters: any[];
+  };
 }
 
 const initialState: SubjectStateProps = {
   data: [],
-  subjectDetail: {},
+  subjectDetail: {
+    data: {},
+    chapters: [],
+  },
 };
 
 export const getChapters = createAsyncThunk(
@@ -66,6 +72,32 @@ export const updateSubject = createAsyncThunk(
   }
 );
 
+export const addChapter = createAsyncThunk(
+  "subject/addChapter",
+  async (params: any) => {
+    const form = params?.form;
+    const id = params?.id;
+    const response: any = await SubjectService.addChapter({ id, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const updateChapter = createAsyncThunk(
+  "subject/updateChapter",
+  async (params: any) => {
+    const form = params?.form;
+    const id = params?.id;
+    const response: any = await SubjectService.updateChapter({ id, form });
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const subjectSlice = createSlice({
   name: "subjectSlice",
   initialState,
@@ -89,6 +121,20 @@ export const subjectSlice = createSlice({
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = action.payload.data;
       state.subjectDetail = action.payload.data;
+    });
+    builder.addCase(addChapter.fulfilled, (state, action) => {
+      state.subjectDetail.chapters = [
+        ...state.subjectDetail.chapters,
+        action.payload,
+      ];
+    });
+    builder.addCase(updateChapter.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.subjectDetail.chapters.findIndex(
+        (item: any) => item.id === id
+      );
+      state.subjectDetail.chapters[index] = action.payload;
+      // state.subjectDetail = action.payload.data;
     });
   },
 });

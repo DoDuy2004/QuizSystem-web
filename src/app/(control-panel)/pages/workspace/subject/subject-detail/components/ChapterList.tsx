@@ -9,6 +9,14 @@ import {
   Chip,
 } from "@mui/material";
 import { Add, Edit, Check, Close } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { type AppDispatch } from "../../../../../../../store/store";
+import {
+  addChapter,
+  updateChapter,
+} from "../../../../../../../store/slices/subjectSlice";
+import { useParams } from "react-router-dom";
+import { update } from "lodash";
 
 interface Chapter {
   id: string;
@@ -29,6 +37,8 @@ const ChapterList: React.FC<ChapterListProps> = ({
   onChaptersChange,
 }) => {
   const [newChapterName, setNewChapterName] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const routeParams = useParams();
 
   const bgColor = newChapterName.trim()
     ? "linear-gradient(135deg, #3b82f6, #6366f1)"
@@ -44,6 +54,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
           }
         : chapter
     );
+
     onChaptersChange(updatedChapters);
   };
 
@@ -60,6 +71,11 @@ const ChapterList: React.FC<ChapterListProps> = ({
     );
     onChaptersChange(updatedChapters);
     // TODO: Gọi API cập nhật chương
+    const payload = {
+      name: newChapterName,
+    };
+
+    dispatch(updateChapter({ id, form: payload }));
   };
 
   const handleCancelEdit = (id: string) => {
@@ -85,9 +101,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
         name: newChapterName,
         isEditing: false,
       };
+      const payload = {
+        name: newChapterName,
+      };
       onChaptersChange([...chapters, newChapter]);
       setNewChapterName("");
       // TODO: Gọi API thêm chương
+      dispatch(addChapter({ id: routeParams?.id, form: payload }));
     }
   };
 
@@ -101,20 +121,22 @@ const ChapterList: React.FC<ChapterListProps> = ({
               p: 2,
               mb: 2,
               borderRadius: 1,
-              backgroundColor: chapter.isEditing ? "grey.50" : "transparent",
-              border: chapter.isEditing ? "1px dashed #ddd" : "none",
+              backgroundColor:
+                chapter?.isEditing || false ? "grey.50" : "transparent",
+              border: chapter?.isEditing ? "1px dashed #ddd" : "none",
               display: "flex",
               alignItems: "center",
               gap: 2,
             }}
           >
-            {chapter.isEditing ? (
+            {chapter?.isEditing ? (
               <>
                 <TextField
-                  value={chapter.editingName || ""}
-                  onChange={(e) =>
-                    handleChapterNameChange(chapter.id, e.target.value)
-                  }
+                  value={chapter?.editingName || ""}
+                  onChange={(e) => {
+                    handleChapterNameChange(chapter.id, e.target.value);
+                    setNewChapterName(e.target.value);
+                  }}
                   fullWidth
                   size="small"
                   sx={{

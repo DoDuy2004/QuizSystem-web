@@ -54,14 +54,14 @@ const Header = () => {
                   //   title: "Bảng giá",
                   //   url: "/",
                   // },
-                  {
-                    title: "Giới thiệu",
-                    url: "/",
-                  },
-                  {
-                    title: "Tin tức",
-                    url: "/",
-                  },
+                  // {
+                  //   title: "Giới thiệu",
+                  //   url: "/",
+                  // },
+                  // {
+                  //   title: "Tin tức",
+                  //   url: "/",
+                  // },
                   {
                     title: "Liên hệ",
                     url: "/contact",
@@ -160,14 +160,14 @@ const Header = () => {
                     //   title: "Bảng giá",
                     //   url: "/",
                     // },
-                    {
-                      title: "Giới thiệu",
-                      url: "/",
-                    },
-                    {
-                      title: "Tin tức",
-                      url: "/",
-                    },
+                    // {
+                    //   title: "Giới thiệu",
+                    //   url: "/",
+                    // },
+                    // {
+                    //   title: "Tin tức",
+                    //   url: "/",
+                    // },
                     {
                       title: "Liên hệ",
                       url: "/contact",

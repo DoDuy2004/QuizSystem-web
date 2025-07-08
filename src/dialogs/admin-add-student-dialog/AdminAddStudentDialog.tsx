@@ -57,11 +57,17 @@ const schema: any = yup.object().shape({
   email: yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
   phoneNumber: yup
     .string()
-    .optional()
-    .matches(
-      /^0\d{9}$/,
-      "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)"
+    .nullable()
+    .notRequired()
+    .test(
+      "valid-phone",
+      "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)",
+      (value) => {
+        if (!value) return true; // Nếu trống thì hợp lệ
+        return /^0\d{9}$/.test(value); // Nếu có giá trị thì phải hợp lệ
+      }
     ),
+
   fullName: yup.string().required("Họ tên là bắt buộc"),
   gender: yup.string(),
   birthday: yup.date().nullable(),
@@ -157,6 +163,7 @@ const AddSubjectDialog = () => {
       .finally(() => {
         setButtonLoading(false);
       });
+    handleClose();
   };
 
   return (

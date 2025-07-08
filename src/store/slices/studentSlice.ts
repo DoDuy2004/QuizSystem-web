@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import StudentService from "../../services/student/StudentService";
+import userService from "../../services/user/UserService";
 
 export interface StudentStateProps {
   data: any[];
@@ -121,6 +122,17 @@ export const isSubmitted = createAsyncThunk(
   }
 );
 
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async (id: any) => {
+    const response: any = await userService.deleteUser(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const studentSlice = createSlice({
   name: "studentSlice",
   initialState,
@@ -154,6 +166,12 @@ export const studentSlice = createSlice({
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = action.payload.data;
       state.studentDetail = action.payload.data;
+    });
+    builder.addCase(deleteUser.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = { ...state.data[index], status: "DELETED" };
+      // state.teacherDetail = action.payload.data;
     });
   },
 });
