@@ -25,23 +25,22 @@ import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 // import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
-import {
-  getSubjects,
-  selectSubjects,
-} from "../../../../../store/slices/subjectSlice";
 import { MoreVert } from "@mui/icons-material";
 import {
-  getStudents,
-  selectStudents,
-} from "../../../../../store/slices/studentSlice";
-import {
-  openAddStudentsDialog,
   openAddTeacherDialog,
+  openAddTeachersDialog,
 } from "../../../../../store/slices/globalSlice";
 import {
+  deleteUser,
   getTeachers,
   selectTeachers,
 } from "../../../../../store/slices/teacherSlice";
+import Pagination from "@mui/material/Pagination";
+import PaginationItem from "@mui/material/PaginationItem";
+import Stack from "@mui/material/Stack";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { openConfirmationDialog } from "../../../../../store/slices/confirmationSlice";
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -52,6 +51,16 @@ const TeacherList = () => {
   const teachers = useSelector(selectTeachers);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const totalPages = Math.ceil(teachers.length / itemsPerPage);
+
+  const currentTeachers = teachers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -74,6 +83,25 @@ const TeacherList = () => {
     //   dispatch(resetSubjectState());
     // };
   }, [dispatch]);
+
+  const openConfirmDialog = (e: any, id: any) => {
+    e.stopPropagation();
+    handleClose(e);
+    dispatch(
+      openConfirmationDialog({
+        data: {
+          onAgree: () => {
+            dispatch(deleteUser(id));
+          },
+          dialogContent: "Bạn có chắc muốn xóa giảng viên này",
+          titleContent: "Xóa giảng viên",
+          agreeText: "Xác nhận",
+          disagreeText: "Hủy",
+          onDisagree: () => {},
+        },
+      })
+    );
+  };
 
   if (loading) {
     return <CircularLoading delay={0} />;
@@ -100,7 +128,7 @@ const TeacherList = () => {
           </div>
           <div className="flex items-center gap-x-4">
             <Button
-              onClick={() => dispatch(openAddStudentsDialog())}
+              onClick={() => dispatch(openAddTeachersDialog())}
               sx={{
                 marginLeft: "auto",
                 padding: "6px 10px",
@@ -180,7 +208,7 @@ const TeacherList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {teachers?.map((row: any) => (
+              {currentTeachers?.map((row: any) => (
                 <TableRow
                   key={row?.fullName}
                   onClick={() => {
@@ -220,9 +248,9 @@ const TeacherList = () => {
                   </TableCell>
                   <TableCell align="left">
                     <Chip
-                      label={row?.status ? "Active" : "Inactive"}
+                      label={row?.status === "ACTIVE" ? "Active" : "Inactive"}
                       size="small"
-                      color={row?.status ? "success" : "error"}
+                      color={row?.status === "ACTIVE" ? "success" : "error"}
                       sx={{
                         fontWeight: 500,
                         borderRadius: "4px",
@@ -267,7 +295,7 @@ const TeacherList = () => {
                       <Divider />
                       <MenuItem
                         sx={{ paddingY: 0 }}
-                        // onClick={(e) => openConfirmDialog(e, data?.id)}
+                        onClick={(e) => openConfirmDialog(e, row?.id)}
                       >
                         <ListItemText
                           primaryTypographyProps={{ fontSize: "12px" }}
@@ -282,6 +310,19 @@ const TeacherList = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Stack spacing={2} sx={{ my: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(event, value) => setCurrentPage(value)}
+            renderItem={(item) => (
+              <PaginationItem
+                slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
+                {...item}
+              />
+            )}
+          />
+        </Stack>
       </div>
     </>
   );

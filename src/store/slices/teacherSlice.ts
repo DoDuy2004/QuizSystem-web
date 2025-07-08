@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import TeacherService from "../../services/teacher/TeacherService";
+import userService from "../../services/user/UserService";
 
 export interface TeacherStateProps {
   data: any[];
@@ -55,29 +56,40 @@ export const updateTeacher = createAsyncThunk(
   }
 );
 
-// export const importStudents = createAsyncThunk(
-//   "student/import",
-//   async ({ file }: { file: File }, { rejectWithValue }) => {
-//     try {
-//       const response: any = await TeacherService.importStudents(file);
-//       return response.data;
-//     } catch (error: any) {
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
+export const importTeachers = createAsyncThunk(
+  "student/import",
+  async ({ file }: { file: File }, { rejectWithValue }) => {
+    try {
+      const response: any = await TeacherService.importTeachers(file);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
-// export const addListStudents = createAsyncThunk(
-//   "student/addListStudents",
-//   async (params: any) => {
-//     const form = params?.form;
-//     const response: any = await StudentService.addListStudents({ form });
+export const addListTeachers = createAsyncThunk(
+  "student/addListStudents",
+  async (params: any) => {
+    const form = params?.form;
+    const response: any = await TeacherService.addListTeachers({ form });
 
-//     const data = response.data;
+    const data = response.data;
 
-//     return data;
-//   }
-// );
+    return data;
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async (id: any) => {
+    const response: any = await userService.deleteUser(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
 
 export const teacherSlice = createSlice({
   name: "teacherSlice",
@@ -90,14 +102,14 @@ export const teacherSlice = createSlice({
       // console.log({ data: action.payload.data });
       state.data = action.payload.data;
     });
-    // builder.addCase(addListStudents.fulfilled, (state, action) => {
-    //   state.data = [
-    //     ...state.data,
-    //     ...action.payload.data.map((item: any) => ({
-    //       ...item,
-    //     })),
-    //   ];
-    // });
+    builder.addCase(addListTeachers.fulfilled, (state, action) => {
+      state.data = [
+        ...state.data,
+        ...action.payload.data.map((item: any) => ({
+          ...item,
+        })),
+      ];
+    });
     builder.addCase(getTeacher.fulfilled, (state, action) => {
       state.teacherDetail = action.payload.data;
     });
@@ -111,6 +123,12 @@ export const teacherSlice = createSlice({
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = action.payload.data;
       state.teacherDetail = action.payload.data;
+    });
+    builder.addCase(deleteUser.fulfilled, (state, action) => {
+      const { id } = action.meta.arg;
+      const index = state.data.findIndex((item: any) => item.id === id);
+      state.data[index] = { ...state.data[index], status: "DELETED" };
+      // state.teacherDetail = action.payload.data;
     });
   },
 });

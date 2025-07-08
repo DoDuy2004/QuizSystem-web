@@ -62,7 +62,7 @@ const SubjectDetail = () => {
       dispatch(getSubjectById(id))
         .unwrap()
         .then((res) => {
-          setLocalChapters(res?.chapters || []);
+          setLocalChapters(res?.data?.chapters || []);
         })
         .finally(() => {
           setLoading(false);
@@ -99,7 +99,7 @@ const SubjectDetail = () => {
       description: data.description,
       major: data.major,
       status: subject.status, // giữ nguyên trạng thái
-      chapters: localChapters, // truyền luôn danh sách chương đã chỉnh sửa
+      // chapters: localChapters, // truyền luôn danh sách chương đã chỉnh sửa
     };
 
     dispatch(updateSubject({ id, form: payload }))

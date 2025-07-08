@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../store/store";
 import { useDeepCompareEffect } from "../../../../../hooks";
-import { useRef } from "react";
+// import { useRef } from "react";
 import CircularLoading from "../../../../../components/CircularLoading";
 import {
   Button,
@@ -25,10 +25,6 @@ import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 // import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
-import {
-  getSubjects,
-  selectSubjects,
-} from "../../../../../store/slices/subjectSlice";
 import { MoreVert } from "@mui/icons-material";
 import {
   getStudents,
@@ -38,8 +34,15 @@ import {
   openAddStudentDialog,
   openAddStudentsDialog,
 } from "../../../../../store/slices/globalSlice";
+import Pagination from "@mui/material/Pagination";
+import PaginationItem from "@mui/material/PaginationItem";
+import Stack from "@mui/material/Stack";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { openConfirmationDialog } from "../../../../../store/slices/confirmationSlice";
+import { deleteUser } from "../../../../../store/slices/teacherSlice";
 
-const paginationModel = { page: 0, pageSize: 5 };
+// const paginationModel = { page: 0, pageSize: 5 };
 
 const StudentList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +51,16 @@ const StudentList = () => {
   const students = useSelector(selectStudents);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+
+  const currentStudents = students.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -70,6 +83,25 @@ const StudentList = () => {
     //   dispatch(resetSubjectState());
     // };
   }, [dispatch]);
+
+  const openConfirmDialog = (e: any, id: any) => {
+    e.stopPropagation();
+    handleClose(e);
+    dispatch(
+      openConfirmationDialog({
+        data: {
+          onAgree: () => {
+            dispatch(deleteUser(id));
+          },
+          dialogContent: "Bạn có chắc muốn xóa sinh viên này",
+          titleContent: "Xóa sinh viên",
+          agreeText: "Xác nhận",
+          disagreeText: "Hủy",
+          onDisagree: () => {},
+        },
+      })
+    );
+  };
 
   if (loading) {
     return <CircularLoading delay={0} />;
@@ -176,7 +208,7 @@ const StudentList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {students?.map((row: any) => (
+              {currentStudents?.map((row: any) => (
                 <TableRow
                   key={row?.fullName}
                   onClick={() => {
@@ -263,7 +295,7 @@ const StudentList = () => {
                       <Divider />
                       <MenuItem
                         sx={{ paddingY: 0 }}
-                        // onClick={(e) => openConfirmDialog(e, data?.id)}
+                        onClick={(e) => openConfirmDialog(e, row?.id)}
                       >
                         <ListItemText
                           primaryTypographyProps={{ fontSize: "12px" }}
@@ -278,6 +310,19 @@ const StudentList = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Stack spacing={2} sx={{ my: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(event, value) => setCurrentPage(value)}
+            renderItem={(item) => (
+              <PaginationItem
+                slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
+                {...item}
+              />
+            )}
+          />
+        </Stack>
       </div>
     </>
   );
