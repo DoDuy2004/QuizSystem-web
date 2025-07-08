@@ -212,8 +212,8 @@ const TeacherList = () => {
                 <TableRow
                   key={row?.fullName}
                   onClick={() => {
-                    dispatch(openAddTeacherDialog());
                     navigate(`/workspace/teacher/${row.id}/edit`);
+                    dispatch(openAddTeacherDialog());
                   }}
                   sx={{
                     "&:last-child td": {
@@ -284,7 +284,11 @@ const TeacherList = () => {
                     >
                       <MenuItem
                         sx={{ paddingY: 0 }}
-                        // onClick={(e) => handleUpdate(e)}
+                        onClick={(e: any) => {
+                          handleClose(e);
+                          dispatch(openAddTeacherDialog());
+                          navigate(`/workspace/teacher/${row.id}/edit`);
+                        }}
                       >
                         <ListItemText
                           primaryTypographyProps={{ fontSize: "12px" }}

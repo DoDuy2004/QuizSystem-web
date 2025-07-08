@@ -284,7 +284,11 @@ const StudentList = () => {
                     >
                       <MenuItem
                         sx={{ paddingY: 0 }}
-                        // onClick={(e) => handleUpdate(e)}
+                        onClick={(e: any) => {
+                          handleClose(e);
+                          navigate(`/workspace/student/${row.id}/edit`);
+                          dispatch(openAddStudentDialog());
+                        }}
                       >
                         <ListItemText
                           primaryTypographyProps={{ fontSize: "12px" }}
