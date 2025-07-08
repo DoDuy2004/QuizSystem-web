@@ -103,8 +103,9 @@ const SubjectList = () => {
             </IconButton>
           </div>
           <Button
-            onClick={() => {
+            onClick={(e) => {
               navigate("/workspace/subject/new");
+              handleClose(e);
               dispatch(openAddSubjectDialog());
             }}
             sx={{
@@ -253,8 +254,7 @@ const SubjectList = () => {
                         sx={{ paddingY: 0 }}
                         // onClick={(e) => handleUpdate(e)}
                         onClick={() => {
-                          navigate(`/workspace/subject/${row?.id}/edit`);
-                          dispatch(openAddSubjectDialog());
+                          navigate(`/workspace/subject/${row?.id}`);
                         }}
                       >
                         <ListItemText

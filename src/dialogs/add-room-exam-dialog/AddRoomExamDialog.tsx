@@ -62,7 +62,13 @@ const schema = yup.object().shape({
   startDate: yup
     .date()
     .required("Ngày bắt đầu là bắt buộc")
-    .min(currentDate, "Ngày bắt đầu không được nhỏ hơn ngày hiện tại"),
+    .test(
+      "is-after-now",
+      "Ngày bắt đầu không được nhỏ hơn thời điểm hiện tại",
+      function (value) {
+        return value && value > new Date();
+      }
+    ),
   endDate: yup
     .date()
     .required("Ngày kết thúc là bắt buộc")
