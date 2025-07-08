@@ -90,7 +90,7 @@ const Header = () => {
           <SearchInput />
         </div>
         <div className="flex items-center gap-x-4">
-          {!isMobile && (
+          {userData?.role === "TEACHER" && !isMobile && (
             <Button
               startIcon={<QueueIcon />}
               onClick={() => navigate("/workspace/exam/new")}

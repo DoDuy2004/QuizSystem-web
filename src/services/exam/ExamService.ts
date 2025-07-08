@@ -180,7 +180,7 @@ class ExamService {
       const id = params?.id;
       axios
         .post(
-          `${import.meta.env.VITE_DOMAIN}/api/exams/${id}/add-list-question`,
+          `${import.meta.env.VITE_DOMAIN}/api/exams/${id}/AddQuestion`,
           form
         )
         .then((response) => resolve(response))

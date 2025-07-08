@@ -128,9 +128,9 @@ const OtpInput = ({ email, setStep }: any) => {
                 {...field}
                 numInputs={6}
                 inputStyle={{
-                  width: "3rem",
+                  width: "2.5rem",
                   height: "auto",
-                  margin: "0 6px",
+                  margin: "0 7px",
                   fontSize: "24px",
                   borderBottom: "5px solid rgba(0,0,0,0.3)",
                 }}

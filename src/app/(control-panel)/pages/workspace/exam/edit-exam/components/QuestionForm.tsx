@@ -216,27 +216,27 @@ const QuestionForm = ({ questionData }: any) => {
     // console.log({ data });
     // setLoading(true);
 
-    const payload1 = {
-      questionScores: [
-        {
-          question: {
-            topic: data.topic,
-            type: data.type,
-            content: data.content.trim(),
-            status: 0,
-            difficulty: difficultyOptions.findIndex(
-              (item) => item.value == data.difficulty
-            ),
-            image: data.image,
-            chapterId: data.chapterId,
-            answers: data.answers,
-            createdBy: user?.id,
-          },
-          score: 0,
-        },
-      ],
-      examId: exam?.data?.id,
-    };
+    // const payload1 = {
+    //   questionScores: [
+    //     {
+    //       question: {
+    //         topic: data.topic,
+    //         type: data.type,
+    //         content: data.content.trim(),
+    //         status: 0,
+    //         difficulty: difficultyOptions.findIndex(
+    //           (item) => item.value == data.difficulty
+    //         ),
+    //         image: data.image,
+    //         chapterId: data.chapterId,
+    //         answers: data.answers,
+    //         createdBy: user?.id,
+    //       },
+    //       score: 0,
+    //     },
+    //   ],
+    //   examId: exam?.data?.id,
+    // };
 
     const payload2 = {
       topic: data.topic,
@@ -259,7 +259,7 @@ const QuestionForm = ({ questionData }: any) => {
           id: question.id,
           form: { id: question.id, ...payload2 },
         })
-      : addQuestionToExam({ id: exam?.data?.id, form: payload1 });
+      : addQuestionToExam({ id: exam?.data?.id, form: payload2 });
     // console.log({ payload });
     dispatch(action)
       .unwrap()

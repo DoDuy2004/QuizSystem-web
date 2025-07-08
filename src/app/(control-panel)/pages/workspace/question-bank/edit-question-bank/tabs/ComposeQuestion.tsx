@@ -97,8 +97,8 @@ const ComposeQuestion = () => {
   }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && questionsData.length > 0) {
-      dispatch(getQuestionById(questionsData.questions[0]?.id))
+    if (routeParams.id && questionBank?.questions?.length > 0) {
+      dispatch(getQuestionById(questionBank?.questions[0]?.id))
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -112,7 +112,7 @@ const ComposeQuestion = () => {
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id]);
+  }, [dispatch, routeParams?.id, questionsData]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {
