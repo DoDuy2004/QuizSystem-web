@@ -91,6 +91,7 @@ const AddTeacherDialog = () => {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { dirtyFields, errors, isValid },
   } = useForm({
     mode: "onChange",
@@ -103,6 +104,17 @@ const AddTeacherDialog = () => {
   //       setLoading(true);
   //     }
   //   }, [addTeacherDialog?.isOpen]);
+
+  const form = watch();
+
+  schema
+    .validate(form, { abortEarly: false })
+    .then(() => {
+      console.log("VALID");
+    })
+    .catch((err: any) => {
+      console.log("INVALID", err.errors);
+    });
 
   useDeepCompareEffect(() => {
     // setLoading(true);
@@ -131,6 +143,12 @@ const AddTeacherDialog = () => {
       reset(UserModel({}));
     }
   }, [routeParams?.id, teacher]);
+
+  useEffect(() => {
+    if (!addTeacherDialog?.isOpen) {
+      reset(UserModel({}));
+    }
+  }, [addTeacherDialog?.isOpen]);
 
   const handleClose = () => {
     navigate("/workspace/teacher/list");
@@ -163,7 +181,7 @@ const AddTeacherDialog = () => {
         );
       })
       .finally(() => {
-        setButtonLoading(true);
+        setButtonLoading(false);
       });
     handleClose();
   };

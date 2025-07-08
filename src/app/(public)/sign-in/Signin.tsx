@@ -80,6 +80,7 @@ const Signin = () => {
       })
       .catch((err: any) => {
         if (err) {
+          console.log({ err });
           dispatch(
             showMessage({
               message:

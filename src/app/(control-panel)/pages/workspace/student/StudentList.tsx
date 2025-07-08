@@ -49,27 +49,19 @@ const StudentList = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const students = useSelector(selectStudents);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+
+  const [menuState, setMenuState] = useState<{
+    anchorEl: null | HTMLElement;
+    studentId: string | null;
+  }>({ anchorEl: null, studentId: null });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const totalPages = Math.ceil(students.length / itemsPerPage);
-
   const currentStudents = students.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-    event.stopPropagation();
-  };
-  const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(null);
-    event.stopPropagation();
-  };
 
   useDeepCompareEffect(() => {
     setLoading(true);
@@ -78,11 +70,20 @@ const StudentList = () => {
       .finally(() => {
         setLoading(false);
       });
-
-    // return () => {
-    //   dispatch(resetSubjectState());
-    // };
   }, [dispatch]);
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    studentId: string
+  ) => {
+    event.stopPropagation();
+    setMenuState({ anchorEl: event.currentTarget, studentId });
+  };
+
+  const handleClose = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.stopPropagation?.();
+    setMenuState({ anchorEl: null, studentId: null });
+  };
 
   const openConfirmDialog = (e: any, id: any) => {
     e.stopPropagation();
@@ -103,19 +104,17 @@ const StudentList = () => {
     );
   };
 
-  if (loading) {
-    return <CircularLoading delay={0} />;
-  }
+  if (loading) return <CircularLoading delay={0} />;
 
   return (
     <>
       <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
         Quản lý sinh viên
       </Typography>
-      <div className=" bg-white rounded-md shadow-md">
+      <div className="bg-white rounded-md shadow-md">
         <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
-          <div className="w-fit flex items-center gap-x-4 justify-start">
-            <Typography className="w-1/2" fontSize={15}>
+          <div className="flex items-center gap-x-4">
+            <Typography fontSize={15}>
               <span className="text-blue-600 font-semibold">
                 {students?.length}
               </span>{" "}
@@ -130,7 +129,6 @@ const StudentList = () => {
             <Button
               onClick={() => dispatch(openAddStudentsDialog())}
               sx={{
-                marginLeft: "auto",
                 padding: "6px 10px",
                 background: "linear-gradient(to right, #3b82f6, #a855f7)",
                 borderRadius: "4px",
@@ -144,7 +142,6 @@ const StudentList = () => {
             <Button
               onClick={() => dispatch(openAddStudentDialog())}
               sx={{
-                marginLeft: "auto",
                 padding: "6px 10px",
                 background: "linear-gradient(to right, #3b82f6, #a855f7)",
                 borderRadius: "4px",
@@ -157,6 +154,7 @@ const StudentList = () => {
             </Button>
           </div>
         </div>
+
         <TableContainer
           component={Paper}
           sx={{
@@ -169,7 +167,7 @@ const StudentList = () => {
             sx={{
               minWidth: 650,
               "& .MuiTableCell-root": {
-                padding: "16px 24px", // Tăng padding cho các cell
+                padding: "16px 24px",
                 fontSize: "0.875rem",
                 borderColor: "#f0f0f0",
               },
@@ -183,60 +181,36 @@ const StudentList = () => {
               },
             }}
             size="medium"
-            aria-label="subject table"
+            aria-label="student table"
           >
             <TableHead>
               <TableRow>
-                <TableCell
-                  sx={{
-                    paddingLeft: "32px", // Thêm padding left cho ô đầu tiên
-                  }}
-                >
-                  Họ tên
-                </TableCell>
+                <TableCell sx={{ paddingLeft: "32px" }}>Họ tên</TableCell>
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">Khoa</TableCell>
                 <TableCell align="left">Trạng thái</TableCell>
-                <TableCell
-                  align="left"
-                  sx={{
-                    paddingRight: "32px", // Thêm padding right cho ô cuối
-                  }}
-                >
+                <TableCell align="left" sx={{ paddingRight: "32px" }}>
                   Hành động
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentStudents?.map((row: any) => (
+              {currentStudents.map((row: any) => (
                 <TableRow
-                  key={row?.fullName}
+                  key={row.id}
                   onClick={() => {
                     dispatch(openAddStudentDialog());
                     navigate(`/workspace/student/${row.id}/edit`);
                   }}
                   sx={{
-                    "&:last-child td": {
-                      borderBottom: "none", // Bỏ border bottom cho hàng cuối
-                    },
-                    // "&:last-child td:first-of-type": {
-                    //   borderBottomLeftRadius: "8px", // Bo góc trái dưới
-                    // },
-                    // "&:last-child td:last-child": {
-                    //   borderBottomRightRadius: "8px", // Bo góc phải dưới
-                    // },
+                    "&:last-child td": { borderBottom: "none" },
                   }}
                 >
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    sx={{ paddingLeft: "32px" }}
-                  >
-                    {row?.fullName}
+                  <TableCell sx={{ paddingLeft: "32px" }}>
+                    {row.fullName}
                   </TableCell>
-                  <TableCell align="left">{row?.email || ""}</TableCell>
+                  <TableCell>{row.email || ""}</TableCell>
                   <TableCell
-                    align="left"
                     sx={{
                       maxWidth: "300px",
                       whiteSpace: "nowrap",
@@ -244,81 +218,67 @@ const StudentList = () => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {row?.facutly}
+                    {row.facutly}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell>
                     <Chip
-                      label={row?.status ? "Active" : "Inactive"}
+                      label={row.status === "ACTIVE" ? "ACTIVE" : "DELETED"}
                       size="small"
-                      color={row?.status ? "success" : "error"}
-                      sx={{
-                        fontWeight: 500,
-                        borderRadius: "4px",
-                      }}
+                      color={row.status === "ACTIVE" ? "success" : "error"}
+                      sx={{ fontWeight: 500, borderRadius: "4px" }}
                     />
                   </TableCell>
-                  <TableCell align="left" sx={{ paddingRight: "32px" }}>
-                    <IconButton size="small" onClick={handleClick}>
+                  <TableCell sx={{ paddingRight: "32px" }}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleClick(e, row.id)}
+                    >
                       <MoreVert fontSize="small" />
                     </IconButton>
-                    <Menu
-                      id="basic-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      slotProps={{
-                        list: {
-                          "aria-labelledby": "basic-button",
-                        },
-                      }}
-                      PaperProps={{
-                        sx: {
-                          px: 1,
-                          boxShadow: 1,
-                        },
-                      }}
-                    >
-                      <MenuItem
-                        sx={{ paddingY: 0 }}
-                        onClick={(e: any) => {
-                          handleClose(e);
-                          navigate(`/workspace/student/${row.id}/edit`);
-                          dispatch(openAddStudentDialog());
-                        }}
-                      >
-                        <ListItemText
-                          primaryTypographyProps={{ fontSize: "12px" }}
-                        >
-                          Cập nhập
-                        </ListItemText>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        sx={{ paddingY: 0 }}
-                        onClick={(e) => openConfirmDialog(e, row?.id)}
-                      >
-                        <ListItemText
-                          primaryTypographyProps={{ fontSize: "12px" }}
-                        >
-                          Xóa
-                        </ListItemText>
-                      </MenuItem>
-                    </Menu>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Menu chung, dùng menuState */}
+        <Menu
+          id="basic-menu"
+          anchorEl={menuState.anchorEl}
+          open={Boolean(menuState.anchorEl)}
+          onClose={() => handleClose()}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          PaperProps={{ sx: { px: 1, boxShadow: 1 } }}
+        >
+          <MenuItem
+            sx={{ paddingY: 0 }}
+            onClick={(e: any) => {
+              handleClose(e);
+              navigate(`/workspace/student/${menuState.studentId}/edit`);
+              dispatch(openAddStudentDialog());
+            }}
+          >
+            <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
+              Cập nhật
+            </ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            sx={{ paddingY: 0 }}
+            onClick={(e) => openConfirmDialog(e, menuState.studentId)}
+          >
+            <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
+              Xóa
+            </ListItemText>
+          </MenuItem>
+        </Menu>
+
         <Stack spacing={2} sx={{ my: 2 }}>
           <Pagination
             count={totalPages}
             page={currentPage}
-            onChange={(event, value) => setCurrentPage(value)}
+            onChange={(e, value) => setCurrentPage(value)}
             renderItem={(item) => (
               <PaginationItem
                 slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}

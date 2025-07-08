@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../store/store";
 import { useDeepCompareEffect } from "../../../../../hooks";
-import { useRef } from "react";
 import CircularLoading from "../../../../../components/CircularLoading";
 import {
   Button,
@@ -23,7 +22,6 @@ import {
 } from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
-// import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { MoreVert } from "@mui/icons-material";
 import {
@@ -42,19 +40,19 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { openConfirmationDialog } from "../../../../../store/slices/confirmationSlice";
 
-const paginationModel = { page: 0, pageSize: 5 };
-
 const TeacherList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const teachers = useSelector(selectTeachers);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+
+  const [menuState, setMenuState] = useState<{
+    anchorEl: HTMLElement | null;
+    teacherId: string | null;
+  }>({ anchorEl: null, teacherId: null });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const totalPages = Math.ceil(teachers.length / itemsPerPage);
 
   const currentTeachers = teachers.slice(
@@ -62,26 +60,24 @@ const TeacherList = () => {
     currentPage * itemsPerPage
   );
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    teacherId: string
+  ) => {
     event.stopPropagation();
+    setMenuState({ anchorEl: event.currentTarget, teacherId });
   };
-  const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(null);
-    event.stopPropagation();
+
+  const handleClose = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.stopPropagation?.();
+    setMenuState({ anchorEl: null, teacherId: null });
   };
 
   useDeepCompareEffect(() => {
     setLoading(true);
     dispatch(getTeachers())
       .unwrap()
-      .finally(() => {
-        setLoading(false);
-      });
-
-    // return () => {
-    //   dispatch(resetSubjectState());
-    // };
+      .finally(() => setLoading(false));
   }, [dispatch]);
 
   const openConfirmDialog = (e: any, id: any) => {
@@ -90,9 +86,7 @@ const TeacherList = () => {
     dispatch(
       openConfirmationDialog({
         data: {
-          onAgree: () => {
-            dispatch(deleteUser(id));
-          },
+          onAgree: () => dispatch(deleteUser(id)),
           dialogContent: "Bạn có chắc muốn xóa giảng viên này",
           titleContent: "Xóa giảng viên",
           agreeText: "Xác nhận",
@@ -103,16 +97,14 @@ const TeacherList = () => {
     );
   };
 
-  if (loading) {
-    return <CircularLoading delay={0} />;
-  }
+  if (loading) return <CircularLoading delay={0} />;
 
   return (
     <>
       <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
         Quản lý giảng viên
       </Typography>
-      <div className=" bg-white rounded-md shadow-md">
+      <div className="bg-white rounded-md shadow-md">
         <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
             <Typography className="w-1/2" fontSize={15}>
@@ -157,6 +149,7 @@ const TeacherList = () => {
             </Button>
           </div>
         </div>
+
         <TableContainer
           component={Paper}
           sx={{
@@ -169,7 +162,7 @@ const TeacherList = () => {
             sx={{
               minWidth: 650,
               "& .MuiTableCell-root": {
-                padding: "16px 24px", // Tăng padding cho các cell
+                padding: "16px 24px",
                 fontSize: "0.875rem",
                 borderColor: "#f0f0f0",
               },
@@ -183,60 +176,37 @@ const TeacherList = () => {
               },
             }}
             size="medium"
-            aria-label="subject table"
           >
             <TableHead>
               <TableRow>
-                <TableCell
-                  sx={{
-                    paddingLeft: "32px", // Thêm padding left cho ô đầu tiên
-                  }}
-                >
-                  Họ tên
-                </TableCell>
+                <TableCell sx={{ paddingLeft: "32px" }}>Họ tên</TableCell>
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">Khoa</TableCell>
                 <TableCell align="left">Trạng thái</TableCell>
-                <TableCell
-                  align="left"
-                  sx={{
-                    paddingRight: "32px", // Thêm padding right cho ô cuối
-                  }}
-                >
+                <TableCell align="left" sx={{ paddingRight: "32px" }}>
                   Hành động
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentTeachers?.map((row: any) => (
+              {currentTeachers.map((row: any) => (
                 <TableRow
-                  key={row?.fullName}
+                  key={row?.id}
                   onClick={() => {
                     navigate(`/workspace/teacher/${row.id}/edit`);
                     dispatch(openAddTeacherDialog());
                   }}
                   sx={{
                     "&:last-child td": {
-                      borderBottom: "none", // Bỏ border bottom cho hàng cuối
+                      borderBottom: "none",
                     },
-                    // "&:last-child td:first-of-type": {
-                    //   borderBottomLeftRadius: "8px", // Bo góc trái dưới
-                    // },
-                    // "&:last-child td:last-child": {
-                    //   borderBottomRightRadius: "8px", // Bo góc phải dưới
-                    // },
                   }}
                 >
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    sx={{ paddingLeft: "32px" }}
-                  >
+                  <TableCell sx={{ paddingLeft: "32px" }}>
                     {row?.fullName}
                   </TableCell>
-                  <TableCell align="left">{row?.email || ""}</TableCell>
+                  <TableCell>{row?.email || ""}</TableCell>
                   <TableCell
-                    align="left"
                     sx={{
                       maxWidth: "300px",
                       whiteSpace: "nowrap",
@@ -246,74 +216,58 @@ const TeacherList = () => {
                   >
                     {row?.facutly}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell>
                     <Chip
-                      label={row?.status === "ACTIVE" ? "Active" : "Inactive"}
+                      label={row?.status === "ACTIVE" ? "ACTIVE" : "DELETED"}
                       size="small"
                       color={row?.status === "ACTIVE" ? "success" : "error"}
-                      sx={{
-                        fontWeight: 500,
-                        borderRadius: "4px",
-                      }}
+                      sx={{ fontWeight: 500, borderRadius: "4px" }}
                     />
                   </TableCell>
-                  <TableCell align="left" sx={{ paddingRight: "32px" }}>
-                    <IconButton size="small" onClick={handleClick}>
+                  <TableCell sx={{ paddingRight: "32px" }}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleClick(e, row.id)}
+                    >
                       <MoreVert fontSize="small" />
                     </IconButton>
-                    <Menu
-                      id="basic-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      slotProps={{
-                        list: {
-                          "aria-labelledby": "basic-button",
-                        },
-                      }}
-                      PaperProps={{
-                        sx: {
-                          px: 1,
-                          boxShadow: 1,
-                        },
-                      }}
-                    >
-                      <MenuItem
-                        sx={{ paddingY: 0 }}
-                        onClick={(e: any) => {
-                          handleClose(e);
-                          dispatch(openAddTeacherDialog());
-                          navigate(`/workspace/teacher/${row.id}/edit`);
-                        }}
-                      >
-                        <ListItemText
-                          primaryTypographyProps={{ fontSize: "12px" }}
-                        >
-                          Cập nhập
-                        </ListItemText>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        sx={{ paddingY: 0 }}
-                        onClick={(e) => openConfirmDialog(e, row?.id)}
-                      >
-                        <ListItemText
-                          primaryTypographyProps={{ fontSize: "12px" }}
-                        >
-                          Xóa
-                        </ListItemText>
-                      </MenuItem>
-                    </Menu>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Menu
+          anchorEl={menuState.anchorEl}
+          open={Boolean(menuState.anchorEl)}
+          onClose={() => handleClose()}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          PaperProps={{ sx: { px: 1, boxShadow: 1 } }}
+        >
+          <MenuItem
+            sx={{ paddingY: 0 }}
+            onClick={(e: any) => {
+              handleClose(e);
+              dispatch(openAddTeacherDialog());
+              navigate(`/workspace/teacher/${menuState.teacherId}/edit`);
+            }}
+          >
+            <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
+              Cập nhật
+            </ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            sx={{ paddingY: 0 }}
+            onClick={(e) => openConfirmDialog(e, menuState.teacherId)}
+          >
+            <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
+              Xóa
+            </ListItemText>
+          </MenuItem>
+        </Menu>
+
         <Stack spacing={2} sx={{ my: 2 }}>
           <Pagination
             count={totalPages}
