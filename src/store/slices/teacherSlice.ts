@@ -116,7 +116,7 @@ export const teacherSlice = createSlice({
 
     builder.addCase(addTeacher.fulfilled, (state, action) => {
       console.log({ data: action.payload.data });
-      state.data = [...state.data, action.payload.data];
+      state.data = [...state.data, action.payload];
     });
     builder.addCase(updateTeacher.fulfilled, (state, action) => {
       const { id } = action.meta.arg;
@@ -125,7 +125,7 @@ export const teacherSlice = createSlice({
       state.teacherDetail = action.payload.data;
     });
     builder.addCase(deleteUser.fulfilled, (state, action) => {
-      const { id } = action.meta.arg;
+      const id = action.meta.arg;
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = { ...state.data[index], status: "DELETED" };
       // state.teacherDetail = action.payload.data;

@@ -9,14 +9,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { showMessage } from "../../../components/FuseMessage/fuseMessageSlice";
 import { useDispatch } from "react-redux";
 import { type AppDispatch } from "../../../store/store";
 import { errorAnchor, successAnchor } from "../../../constants/confirm";
 import jwtService from "../../../services/auth/jwtService";
 import { Link, useNavigate } from "react-router-dom";
+import OtpInput from "./components/OtpInput";
+import ResetPassword from "./components/ResetPassword";
 
 const schema: any = yup.object().shape({
   email: yup
@@ -46,26 +46,22 @@ const ForgotPassword = () => {
   const { isValid, errors } = formState;
 
   const onSubmit = (data: any) => {
-    const { username, password } = data;
+    const { email } = data;
+    setEmail(email);
 
     setLoading(true);
     jwtService
-      .signInWithUsernameAndPassword(username, password)
-      .then((user: any) => {
+      .requestPin({ email })
+      .then(() => {
         // if (form?.remember) {
         //   localStorage.setItem("username", username);
         // } else {
         //   localStorage.setItem("username", "");
         // }
         // console.log({ user })
-        if (user?.data && user?.data?.role !== "ADMIN") {
-          navigate("/workspace/class");
-        } else {
-          navigate("/workspace/teacher");
-        }
-
+        setStep(2);
         dispatch(
-          showMessage({ message: "Đăng nhập thành công", ...successAnchor })
+          showMessage({ message: "Otp được gửi thành công", ...successAnchor })
         );
         setLoading(false);
       })
@@ -86,64 +82,72 @@ const ForgotPassword = () => {
   return (
     <div className="lg:w-1/4 sm:w-1/2 w-full rounded-xl m-auto sm:h-fit h-full shodow bg-white px-8 py-16 flex flex-col gap-y-6">
       <img src="/assets/images/logo_1.png" className="w-1/2" alt="" />
-      <div>
-        <Typography sx={{ fontSize: 24 }}>Quên mật khẩu</Typography>
-        <Typography sx={{ fontSize: 14 }}>
-          Hãy thực hiện các bước bên dưới để đặt lại mật khẩu
-        </Typography>
-      </div>
-      <form
-        action=""
-        onSubmit={handleSubmit(onSubmit)}
-        className=" flex flex-col gap-y-6"
-      >
-        <Controller
-          name="email"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              className=""
-              label="Nhập email của bạn"
-              autoFocus
-              type="text"
-              error={!!errors.email}
-              disabled={loading}
-              helperText={errors?.email?.message}
-              variant="outlined"
-              fullWidth
-              InputLabelProps={{
-                required: true,
-                classes: {
-                  asterisk: "text-red-500",
-                },
-              }}
+      {step === 1 && (
+        <>
+          <div>
+            <Typography sx={{ fontSize: 24 }}>Quên mật khẩu</Typography>
+            <Typography sx={{ fontSize: 14 }}>
+              Hãy thực hiện các bước bên dưới để đặt lại mật khẩu
+            </Typography>
+          </div>
+          <form
+            action=""
+            onSubmit={handleSubmit(onSubmit)}
+            className=" flex flex-col gap-y-6"
+          >
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  className=""
+                  label="Nhập email của bạn"
+                  autoFocus
+                  type="text"
+                  error={!!errors.email}
+                  disabled={loading}
+                  helperText={errors?.email?.message}
+                  variant="outlined"
+                  fullWidth
+                  InputLabelProps={{
+                    required: true,
+                    classes: {
+                      asterisk: "text-red-500",
+                    },
+                  }}
+                />
+              )}
             />
-          )}
-        />
-        <Button
-          variant="contained"
-          disabled={!isValid || loading}
-          type="submit"
-          sx={{
-            background: !isValid
-              ? "gray"
-              : "linear-gradient(to right, #3b82f6, #a855f7)",
-            borderRadius: "999px",
-            textTransform: "none",
-            color: "white",
-            width: "100%",
-            px: 3,
-            py: 1,
-          }}
-        >
-          Gửi OTP
-        </Button>
-      </form>
+            <Button
+              variant="contained"
+              disabled={!isValid || loading}
+              type="submit"
+              sx={{
+                background: !isValid
+                  ? "gray"
+                  : "linear-gradient(to right, #3b82f6, #a855f7)",
+                borderRadius: "999px",
+                textTransform: "none",
+                color: "white",
+                width: "100%",
+                px: 3,
+                py: 1,
+              }}
+            >
+              Gửi OTP
+            </Button>
+          </form>
+        </>
+      )}
+          {step === 2 && <OtpInput email={email} setStep={setStep} />}
+          {
+              step === 3 && <ResetPassword email={email} />
+          }
       <div className="flex items-center gap-x-2">
-        <Typography fontSize={16}>Trở lại</Typography>
+        <Typography fontSize={14}>Trở lại</Typography>
         <Link to="/auth/login" className="text-blue-500 underline">
-          <Typography fontSize={16}>Đăng nhập</Typography>
+          <Typography fontSize={14}>Đăng nhập</Typography>
         </Link>
       </div>
     </div>

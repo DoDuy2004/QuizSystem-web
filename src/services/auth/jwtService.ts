@@ -270,6 +270,105 @@ class JwtService {
   public getToken(): string | null {
     return window.localStorage.getItem("jwt_access_token");
   }
+
+  requestPin = (params: any) => {
+    const email = params?.email;
+
+    return new Promise((resolve, reject) => {
+      axios
+        .post(
+          // `${AUTH_DOMAIN}/api/user/requestPin?${queryParams.toString()}`,
+          `${import.meta.env.VITE_DOMAIN}/api/auth/forgot-password/request-pin`,
+
+          {
+            email,
+          }
+        )
+        .then((response) => resolve(response))
+        .catch(function (error) {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+          } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log("Error", error.message);
+          }
+
+          reject(error.response);
+        });
+    });
+  };
+
+  validatePin = (params: any) => {
+    const email = params?.email;
+    const otp = params?.otp;
+    return new Promise((resolve, reject) => {
+      axios
+        .post(
+          // `${AUTH_DOMAIN}/api/user/validatePin?${queryParams.toString()}`,
+          `${import.meta.env.VITE_DOMAIN}/api/auth/validatePin`,
+          {
+            email,
+            otp,
+          }
+        )
+        .then((response) => resolve(response))
+        .catch(function (error) {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+          } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log("Error", error.message);
+          }
+
+          reject(error.response);
+        });
+    });
+  };
+
+  resetPassword = (params: any) => {
+    const email = params?.email;
+    const password = params?.password;
+    return new Promise((resolve, reject) => {
+      axios
+        .post(
+          // `${AUTH_DOMAIN}/api/user/validatePin?${queryParams.toString()}`,
+          `${import.meta.env.VITE_DOMAIN}/api/auth/reset-password`,
+          {
+            email,
+            password,
+          }
+        )
+        .then((response) => resolve(response))
+        .catch(function (error) {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+          } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log("Error", error.message);
+          }
+
+          reject(error.response);
+        });
+    });
+  };
 }
 
 const jwtService = new JwtService();

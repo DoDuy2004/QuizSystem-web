@@ -131,6 +131,12 @@ const AddSubjectDialog = () => {
     }
   }, [routeParams?.id, student]);
 
+  useEffect(() => {
+    if (!addStudentDialog?.isOpen) {
+      reset(UserModel({}));
+    }
+  }, [addStudentDialog?.isOpen]);
+
   const handleClose = () => {
     navigate("/workspace/student/list");
     dispatch(closeAddStudentDialog());
