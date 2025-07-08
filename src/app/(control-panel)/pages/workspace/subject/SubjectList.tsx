@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../store/store";
+import SearchIcon from "@mui/icons-material/Search";
 import { useDeepCompareEffect } from "../../../../../hooks";
 // import { useRef } from "react";
 import CircularLoading from "../../../../../components/CircularLoading";
@@ -8,6 +9,7 @@ import {
   Button,
   Chip,
   IconButton,
+  InputAdornment,
   ListItemText,
   Menu,
   MenuItem,
@@ -18,6 +20,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
@@ -35,6 +38,7 @@ import PaginationItem from "@mui/material/PaginationItem";
 import Stack from "@mui/material/Stack";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { debounce } from "lodash";
 
 // const paginationModel = { page: 0, pageSize: 5 };
 
@@ -43,6 +47,8 @@ const SubjectList = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const subjects = useSelector(selectSubjects);
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -66,18 +72,49 @@ const SubjectList = () => {
     event.stopPropagation();
   };
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500); // Debounce 500ms
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          setLoading(true);
+          dispatch(getSubjects(text))
+            .unwrap()
+            .finally(() => setLoading(false));
+        }
+      }, 500),
+    [dispatch]
+  );
+
   useDeepCompareEffect(() => {
     setLoading(true);
-    dispatch(getSubjects())
+    dispatch(getSubjects(""))
       .unwrap()
       .finally(() => {
         setLoading(false);
       });
-
-    // return () => {
-    //   dispatch(resetSubjectState());
-    // };
   }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
+    debouncedSearch(text);
+  };
 
   if (loading) {
     return <CircularLoading delay={0} />;
@@ -97,7 +134,21 @@ const SubjectList = () => {
               </span>{" "}
               Môn học
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Tìm kiếm..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>

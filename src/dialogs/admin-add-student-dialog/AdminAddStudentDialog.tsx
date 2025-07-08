@@ -6,6 +6,8 @@ import { type TransitionProps } from "@mui/material/transitions";
 import withReducer from "../../store/withReducer";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   closeAddStudentDialog,
   selectAddStudentDialog,
@@ -15,6 +17,7 @@ import {
   Button,
   FormControl,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -63,29 +66,38 @@ const schema: any = yup.object().shape({
       "valid-phone",
       "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)",
       (value) => {
-        if (!value) return true; // Nếu trống thì hợp lệ
-        return /^0\d{9}$/.test(value); // Nếu có giá trị thì phải hợp lệ
+        if (!value) return true;
+        return /^0\d{9}$/.test(value);
       }
     ),
-
   fullName: yup.string().required("Họ tên là bắt buộc"),
   gender: yup.string(),
   birthday: yup.date().nullable(),
+  password: yup.string().when("$isCreate", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Mật khẩu là bắt buộc")
+        .min(6, "Mật khẩu phải từ 6 ký tự"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
-const AddSubjectDialog = () => {
+const AdminAddStudentDialog = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("sm")); // < 600px
   const isTablet = useThemeMediaQuery((theme) =>
     theme.breakpoints.between("sm", "md")
   );
   const dispatch = useDispatch<AppDispatch>();
   const [initialValues, setInitialValues] = useState(UserModel({}));
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const routeParams = useParams();
   const navigate = useNavigate();
   const student = useSelector(selectStudent);
   const addStudentDialog = useSelector(selectAddStudentDialog);
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [isCreate, setIsCreate] = useState(true);
 
   const {
     control,
@@ -97,6 +109,7 @@ const AddSubjectDialog = () => {
     mode: "onChange",
     resolver: yupResolver(schema),
     defaultValues: initialValues,
+    context: { isCreate },
   });
 
   console.log({ form: watch() });
@@ -104,9 +117,11 @@ const AddSubjectDialog = () => {
   useDeepCompareEffect(() => {
     if (!routeParams?.id) {
       setLoading(false);
+      setIsCreate(true);
     }
 
     if (routeParams?.id && addStudentDialog?.isOpen) {
+      setIsCreate(false);
       dispatch(getStudent(routeParams?.id))
         .unwrap()
         .finally(() => {
@@ -133,7 +148,7 @@ const AddSubjectDialog = () => {
 
   useEffect(() => {
     if (!addStudentDialog?.isOpen) {
-      reset(UserModel({}));
+      reset({ ...UserModel({}), password: "" });
     }
   }, [addStudentDialog?.isOpen]);
 
@@ -144,13 +159,18 @@ const AddSubjectDialog = () => {
 
   const onSubmit = (data: any) => {
     setButtonLoading(true);
-    const payload = {
+    let payload = {
       gender: data.gender === "MALE" ? true : false,
       dateOfBirth: new Date(data.birthday),
       fullName: data?.fullName,
       email: data?.email,
       phoneNumber: data?.phoneNumber,
+      role: "STUDENT",
+      password: data.password,
     };
+
+    // if (isCreate) {
+    // }
 
     const action = routeParams?.id
       ? updateStudent({ id: student?.id, form: payload })
@@ -238,6 +258,46 @@ const AddSubjectDialog = () => {
                   />
                 )}
               />
+
+              {isCreate && (
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }: any) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type={showPassword ? "text" : "password"}
+                      label={
+                        <>
+                          Mật khẩu <span className="text-red-500">*</span>
+                        </>
+                      }
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      slotProps={{
+                        input: {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              {showPassword ? (
+                                <VisibilityIcon
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => setShowPassword(false)}
+                                />
+                              ) : (
+                                <VisibilityOffIcon
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => setShowPassword(true)}
+                                />
+                              )}
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
+                    />
+                  )}
+                />
+              )}
 
               <Controller
                 name="phoneNumber"
@@ -330,4 +390,4 @@ const AddSubjectDialog = () => {
   );
 };
 
-export default withReducer("students", reducer)(AddSubjectDialog);
+export default withReducer("students", reducer)(AdminAddStudentDialog);

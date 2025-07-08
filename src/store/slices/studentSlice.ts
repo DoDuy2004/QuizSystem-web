@@ -12,13 +12,13 @@ const initialState: StudentStateProps = {
   studentDetail: {},
 };
 
-export const getStudents = createAsyncThunk("student/getStudents", async () => {
-  const response: any = await StudentService.getStudents();
-
-  const data = response.data;
-
-  return data;
-});
+export const getStudents = createAsyncThunk(
+  "student/getStudents",
+  async (searchText?: string) => {
+    const response: any = await StudentService.getStudents(searchText);
+    return response.data;
+  }
+);
 
 export const importStudents = createAsyncThunk(
   "student/import",

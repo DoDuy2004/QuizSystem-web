@@ -28,14 +28,13 @@ export const getChapters = createAsyncThunk(
   }
 );
 
-export const getSubjects = createAsyncThunk("subject/getSubjects", async () => {
-  const response: any = await SubjectService.getSubjects();
-
-  const data = response.data;
-
-  return data;
-});
-
+export const getSubjects = createAsyncThunk(
+  "subject/getSubjects",
+  async (searchText?: string) => {
+    const response: any = await SubjectService.getSubjects(searchText);
+    return response.data;
+  }
+);
 export const getSubjectById = createAsyncThunk(
   "subject/getSubjectById",
   async (id: string) => {
