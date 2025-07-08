@@ -4,6 +4,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { type TransitionProps } from "@mui/material/transitions";
 import withReducer from "../../store/withReducer";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -15,6 +17,7 @@ import {
   Button,
   FormControl,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -63,14 +66,21 @@ const schema: any = yup.object().shape({
       "valid-phone",
       "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)",
       (value) => {
-        if (!value) return true; // Nếu trống thì hợp lệ
-        return /^0\d{9}$/.test(value); // Nếu có giá trị thì phải hợp lệ
+        if (!value) return true;
+        return /^0\d{9}$/.test(value);
       }
     ),
-
   fullName: yup.string().required("Họ tên là bắt buộc"),
   gender: yup.string(),
   birthday: yup.date().nullable(),
+  password: yup.string().when("$isCreate", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Mật khẩu là bắt buộc")
+        .min(6, "Mật khẩu phải từ 6 ký tự"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 const AddTeacherDialog = () => {
@@ -79,6 +89,8 @@ const AddTeacherDialog = () => {
     theme.breakpoints.between("sm", "md")
   );
   const dispatch = useDispatch<AppDispatch>();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isCreate, setIsCreate] = useState(true);
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState(UserModel({}));
   const routeParams = useParams();
@@ -97,6 +109,7 @@ const AddTeacherDialog = () => {
     mode: "onChange",
     resolver: yupResolver(schema),
     defaultValues: initialValues,
+    context: { isCreate },
   });
 
   //   useEffect(() => {
@@ -119,10 +132,12 @@ const AddTeacherDialog = () => {
   useDeepCompareEffect(() => {
     // setLoading(true);
     if (!routeParams?.id) {
+      setIsCreate(true);
       setLoading(false);
     }
 
     if (routeParams?.id && addTeacherDialog?.isOpen) {
+      setIsCreate(false);
       dispatch(getTeacher(routeParams?.id))
         .unwrap()
         .finally(() => {
@@ -163,6 +178,8 @@ const AddTeacherDialog = () => {
       fullName: data?.fullName,
       email: data?.email,
       phoneNumber: data?.phoneNumber,
+      role: "TEACHER",
+      password: data.password,
     };
     // console.log({ payload });
 
@@ -252,6 +269,46 @@ const AddTeacherDialog = () => {
                 )}
               />
 
+              {isCreate && (
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }: any) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type={showPassword ? "text" : "password"}
+                      label={
+                        <>
+                          Mật khẩu <span className="text-red-500">*</span>
+                        </>
+                      }
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      slotProps={{
+                        input: {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              {showPassword ? (
+                                <VisibilityIcon
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => setShowPassword(false)}
+                                />
+                              ) : (
+                                <VisibilityOffIcon
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => setShowPassword(true)}
+                                />
+                              )}
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
+                    />
+                  )}
+                />
+              )}
+
               <Controller
                 name="phoneNumber"
                 control={control}
@@ -260,8 +317,8 @@ const AddTeacherDialog = () => {
                     {...field}
                     fullWidth
                     label="Số điện thoại"
-                    error={!!errors.phone}
-                    helperText={errors.phone?.message}
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber?.message}
                   />
                 )}
               />

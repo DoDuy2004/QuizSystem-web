@@ -16,6 +16,7 @@ function UserModel(data?: any) {
     createdAt: "",
     role: null,
     phoneNumber: "",
+    password: "",
   });
 }
 

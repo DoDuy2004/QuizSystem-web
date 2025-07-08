@@ -12,13 +12,13 @@ const initialState: TeacherStateProps = {
   teacherDetail: {},
 };
 
-export const getTeachers = createAsyncThunk("teacher/getTeachers", async () => {
-  const response: any = await TeacherService.getTeachers();
-
-  const data = response.data;
-
-  return data;
-});
+export const getTeachers = createAsyncThunk(
+  "teacher/getTeachers", 
+  async (searchText?: string) => {
+    const response: any = await TeacherService.getTeachers(searchText);
+    return response.data;
+  }
+);
 
 export const getTeacher = createAsyncThunk(
   "teacher/getTeacher",

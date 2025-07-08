@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../store/store";
 import { useDeepCompareEffect } from "../../../../../hooks";
+import SearchIcon from "@mui/icons-material/Search";
 // import { useRef } from "react";
 import CircularLoading from "../../../../../components/CircularLoading";
 import {
@@ -9,6 +10,7 @@ import {
   Chip,
   Divider,
   IconButton,
+  InputAdornment,
   ListItemText,
   Menu,
   MenuItem,
@@ -19,6 +21,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
@@ -41,6 +44,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { openConfirmationDialog } from "../../../../../store/slices/confirmationSlice";
 import { deleteUser } from "../../../../../store/slices/teacherSlice";
+import { debounce } from "lodash";
 
 // const paginationModel = { page: 0, pageSize: 5 };
 
@@ -49,6 +53,7 @@ const StudentList = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const students = useSelector(selectStudents);
+  const [searchText, setSearchText] = useState("");
 
   const [menuState, setMenuState] = useState<{
     anchorEl: null | HTMLElement;
@@ -62,6 +67,38 @@ const StudentList = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          setLoading(true);
+          dispatch(getStudents(text))
+            .unwrap()
+            .finally(() => setLoading(false));
+        }
+      }, 500),
+    [dispatch]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  useDeepCompareEffect(() => {
+    setLoading(true);
+    dispatch(getStudents(searchText))
+      .unwrap()
+      .finally(() => setLoading(false));
+  }, [dispatch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
+    debouncedSearch(text);
+  };
 
   useDeepCompareEffect(() => {
     setLoading(true);
@@ -114,13 +151,33 @@ const StudentList = () => {
       <div className="bg-white rounded-md shadow-md">
         <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-x-4">
-            <Typography fontSize={15}>
+            <Typography className="w-1/2" fontSize={15}>
               <span className="text-blue-600 font-semibold">
                 {students?.length}
               </span>{" "}
               sinh viên
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Nhập tên hoặc email hoặc khoa"
+              variant="outlined"
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiInputBase-input::placeholder": {
+                  fontSize: "0.8rem", 
+                  opacity: 0.6, 
+                },
+              }}
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>
