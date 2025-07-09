@@ -137,18 +137,46 @@ const ComposeQuestion = () => {
     }
   };
 
+  const handleDeleteQuestion = async () => {
+    if (!question?.id) return;
+
+    try {
+      await dispatch(
+        deleteQuestionFromExam({
+          examId: routeParams?.id,
+          questionId: question?.id,
+        })
+      );
+
+      // Cập nhật state ngay lập tức
+      const newQuestionsData = questionsData.filter(
+        (q: any) => q.id !== question.id
+      );
+      setQuestionsData(newQuestionsData);
+      setNoOfQuestions(newQuestionsData.length);
+
+      // Reset active question
+      if (newQuestionsData.length > 0) {
+        setIsActive(0);
+        await dispatch(getQuestionById(newQuestionsData[0].id)).then((res) =>
+          setQuestion(res.payload.data)
+        );
+      } else {
+        setIsActive(null);
+        setQuestion({});
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa câu hỏi:", error);
+    }
+  };
+
   const openConfirmDialog = () => {
     dispatch(
       openConfirmationDialog({
         data: {
           onAgree: () => {
-            dispatch(
-              deleteQuestionFromExam({
-                examId: routeParams?.id,
-                questionId: question?.id,
-              })
-            );
-            dispatch(setImportStatus("succeeded"));
+            handleDeleteQuestion();
+            // dispatch(setImportStatus("succeeded"));
           },
           dialogContent: "Bạn có chắc muốn xóa câu hỏi này",
           titleContent: "Xóa câu hỏi",

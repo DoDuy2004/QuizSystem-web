@@ -144,7 +144,7 @@ const ResetPassword = ({ email }: any) => {
             py: 1,
           }}
         >
-          Gửi OTP
+          Đặt lại mặt khẩu
         </Button>
       </form>
     </>
