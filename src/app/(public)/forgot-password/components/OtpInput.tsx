@@ -22,7 +22,7 @@ const validationSchema = () =>
 const OtpInput = ({ email, setStep }: any) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [timer, setTimer] = useState(0);
+  const [timer, setTimer] = useState(60); // Bắt đầu với 60 giây
   const isEmail = !isEmpty(email);
   const [loading, setLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -41,17 +41,21 @@ const OtpInput = ({ email, setStep }: any) => {
   });
 
   useEffect(() => {
-    const countdown = setInterval(() => {
-      setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
-    }, 1000);
-
-    if (timer === 0) {
+    let countdown: NodeJS.Timeout;
+    if (timer > 0) {
+      countdown = setInterval(() => {
+        setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
+      }, 1000);
+      setIsButtonDisabled(true);
+      setIsResend(true);
+    } else {
       setIsButtonDisabled(false);
       setIsResend(false);
-      clearInterval(countdown);
     }
 
-    return () => clearInterval(countdown);
+    return () => {
+      if (countdown) clearInterval(countdown);
+    };
   }, [timer]);
 
   const onSubmit = (data: any) => {
@@ -84,11 +88,11 @@ const OtpInput = ({ email, setStep }: any) => {
   };
 
   const resentPin = () => {
+    setTimer(60); // Đặt lại timer khi gửi lại OTP
+    setIsResend(true);
+    setIsButtonDisabled(true);
     jwtService
-      .requestPin({
-        email,
-      })
-
+      .requestPin({ email })
       .then((res: any) => {
         if (!res?.error) {
           dispatch(
@@ -105,6 +109,9 @@ const OtpInput = ({ email, setStep }: any) => {
             })
           );
         }
+      })
+      .catch((error: any) => {
+        console.error("Error resending pin:", error);
       });
   };
 
@@ -147,12 +154,12 @@ const OtpInput = ({ email, setStep }: any) => {
             </Typography>
           )}
           <Button
-            size={"large"}
-            variant={"contained"}
+            size="large"
+            variant="contained"
             color="secondary"
             disabled={!isValid}
             loading={loading}
-            type={"submit"}
+            type="submit"
             sx={{ textTransform: "none" }}
           >
             Tiếp tục
@@ -167,10 +174,6 @@ const OtpInput = ({ email, setStep }: any) => {
                 disabled={isButtonDisabled}
                 sx={{ textTransform: "none" }}
               >
-                {/* {isButtonDisabled && isEmail
-                    ? `${t('RESEND_IN')} ${timer}s` 
-                    : t('RESEND')} */}
-
                 {isResend ? `Gửi lại sau ${timer}s` : "Gửi lại"}
               </Button>
             </Typography>
