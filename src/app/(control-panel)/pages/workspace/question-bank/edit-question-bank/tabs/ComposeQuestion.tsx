@@ -112,7 +112,7 @@ const ComposeQuestion = () => {
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, questionsData]);
+  }, [dispatch, routeParams?.id, questionBank?.questions]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {

@@ -43,14 +43,22 @@ const initialState: ExamStateProps = {
   },
 };
 
+// export const getRoomExams = createAsyncThunk(
+//   "roomExam/getRoomExams",
+//   async () => {
+//     const response: any = await RoomExamService.getRoomExams();
+
+//     const data = response.data;
+
+//     return data;
+//   }
+// );
+
 export const getRoomExams = createAsyncThunk(
   "roomExam/getRoomExams",
-  async () => {
-    const response: any = await RoomExamService.getRoomExams();
-
-    const data = response.data;
-
-    return data;
+  async (searchText?: string) => {
+    const response: any = await RoomExamService.getRoomExams(searchText);
+    return response.data;
   }
 );
 
@@ -79,25 +87,33 @@ export const createRoomExam = createAsyncThunk(
   }
 );
 
+// export const getRoomExamsByStudent = createAsyncThunk(
+//   "student/getRoomExams",
+//   async (id: string) => {
+//     const response: any = await RoomExamService.getRoomExamsByStudent(id);
+
+//     const data = response.data;
+
+//     return data;
+//   }
+// );
+
 export const getRoomExamsByStudent = createAsyncThunk(
   "student/getRoomExams",
-  async (id: string) => {
-    const response: any = await RoomExamService.getRoomExamsByStudent(id);
-
-    const data = response.data;
-
-    return data;
+  async ({ id, search }: { id: string; search?: string }) => {
+    const response: any = await RoomExamService.getRoomExamsByStudent(
+      id,
+      search
+    );
+    return response.data;
   }
 );
 
 export const getRoomExamResults = createAsyncThunk(
   "student/getRoomExamResults",
-  async () => {
-    const response: any = await RoomExamService.getRoomExamResults();
-
-    const data = response.data;
-
-    return data;
+  async (searchText: string = "") => {
+    const response: any = await RoomExamService.getRoomExamResults(searchText);
+    return response.data;
   }
 );
 

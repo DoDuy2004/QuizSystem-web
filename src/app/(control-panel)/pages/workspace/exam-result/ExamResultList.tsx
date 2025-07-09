@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import withReducer from "../../../../../store/withReducer";
+import SearchIcon from "@mui/icons-material/Search";
 import { type AppDispatch } from "../../../../../store/store";
 import { useDeepCompareEffect } from "../../../../../hooks";
 // import FullscreenLoader from "../../../../../components/FullscreenLoader";
@@ -11,6 +11,7 @@ import {
   Button,
   Chip,
   IconButton,
+  InputAdornment,
   Paper,
   Table,
   TableBody,
@@ -18,19 +19,16 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
 // import ExamListItem from "./components/ExamListItem";
-import {
-  getExams,
-  resetExamState,
-  selectExams,
-} from "../../../../../store/slices/examSlice";
 import { getRoomExamResults } from "../../../../../store/slices/roomExamSlice";
 import { selectUser } from "../../../../../store/slices/userSlice";
+import { debounce } from "lodash";
 // import ExamResultItem from "./components/ExamResultItem";
 
 const ExamResult = () => {
@@ -40,6 +38,7 @@ const ExamResult = () => {
   const [endRoomExams, setEndRoomExams] = useState([]);
   const user = useSelector(selectUser);
   const navigate = useNavigate();
+  const [searchText, setSearchText] = useState("");
   //   console.log({ questionBanks });
 
   function formatVietnamTime(dateString: string): string {
@@ -55,21 +54,37 @@ const ExamResult = () => {
 
   useDeepCompareEffect(() => {
     setLoading(true);
-    dispatch(getRoomExamResults())
+    fetchRoomExams();
+  }, [dispatch]);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          fetchRoomExams(text);
+        }
+      }, 500),
+    []
+  );
+
+  const fetchRoomExams = (search = "") => {
+    setLoading(true);
+    dispatch(getRoomExamResults(search))
       .unwrap()
       .then((res) => {
-        console.log({ res });
         if (user?.role === "STUDENT") setExamResults(res.data);
         else setEndRoomExams(res.data);
       })
       .finally(() => {
         setLoading(false);
       });
+  };
 
-    return () => {
-      dispatch(resetExamState());
-    };
-  }, [dispatch]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
 
   if (loading) {
     return <CircularLoading delay={0} />;
@@ -91,7 +106,21 @@ const ExamResult = () => {
               </span>{" "}
               {user?.role === "STUDENT" ? "bài thi" : "kỳ thi"}
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Tìm kiếm kỳ thi..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>

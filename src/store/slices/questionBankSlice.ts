@@ -49,14 +49,12 @@ const initialState: QuestionBankStateProps = {
 
 export const getQuestionBanks = createAsyncThunk(
   "questionBank/getQuestionBanks",
-  async () => {
-    const response: any = await QuestionBankService.getQuestionBanks();
-
-    const data = response.data;
-
-    return data;
+  async (searchText?: string) => {
+    const response: any = await QuestionBankService.getQuestionBanks(searchText);
+    return response.data;
   }
 );
+
 
 export const getQuestionBankById = createAsyncThunk(
   "questionBank/getQuestionBankById",
