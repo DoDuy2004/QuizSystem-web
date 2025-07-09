@@ -72,18 +72,25 @@ const OtpInput = ({ email, setStep }: any) => {
               ...successAnchor,
             })
           );
-          setStep(3);
+          setStep(3); // Chỉ chuyển bước khi không có lỗi
         } else {
           dispatch(
             showMessage({
-              message: "OTP sai",
+              message: res?.message || "OTP không hợp lệ hoặc đã hết hạn",
               ...errorAnchor,
             })
           );
         }
       })
       .catch((error: any) => {
+        setLoading(false);
         console.log({ error });
+        dispatch(
+          showMessage({
+            message: "Lỗi khi xác nhận OTP",
+            ...errorAnchor,
+          })
+        );
       });
   };
 
