@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import withReducer from "../../../../../store/withReducer";
 import { type AppDispatch } from "../../../../../store/store";
@@ -7,11 +7,18 @@ import { useDeepCompareEffect } from "../../../../../hooks";
 import { useRef } from "react";
 // import reducer from "./store";
 import CircularLoading from "../../../../../components/CircularLoading";
-import { Button, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
 import RoomExamListItem from "./components/RoomExamListItem";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   getRoomExams,
   getRoomExamsByStudent,
@@ -20,6 +27,7 @@ import {
 } from "../../../../../store/slices/roomExamSlice";
 import { openAddRoomExamDialog } from "../../../../../store/slices/globalSlice";
 import { selectUser } from "../../../../../store/slices/userSlice";
+import { debounce } from "lodash";
 
 const RoomExamList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,23 +36,44 @@ const RoomExamList = () => {
   const navigate = useNavigate();
   const roomExams = useSelector(selectRoomExams);
   const user = useSelector(selectUser);
+  const [searchText, setSearchText] = useState("");
   //   console.log({ questionBanks });
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          fetchRoomExams(text);
+        }
+      }, 500),
+    [user]
+  );
+
+  const fetchRoomExams = (search = "") => {
+    setLoading(true);
+    if (user?.role === "TEACHER") {
+      dispatch(getRoomExams(search))
+        .unwrap()
+        .finally(() => setLoading(false));
+    } else {
+      dispatch(getRoomExamsByStudent({ id: user?.id, search }))
+        .unwrap()
+        .finally(() => setLoading(false));
+    }
+  };
 
   useDeepCompareEffect(() => {
     if (hasFetched.current) return;
 
     hasFetched.current = true;
+    fetchRoomExams();
+  }, [dispatch, user?.role, user?.id]);
 
-    if (user?.role === "TEACHER") {
-      dispatch(getRoomExams()).finally(() => {
-        setLoading(false);
-      });
-    } else {
-      dispatch(getRoomExamsByStudent(user?.id)).finally(() => {
-        setLoading(false);
-      });
-    }
-  }, [dispatch]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
+    debouncedSearch(text);
+  };
 
   if (loading || (!roomExams?.length && !hasFetched.current)) {
     return <CircularLoading delay={0} />;
@@ -64,7 +93,21 @@ const RoomExamList = () => {
               </span>{" "}
               kỳ thi
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Tìm kiếm kỳ thi..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>

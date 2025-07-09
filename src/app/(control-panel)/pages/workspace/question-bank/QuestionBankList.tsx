@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getQuestionBanks,
@@ -12,19 +12,41 @@ import { useDeepCompareEffect } from "../../../../../hooks";
 import { useRef } from "react";
 // import reducer from "./store";
 import CircularLoading from "../../../../../components/CircularLoading";
-import { Button, IconButton, Typography } from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
 import QuestionBankItem from "./components/QuestionBankItem";
 import SearchInput from "../../../../../components/SearchInput";
+import SearchIcon from "@mui/icons-material/Search";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 
 const QuestionBankList = () => {
   const questionBanks = useSelector(selectQuestionBanks);
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
   const hasFetched = useRef(false);
+  const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
   //   console.log({ questionBanks });
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          setLoading(true);
+          dispatch(getQuestionBanks(text))
+            .unwrap()
+            .finally(() => setLoading(false));
+        }
+      }, 500),
+    [dispatch]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   useDeepCompareEffect(() => {
     if (hasFetched.current) return;
@@ -32,7 +54,7 @@ const QuestionBankList = () => {
     setLoading(true);
     hasFetched.current = true;
 
-    dispatch(getQuestionBanks()).finally(() => {
+    dispatch(getQuestionBanks(searchText)).finally(() => {
       setLoading(false);
     });
 
@@ -40,6 +62,12 @@ const QuestionBankList = () => {
       dispatch(resetQuestionBankState());
     };
   }, [dispatch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
+    debouncedSearch(text);
+  };
 
   if (loading || (!questionBanks?.length && !hasFetched.current)) {
     return <CircularLoading delay={0} />;
@@ -59,7 +87,21 @@ const QuestionBankList = () => {
               </span>{" "}
               Ngân hàng
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Tìm kiếm ngân hàng câu hỏi..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>

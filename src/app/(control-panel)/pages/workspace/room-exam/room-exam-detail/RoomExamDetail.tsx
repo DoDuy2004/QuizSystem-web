@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Box,
   Card,
@@ -29,10 +27,8 @@ import _ from "lodash";
 import {
   getExambyId,
   getQuestionsByExam,
-  selectExamDetail,
 } from "../../../../../../store/slices/examSlice";
 import { selectUser } from "../../../../../../store/slices/userSlice";
-import Student from "../../student/Student";
 import {
   isSubmitted,
   submitExam,
@@ -64,18 +60,15 @@ const RoomExamDetail = () => {
     [questionId: string]: string | string[];
   }>({});
   const [submitting, setSubmitting] = useState(false);
-  // const [submissionResult, setSubmissionResult] = useState<SubmissionAnswer[]>([])
-
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const roomExam = useSelector(selectRoomExam);
-  const [questionsData, setQuestionsData] = useState([]);
+  const [questionsData, setQuestionsData] = useState<Question[]>([]);
   const [examInfo, setExamInfo] = useState<any>({});
   const [loading, setLoading] = useState(true);
-  // const exam = useSelector(selectExamDetail);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
   const user = useSelector(selectUser);
   const [submitted, setSubmitted] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
   const formatTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60)
@@ -87,20 +80,22 @@ const RoomExamDetail = () => {
     return `${m}:${s}`;
   };
 
-  useEffect(() => {
-    if (examInfo?.durationMinutes) {
-      setTimeLeft(examInfo.durationMinutes * 60); // convert phút => giây
-    }
-  }, [examInfo]);
+  console.log({ roomExam });
 
   useEffect(() => {
-    if (timeLeft <= 0 || submitted) return;
+    if (roomExam?.data?.timeRemaining !== undefined) {
+      setTimeRemaining(roomExam?.data?.timeRemaining);
+    }
+  }, [roomExam]);
+
+  useEffect(() => {
+    if (timeRemaining <= 0 || submitted) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
+      setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmit(); // Tự động nộp bài khi hết giờ
+          handleSubmit();
           return 0;
         }
         return prev - 1;
@@ -108,7 +103,7 @@ const RoomExamDetail = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, submitted]);
+  }, [timeRemaining, submitted]);
 
   useEffect(() => {
     dispatch(isSubmitted({ roomId: id, studentId: user.id }))
@@ -124,7 +119,8 @@ const RoomExamDetail = () => {
       if (id) {
         setLoading(true);
         try {
-          await dispatch(getRoomExambyId({ id })).unwrap();
+          const response = await dispatch(getRoomExambyId({ id })).unwrap();
+          console.log("RoomExam response:", response);
         } finally {
           setLoading(false);
         }
@@ -135,7 +131,7 @@ const RoomExamDetail = () => {
 
   useEffect(() => {
     const fetchExamAndQuestions = async () => {
-      const examId = roomExam?.data?.exams?.[0]?.id;
+      const examId = roomExam?.exams?.[0]?.id;
       if (examId) {
         setLoading(true);
         try {
@@ -159,12 +155,11 @@ const RoomExamDetail = () => {
       }
     };
 
-    if (!_.isEmpty(roomExam?.data?.exams)) {
+    if (roomExam?.id) {
       fetchExamAndQuestions();
     }
   }, [dispatch, roomExam]);
 
-  // Xử lý chọn đáp án cho single choice
   const handleSingleChoice = (questionId: string, answerId: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -172,7 +167,6 @@ const RoomExamDetail = () => {
     }));
   };
 
-  // Xử lý chọn đáp án cho multiple choice
   const handleMultipleChoice = (
     questionId: string,
     answerId: string,
@@ -183,7 +177,6 @@ const RoomExamDetail = () => {
       const newAnswers = checked
         ? [...currentAnswers, answerId]
         : currentAnswers.filter((id) => id !== answerId);
-
       return {
         ...prev,
         [questionId]: newAnswers,
@@ -191,21 +184,17 @@ const RoomExamDetail = () => {
     });
   };
 
-  // Chuyển đổi answers thành format submit
   const convertToSubmissionFormat = (): SubmissionAnswer[] => {
     const submissionData: SubmissionAnswer[] = [];
-
     Object.entries(answers).forEach(([questionId, answerValue]) => {
       if (Array.isArray(answerValue)) {
-        // Multiple choice: tạo một object với array answerIds
         if (answerValue.length > 0) {
           submissionData.push({
             questionId,
-            answerIds: answerValue.filter((id) => id), // Lọc bỏ các giá trị empty
+            answerIds: answerValue.filter((id) => id),
           });
         }
       } else {
-        // Single choice: tạo một object với array chứa một answerId
         if (answerValue) {
           submissionData.push({
             questionId,
@@ -214,35 +203,26 @@ const RoomExamDetail = () => {
         }
       }
     });
-
     return submissionData;
   };
 
-  // Tính toán tiến độ
   const calculateProgress = (): number => {
     const answeredQuestions = Object.values(answers).filter((answer) => {
-      if (Array.isArray(answer)) {
-        return answer.length > 0;
-      }
+      if (Array.isArray(answer)) return answer.length > 0;
       return answer !== "";
     }).length;
-
-    return (answeredQuestions / questionsData?.length) * 100;
+    return (answeredQuestions / questionsData.length) * 100;
   };
 
   const getAnsweredCount = (): number => {
     return Object.values(answers).filter((answer) => {
-      if (Array.isArray(answer)) {
-        return answer.length > 0;
-      }
+      if (Array.isArray(answer)) return answer.length > 0;
       return answer !== "";
     }).length;
   };
 
-  // Xử lý submit
   const handleSubmit = async () => {
     const submissionData = convertToSubmissionFormat();
-
     const payload = {
       examId: examInfo?.id,
       studentId: user?.id,
@@ -260,12 +240,8 @@ const RoomExamDetail = () => {
     setSubmitting(true);
 
     try {
-      // Mock API call
-      // await new Promise((resolve) => setTimeout(resolve, 1500))
-      dispatch(submitExam({ form: payload }));
-      // setSubmissionResult(submissionData)
+      await dispatch(submitExam({ form: payload }));
       setSubmitted(true);
-      // console.log("Dữ liệu đã submit:", submissionData);
     } catch (error) {
       console.error("Lỗi khi nộp bài:", error);
       alert("Có lỗi xảy ra khi nộp bài!");
@@ -286,23 +262,8 @@ const RoomExamDetail = () => {
             <Typography variant="h5" gutterBottom>
               Nộp bài thành công (Bạn đã hoàn thành bài thi)! 🎉
             </Typography>
-            {/* <Typography variant="body2" color="text.secondary" gutterBottom>
-              Bạn đã trả lời {answeredCount}/{questionsData?.length} câu hỏi
-            </Typography> */}
           </CardContent>
         </Card>
-        {/* <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Dữ liệu đã submit (Format API):
-            </Typography>
-            <Paper sx={{ p: 2, backgroundColor: "#f5f5f5" }}>
-              <Typography component="pre" sx={{ fontSize: "14px", overflow: "auto" }}>
-                {JSON.stringify(submissionResult, null, 2)}
-              </Typography>
-            </Paper>
-          </CardContent>
-        </Card> */}
       </Box>
     );
   }
@@ -311,7 +272,6 @@ const RoomExamDetail = () => {
 
   return (
     <div className="grid grid-cols-6 gap-3">
-      {/* Header */}
       <div className="col-span-2 h-fit">
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ p: 2 }}>
@@ -326,18 +286,18 @@ const RoomExamDetail = () => {
                 Môn: {examInfo?.subject?.name}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Thời gian: {examInfo?.durationMinutes} phút
+                Thời gian: {roomExam?.data?.durationMinutes} phút
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: "bold",
                   fontSize: "14px",
-                  color: timeLeft <= 60 ? "error.main" : "text.primary",
+                  color: timeRemaining <= 60 ? "error.main" : "text.primary",
                   mt: 1,
                 }}
               >
-                ⏳ Thời gian còn lại: {formatTime(timeLeft)}
+                ⏳ Thời gian còn lại: {formatTime(timeRemaining)}
               </Typography>
             </div>
             <Box
@@ -345,14 +305,12 @@ const RoomExamDetail = () => {
             >
               <Typography variant="body2">
                 Tiến độ: {Math.round(progress)}% ({answeredCount}/
-                {questionsData?.length} câu)
+                {questionsData.length} câu)
               </Typography>
               <Chip
-                label={`${answeredCount}/${questionsData?.length}`}
+                label={`${answeredCount}/${questionsData.length}`}
                 color={
-                  answeredCount === questionsData?.length
-                    ? "success"
-                    : "primary"
+                  answeredCount === questionsData.length ? "success" : "primary"
                 }
                 size="small"
                 sx={{ fontSize: "11px", height: "20px" }}
@@ -392,7 +350,7 @@ const RoomExamDetail = () => {
                   color="text.secondary"
                   sx={{ fontSize: "12px" }}
                 >
-                  Đã trả lời: {answeredCount}/{questionsData?.length} câu hỏi
+                  Đã trả lời: {answeredCount}/{questionsData.length} câu hỏi
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", gap: 1.5 }}>
@@ -435,10 +393,8 @@ const RoomExamDetail = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Questions */}
       <div className="col-span-4 h-screen overflow-y-scroll">
-        {questionsData?.map((question: any, index: number) => (
+        {questionsData.map((question: Question, index: number) => (
           <Card key={question.id} sx={{ mb: 2 }}>
             <CardContent sx={{ p: 1.5 }}>
               <Box
@@ -453,45 +409,43 @@ const RoomExamDetail = () => {
                   variant="body1"
                   sx={{ flex: 1, fontSize: "14px", fontWeight: 500 }}
                 >
-                  Câu {index + 1}: {question?.content}
+                  Câu {index + 1}: {question.questionText}
                 </Typography>
                 <Chip
                   icon={
-                    question?.type === "MultipleChoice" ? (
+                    question.type === "multiple" ? (
                       <CheckCircle sx={{ fontSize: 14 }} />
                     ) : (
                       <RadioButtonUnchecked sx={{ fontSize: 14 }} />
                     )
                   }
                   label={
-                    question.type === "MultipleChoice"
+                    question.type === "multiple"
                       ? "Nhiều lựa chọn"
                       : "Một lựa chọn"
                   }
                   size="small"
-                  color={
-                    question.type === "MultipleChoice" ? "secondary" : "primary"
-                  }
+                  color={question.type === "multiple" ? "secondary" : "primary"}
                   variant="outlined"
                   sx={{ fontSize: "10px", height: "22px" }}
                 />
               </Box>
               <FormControl component="fieldset" sx={{ width: "100%" }}>
-                {question.type === "SingleChoice" ? (
+                {question.type === "single" ? (
                   <RadioGroup
                     value={answers[question.id] || ""}
                     onChange={(e) =>
                       handleSingleChoice(question.id, e.target.value)
                     }
                   >
-                    {question?.answers?.map((answer: any) => (
+                    {question.answers.map((answer: Answer) => (
                       <FormControlLabel
                         key={answer.id}
                         value={answer.id}
                         control={<Radio size="small" />}
                         label={
                           <Typography variant="body2" sx={{ fontSize: "13px" }}>
-                            {answer.content}
+                            {answer.text}
                           </Typography>
                         }
                         sx={{
@@ -518,7 +472,7 @@ const RoomExamDetail = () => {
                     >
                       💡 Có thể chọn nhiều đáp án
                     </Typography>
-                    {question.answers.map((answer: any) => (
+                    {question.answers.map((answer: Answer) => (
                       <FormControlLabel
                         key={answer.id}
                         control={
@@ -541,7 +495,7 @@ const RoomExamDetail = () => {
                         }
                         label={
                           <Typography variant="body2" sx={{ fontSize: "13px" }}>
-                            {answer.content}
+                            {answer.text}
                           </Typography>
                         }
                         sx={{
@@ -564,8 +518,6 @@ const RoomExamDetail = () => {
                   </Box>
                 )}
               </FormControl>
-
-              {/* Hiển thị đáp án đã chọn */}
               <Box
                 sx={{
                   mt: 1.5,

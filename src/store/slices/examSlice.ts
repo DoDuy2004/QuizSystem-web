@@ -46,13 +46,13 @@ const initialState: ExamStateProps = {
   },
 };
 
-export const getExams = createAsyncThunk("exam/getExams", async () => {
-  const response: any = await ExamService.getExams();
-
-  const data = response.data;
-
-  return data;
-});
+export const getExams = createAsyncThunk(
+  "exam/getExams",
+  async (searchText?: string) => {
+    const response: any = await ExamService.getExams(searchText);
+    return response.data;
+  }
+);
 
 export const getExambyId = createAsyncThunk(
   "exam/getExambyId",

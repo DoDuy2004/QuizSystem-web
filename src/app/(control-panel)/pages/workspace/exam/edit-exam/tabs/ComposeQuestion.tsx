@@ -90,7 +90,7 @@ const ComposeQuestion = () => {
     };
 
     fetchData();
-  }, [dispatch, routeParams?.id, questionsData]);
+  }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
     if (routeParams.id && exam?.questions?.length > 0) {

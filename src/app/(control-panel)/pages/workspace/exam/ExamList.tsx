@@ -1,43 +1,75 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import withReducer from "../../../../../store/withReducer";
+// import withReducer from "../../../../../store/withReducer";
+import SearchIcon from "@mui/icons-material/Search";
 import { type AppDispatch } from "../../../../../store/store";
 import { useDeepCompareEffect } from "../../../../../hooks";
 // import FullscreenLoader from "../../../../../components/FullscreenLoader";
 import { useRef } from "react";
-import reducer from "./store";
 import CircularLoading from "../../../../../components/CircularLoading";
-import { Button, IconButton, Typography } from "@mui/material";
-import SearchInput from "../../../../../components/SearchInput";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
 import ExamListItem from "./components/ExamListItem";
-import { getExams, resetExamState, selectExams } from "../../../../../store/slices/examSlice";
+import {
+  getExams,
+  resetExamState,
+  selectExams,
+} from "../../../../../store/slices/examSlice";
+import { debounce } from "lodash";
 
 const ExamList = () => {
   const exams = useSelector(selectExams);
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
-  const hasFetched = useRef(false);
   const navigate = useNavigate();
   //   console.log({ questionBanks });
+  const [searchText, setSearchText] = useState("");
 
-  useDeepCompareEffect(() => {
-    if (hasFetched.current) return;
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text: string) => {
+        if (text.length >= 3 || text.length === 0) {
+          setLoading(true);
+          dispatch(getExams(text))
+            .unwrap()
+            .finally(() => setLoading(false));
+        }
+      }, 500),
+    [dispatch]
+  );
 
+  useEffect(() => {
     setLoading(true);
-    hasFetched.current = true;
-
-    dispatch(getExams()).finally(() => {
-      setLoading(false);
-    });
-
-    return () => {
-      dispatch(resetExamState());
-    };
+    dispatch(getExams(""))
+      .unwrap()
+      .then((res: any) => {
+        console.log({ res });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [dispatch]);
 
-  if (loading || (!exams?.length && !hasFetched.current)) {
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setSearchText(text);
+    debouncedSearch(text);
+  };
+
+  if (loading) {
     return <CircularLoading delay={0} />;
   }
 
@@ -55,7 +87,21 @@ const ExamList = () => {
               </span>{" "}
               Đề thi
             </Typography>
-            <SearchInput />
+            <TextField
+              placeholder="Tìm kiếm..."
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <IconButton>
               <FilterAltOutlinedIcon />
             </IconButton>
