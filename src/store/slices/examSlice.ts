@@ -143,17 +143,19 @@ export const deleteQuestionFromExam = createAsyncThunk(
   }
 );
 
+// Ví dụ định nghĩa createMatrix (nếu dùng createAsyncThunk)
 export const createMatrix = createAsyncThunk(
-  "exam/create-matrix",
-  async (params: any) => {
-    const form = params?.form;
-    const response: any = await ExamService.createExamMatrix({
-      form,
-    });
-
-    const data = response.data;
-
-    return data;
+  "exam/createMatrix",
+  async (params: any, { rejectWithValue }) => {
+    try {
+      const response: any = await ExamService.createExamMatrix(params);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return rejectWithValue(error.response.data); // <-- chính là { errors: ... }
+      }
+      return rejectWithValue({ message: error.message });
+    }
   }
 );
 

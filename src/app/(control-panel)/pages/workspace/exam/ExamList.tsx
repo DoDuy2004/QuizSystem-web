@@ -27,7 +27,7 @@ import { debounce } from "lodash";
 const ExamList = () => {
   const exams = useSelector(selectExams);
   const dispatch = useDispatch<AppDispatch>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   //   console.log({ questionBanks });
   const [searchText, setSearchText] = useState("");

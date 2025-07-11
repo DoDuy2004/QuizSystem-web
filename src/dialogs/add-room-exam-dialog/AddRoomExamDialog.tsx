@@ -69,10 +69,10 @@ const schema = yup.object().shape({
         return value && value > new Date();
       }
     ),
-  endDate: yup
-    .date()
-    .required("Ngày kết thúc là bắt buộc")
-    .min(yup.ref("startDate"), "Ngày kết thúc không được nhỏ hơn ngày bắt đầu"),
+  // endDate: yup
+  //   .date()
+  //   .required("Ngày kết thúc là bắt buộc")
+  //   .min(yup.ref("startDate"), "Ngày kết thúc không được nhỏ hơn ngày bắt đầu"),
 });
 
 const AddRoomExamDialog = () => {
@@ -109,7 +109,7 @@ const AddRoomExamDialog = () => {
       name: "",
       // status: true,
       startDate: undefined,
-      endDate: undefined,
+      // endDate: undefined,
     },
     resolver: yupResolver(schema),
   });
@@ -154,7 +154,7 @@ const AddRoomExamDialog = () => {
       subjectId: data.subjectId,
       examId: data?.exam.id,
       startDate: toLocalISOString(data.startDate), // 👈 giữ giờ Việt Nam
-      endDate: toLocalISOString(data.endDate),
+      endDate: undefined,
     };
 
     setLoading(true);
@@ -169,7 +169,7 @@ const AddRoomExamDialog = () => {
           class: {},
           exam: {},
           startDate: undefined,
-          endDate: undefined,
+          // endDate: undefined,
         });
         dispatch(
           showMessage({ message: "Lưu phòng thi thành công", ...successAnchor })
@@ -338,7 +338,8 @@ const AddRoomExamDialog = () => {
                       {...field}
                       label={
                         <>
-                          Ngày bắt đầu <span className="text-red-500">*</span>
+                          Thời gian bắt đầu bắt đầu{" "}
+                          <span className="text-red-500">*</span>
                         </>
                       }
                       value={field.value || null}
@@ -355,7 +356,8 @@ const AddRoomExamDialog = () => {
                     />
                   )}
                 />
-                <Controller
+                <Typography>{errors.startDate?.message}</Typography>
+                {/* <Controller
                   name="endDate"
                   control={control}
                   render={({ field }: any) => (
@@ -379,7 +381,7 @@ const AddRoomExamDialog = () => {
                       minDateTime={watch("startDate") || currentDate}
                     />
                   )}
-                />
+                /> */}
                 <div className="flex justify-end pt-4">
                   <Button
                     type="submit"

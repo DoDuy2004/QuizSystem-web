@@ -18,7 +18,7 @@ interface ExamSearchProps {
   onSelectExam: (exam: any | null) => void;
   placeholder?: string;
   label?: string;
-  disabledExams?: string[]; // danh sách ID đề thi đã bị disable
+  disabledExams?: string[]; // Không cần sử dụng nữa, nhưng giữ để tương thích
   isOpen?: boolean;
 }
 
@@ -26,7 +26,7 @@ const ExamSearch = ({
   onSelectExam,
   placeholder = "Nhập tên hoặc mã đề thi...",
   label = "Tìm kiếm đề thi",
-  disabledExams = [],
+  disabledExams = [], // Không sử dụng, chỉ giữ để tương thích
   isOpen = false,
 }: ExamSearchProps) => {
   const [inputValue, setInputValue] = useState("");
@@ -79,7 +79,10 @@ const ExamSearch = ({
     }
   }, [isOpen]);
 
-  const isOptionDisabled = (option: any) => disabledExams.includes(option.id);
+  const isOptionDisabled = (option: any) => {
+    // Kiểm tra nếu exam có roomExamId (đã được sử dụng)
+    return !!option.roomExamId && option.roomExamId !== "";
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -99,7 +102,7 @@ const ExamSearch = ({
             typeof newValue !== "string" &&
             isOptionDisabled(newValue)
           ) {
-            return;
+            return; // Không cho chọn nếu đã bị disable
           }
           onSelectExam(newValue as any);
           setInputValue("");
@@ -120,9 +123,6 @@ const ExamSearch = ({
             helperText={error}
             InputProps={{
               ...params.InputProps,
-              //   startAdornment: (
-              //     <SearchIcon sx={{ color: "action.active", mr: 1 }} />
-              //   ),
               endAdornment: (
                 <>
                   {loading ? (
@@ -138,10 +138,7 @@ const ExamSearch = ({
           const isDisabled = isOptionDisabled(option);
           return (
             <li {...props} key={option.id}>
-              <Tooltip
-                title={isDisabled ? "Đề thi đã bị khóa/chọn rồi" : ""}
-                arrow
-              >
+              <Tooltip title={isDisabled ? "Đề thi đã được sử dụng" : ""} arrow>
                 <div
                   style={{
                     width: "100%",
@@ -154,6 +151,9 @@ const ExamSearch = ({
                 >
                   <div>
                     <div style={{ fontWeight: 500 }}>{option.name}</div>
+                    <Typography variant="caption" color="text.secondary">
+                      Mã: {option.examCode}
+                    </Typography>
                   </div>
                   {isDisabled && (
                     <Box
@@ -164,7 +164,7 @@ const ExamSearch = ({
                         color="success"
                       />
                       <Typography variant="caption" color="success.main">
-                        Đã chọn
+                        Đề thi đã được sử dụng
                       </Typography>
                     </Box>
                   )}

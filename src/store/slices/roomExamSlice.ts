@@ -128,6 +128,17 @@ export const getStudentExamsByRoom = createAsyncThunk(
   }
 );
 
+export const getStudentExamDetail = createAsyncThunk(
+  "student/getStudentExamDetail",
+  async (params: any) => {
+    const response: any = await RoomExamService.getStudentExamDetail(params);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,

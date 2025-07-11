@@ -13,6 +13,7 @@ import {
   addExam,
   editExam,
   getExambyId,
+  resetExamState,
   selectExam,
 } from "../../../../../../../store/slices/examSlice";
 import ExamModel from "../../../../../../../models/ExamModel";
@@ -64,13 +65,20 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   }, [dispatch, routeParams?.id]);
 
   useEffect(() => {
-    if (exam) {
+    if (exam && routeParams?.id) {
       const transformedData = {
         ...exam?.data,
       };
       reset(ExamModel(transformedData));
     }
   }, [exam, reset]);
+
+  useEffect(() => {
+    return () => {
+      // dispatch(resetExamState());
+      reset(ExamModel({}));
+    };
+  }, []);
 
   useDeepCompareEffect(() => {
     if (hasFetchedSubject.current) return;

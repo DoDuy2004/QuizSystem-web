@@ -219,43 +219,34 @@ const AddQuestionToExamDialog = () => {
 
   const onSubmit = async (data: any) => {
     setLoading(true);
-    // console.log({ exam });
     try {
-      // Tạo payload
       const payload = {
         examId: exam?.data?.id,
         matrix: data.matrix,
       };
 
-      // console.log("Payload:", JSON.stringify(payload, null, 2));
-
-      // Chọn câu hỏi dựa trên matrix
-      // const selectedQuestions: any[] = [];
-      // const availableQuestions = getAvailableQuestions();
-      // await dispatch(
-      //   addQuestionToExam({ id: exam?.data?.id, form: payload })
-      // ).unwrap();
-
-      dispatch(createMatrix({ form: payload }))
+      await dispatch(createMatrix({ form: payload }))
         .unwrap()
-        .finally(() => {
-          setLoading(false);
+        .then((res) => {
+          console.log({ res });
         });
 
       dispatch(setImportStatus("succeeded"));
 
       dispatch(
         showMessage({
-          message: `Đã thêm câu hỏi vào để thi`,
+          message: `Đã thêm câu hỏi vào đề thi`,
           ...successAnchor,
         })
       );
 
       dispatch(closeAddQuestionToExamDialog());
     } catch (error: any) {
+      let errorMessage = "Không đủ câu hỏi để thêm";
+
       dispatch(
         showMessage({
-          message: "Không đủ câu hỏi để thêm",
+          message: errorMessage,
           autoHideDuration: 6000,
           anchorOrigin: {
             vertical: "top",
@@ -264,7 +255,8 @@ const AddQuestionToExamDialog = () => {
           variant: "error",
         })
       );
-      console.error("Error adding questions to exam:", error);
+
+      reset({ matrix: [] });
     } finally {
       setLoading(false);
     }

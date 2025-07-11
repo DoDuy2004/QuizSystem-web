@@ -277,29 +277,29 @@ class JwtService {
     return new Promise((resolve, reject) => {
       axios
         .post(
-          // `${AUTH_DOMAIN}/api/user/requestPin?${queryParams.toString()}`,
           `${import.meta.env.VITE_DOMAIN}/api/auth/forgot-password/request-pin`,
-
           {
             email,
           }
         )
-        .then((response) => resolve(response))
+        .then((response) => {
+          // Chỉ trả về response.data (dữ liệu JSON từ API)
+          resolve(response?.data);
+        })
         .catch(function (error) {
           if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
+            // Lỗi từ server (ví dụ: 400 Bad Request)
+            console.log("Server error:", error.response?.data);
+            reject(error.response?.data); // Trả về dữ liệu lỗi từ API
           } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
+            // Không nhận được response
+            console.log("No response:", error.request);
+            reject({ error: true, message: "Không thể kết nối đến server" });
           } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log("Error", error.message);
+            // Lỗi khi thiết lập request
+            console.log("Error:", error.message);
+            reject({ error: true, message: error.message });
           }
-
-          reject(error.response);
         });
     });
   };

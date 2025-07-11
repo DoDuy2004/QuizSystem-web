@@ -36,6 +36,9 @@ const SubjectDetail = lazy(
 const ExamResultDetail = lazy(
   () => import("./exam-result/exam-result-detail/ExamResultDetail")
 );
+const StudentExamDetail = lazy(
+  () => import("./exam-result/student-exam-detail/StudentExamDetail")
+);
 
 const WorkspaceRoute = {
   path: "workspace",
@@ -222,6 +225,11 @@ const WorkspaceRoute = {
         {
           path: ":id/student-exams",
           element: <ExamResultDetail />,
+          children: [],
+        },
+        {
+          path: ":id/student-exams/:studentExamId/detail/:studentId",
+          element: <StudentExamDetail />,
         },
         {
           path: ":id",

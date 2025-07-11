@@ -247,7 +247,7 @@ const ComposeQuestion = () => {
                 Xóa câu hỏi
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {noOfQuestions > 0 &&
                 Array.from({ length: noOfQuestions }, (_, index) => (
                   <Button
