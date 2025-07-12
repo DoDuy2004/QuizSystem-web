@@ -4,8 +4,8 @@ import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 const QuestionItem = ({ data, index }: any) => {
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="flex items-center gap-x-2">
-        Câu {index}:
+      <div className="flex items-start gap-x-2">
+        <Typography fontSize={14}>Câu {index}:</Typography>
         <Typography
           fontSize={14}
           fontWeight={500}

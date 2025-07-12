@@ -105,7 +105,7 @@ const ExamPDF = ({ questions, examInfo }: any) => {
           </View>
           <View style={{ textAlign: "center" }}>
             <Text style={styles.examTitle}>
-              {examInfo?.name.toUpperCase(0)}
+              {examInfo?.name?.toUpperCase(0)}
             </Text>
             <Text style={styles.examTitle}>
               Môn: {examInfo?.subject?.name?.toUpperCase() || ""}

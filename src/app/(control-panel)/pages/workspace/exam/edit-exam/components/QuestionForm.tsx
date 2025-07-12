@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import _ from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import * as yup from "yup";
 import QuestionModel from "../../../../../../../models/QuestionModel";
@@ -115,6 +115,19 @@ const QuestionForm = ({ questionData }: any) => {
 
   const watchType = watch("type");
 
+  const normalizedData = useMemo(() => {
+    if (_.isEmpty(questionData)) return QuestionModel({});
+    return QuestionModel({
+      ...questionData,
+      chapterId: questionData?.chapter?.id,
+      subjectId: questionData?.chapter?.subject?.id,
+    });
+  }, [questionData]);
+
+  const isFormUnchanged = useMemo(() => {
+    return _.isEqual(form, normalizedData);
+  }, [form, normalizedData]);
+
   const handleAddAnswer = () => {
     append({
       isCorrect: false,
@@ -179,9 +192,12 @@ const QuestionForm = ({ questionData }: any) => {
 
       // console.log({ transformedData });
 
-      reset(QuestionModel(transformedData));
+      reset(QuestionModel(transformedData), {
+        keepDirty: false, // This ensures dirtyFields is cleared
+        keepErrors: false, // This clears any validation errors
+      });
       setValue("subjectId", questionData?.chapter?.subject?.id, {
-        shouldDirty: true,
+        shouldDirty: false,
         shouldValidate: true,
       });
     }
@@ -215,7 +231,6 @@ const QuestionForm = ({ questionData }: any) => {
   const onSubmit = (data: any) => {
     // console.log({ data });
     // setLoading(true);
-
     // const payload1 = {
     //   questionScores: [
     //     {
@@ -580,10 +595,7 @@ const QuestionForm = ({ questionData }: any) => {
             type="submit"
             variant="contained"
             disabled={
-              _.isEqual(form, questionData) ||
-              _.isEmpty(dirtyFields) ||
-              !isValid ||
-              loading
+              _.isEmpty(dirtyFields) || isFormUnchanged || !isValid || loading
             }
             sx={{
               textTransform: "none",

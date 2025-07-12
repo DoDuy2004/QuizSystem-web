@@ -36,18 +36,19 @@ import {
 import CircularLoading from "../../../../../../components/CircularLoading";
 import { showMessage } from "../../../../../../components/FuseMessage/fuseMessageSlice";
 import { errorAnchor } from "../../../../../../constants/confirm";
+import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
 
 // Types
 interface Question {
   id: string;
-  questionText: string;
+  content: string;
   type: "single" | "multiple";
   answers: Answer[];
 }
 
 interface Answer {
   id: string;
-  text: string;
+  content: string;
 }
 
 interface SubmissionAnswer {
@@ -80,8 +81,6 @@ const RoomExamDetail = () => {
     return `${m}:${s}`;
   };
 
-  console.log({ roomExam });
-
   useEffect(() => {
     if (roomExam?.data?.timeRemaining !== undefined) {
       setTimeRemaining(roomExam?.data?.timeRemaining);
@@ -109,7 +108,6 @@ const RoomExamDetail = () => {
     dispatch(isSubmitted({ roomId: id, studentId: user.id }))
       .unwrap()
       .then((res: any) => {
-        console.log({ res });
         setSubmitted(res.submitted);
       });
   }, [id]);
@@ -120,7 +118,7 @@ const RoomExamDetail = () => {
         setLoading(true);
         try {
           const response = await dispatch(getRoomExambyId({ id })).unwrap();
-          console.log("RoomExam response:", response);
+          console.log("RoomExam response:", response); // Chỉ log khi fetch
         } finally {
           setLoading(false);
         }
@@ -131,7 +129,7 @@ const RoomExamDetail = () => {
 
   useEffect(() => {
     const fetchExamAndQuestions = async () => {
-      const examId = roomExam?.exams?.[0]?.id;
+      const examId = roomExam?.data.exams?.[0]?.id;
       if (examId) {
         setLoading(true);
         try {
@@ -139,13 +137,11 @@ const RoomExamDetail = () => {
             dispatch(getExambyId({ id: examId }))
               .unwrap()
               .then((res) => {
-                console.log({ res });
                 setExamInfo(res.data);
               }),
             dispatch(getQuestionsByExam(examId))
               .unwrap()
               .then((res) => {
-                console.log({ res });
                 setQuestionsData(res.data);
               }),
           ]);
@@ -155,9 +151,14 @@ const RoomExamDetail = () => {
       }
     };
 
-    if (roomExam?.id) {
+    if (roomExam?.data.id) {
       fetchExamAndQuestions();
     }
+
+    return () => {
+      setQuestionsData([]);
+      setExamInfo({});
+    };
   }, [dispatch, roomExam]);
 
   const handleSingleChoice = (questionId: string, answerId: string) => {
@@ -248,6 +249,24 @@ const RoomExamDetail = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const openConfirmDialog = (e: any) => {
+    e.stopPropagation();
+    dispatch(
+      openConfirmationDialog({
+        data: {
+          onAgree: () => {
+            handleSubmit();
+          },
+          dialogContent: "Bạn có chắc muốn nộp bài thi",
+          titleContent: "Nộp bài thi",
+          agreeText: "Xác nhận",
+          disagreeText: "Hủy",
+          onDisagree: () => {},
+        },
+      })
+    );
   };
 
   const progress = calculateProgress();
@@ -357,7 +376,7 @@ const RoomExamDetail = () => {
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={handleSubmit}
+                  onClick={(e) => openConfirmDialog(e)}
                   disabled={submitting}
                   sx={{
                     minWidth: 120,
@@ -394,59 +413,82 @@ const RoomExamDetail = () => {
         </Card>
       </div>
       <div className="col-span-4 h-screen overflow-y-scroll">
-        {questionsData.map((question: Question, index: number) => (
+        {questionsData?.map((question: any, index: number) => (
           <Card key={question.id} sx={{ mb: 2 }}>
             <CardContent sx={{ p: 1.5 }}>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "flex-start",
+                  justifyContent: "space-between",
                   gap: 1.5,
                   mb: 1.5,
                 }}
               >
-                <Typography
-                  variant="body1"
-                  sx={{ flex: 1, fontSize: "14px", fontWeight: 500 }}
-                >
-                  Câu {index + 1}: {question.questionText}
-                </Typography>
+                <div className="flex items-start gap-x-1">
+                  <Typography
+                    className="underline"
+                    sx={{ fontWeight: 550 }}
+                    fontSize={14}
+                  >
+                    Câu {index + 1}:
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ flex: 1, fontSize: "14px", fontWeight: 500 }}
+                    dangerouslySetInnerHTML={{ __html: question.content }}
+                  />
+                </div>
                 <Chip
                   icon={
-                    question.type === "multiple" ? (
+                    question.type === "MultipleChoice" ? (
                       <CheckCircle sx={{ fontSize: 14 }} />
                     ) : (
                       <RadioButtonUnchecked sx={{ fontSize: 14 }} />
                     )
                   }
                   label={
-                    question.type === "multiple"
+                    question.type === "MultipleChoice"
                       ? "Nhiều lựa chọn"
                       : "Một lựa chọn"
                   }
                   size="small"
-                  color={question.type === "multiple" ? "secondary" : "primary"}
+                  color={
+                    question.type === "MultipleChoice" ? "secondary" : "primary"
+                  }
                   variant="outlined"
                   sx={{ fontSize: "10px", height: "22px" }}
                 />
               </Box>
               <FormControl component="fieldset" sx={{ width: "100%" }}>
-                {question.type === "single" ? (
+                {question.type === "SingleChoice" ? (
                   <RadioGroup
                     value={answers[question.id] || ""}
                     onChange={(e) =>
                       handleSingleChoice(question.id, e.target.value)
                     }
                   >
-                    {question.answers.map((answer: Answer) => (
+                    {question?.answers?.map((answer: any) => (
                       <FormControlLabel
                         key={answer.id}
                         value={answer.id}
                         control={<Radio size="small" />}
                         label={
-                          <Typography variant="body2" sx={{ fontSize: "13px" }}>
-                            {answer.text}
-                          </Typography>
+                          <>
+                            {/* <Typography
+                              variant="body2"
+                              sx={{ fontSize: "13px" }}
+                              dangerouslySetInnerHTML={{
+                                __html: answer.content,
+                              }}
+                            /> */}
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: "13px" }}
+                            >
+                              {answer.content}
+                            </Typography>
+                          </>
                         }
                         sx={{
                           display: "flex",
@@ -472,7 +514,7 @@ const RoomExamDetail = () => {
                     >
                       💡 Có thể chọn nhiều đáp án
                     </Typography>
-                    {question.answers.map((answer: Answer) => (
+                    {question.answers.map((answer: any) => (
                       <FormControlLabel
                         key={answer.id}
                         control={
@@ -494,9 +536,21 @@ const RoomExamDetail = () => {
                           />
                         }
                         label={
-                          <Typography variant="body2" sx={{ fontSize: "13px" }}>
-                            {answer.text}
-                          </Typography>
+                          <>
+                            {/* <Typography
+                              variant="body2"
+                              sx={{ fontSize: "13px" }}
+                              dangerouslySetInnerHTML={{
+                                __html: answer.content,
+                              }}
+                            /> */}
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: "13px" }}
+                            >
+                              {answer.content}
+                            </Typography>
+                          </>
                         }
                         sx={{
                           display: "flex",

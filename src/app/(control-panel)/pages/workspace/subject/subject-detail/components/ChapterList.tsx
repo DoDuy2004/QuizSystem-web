@@ -37,6 +37,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   onChaptersChange,
 }) => {
   const [newChapterName, setNewChapterName] = useState("");
+  const [editChapterName, setEditChapterName] = useState("");
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
 
@@ -95,17 +96,17 @@ const ChapterList: React.FC<ChapterListProps> = ({
   };
 
   const handleAddChapter = () => {
-    if (newChapterName.trim()) {
+    if (editChapterName.trim()) {
       const newChapter: Chapter = {
         id: Date.now().toString(),
-        name: newChapterName,
+        name: editChapterName,
         isEditing: false,
       };
       const payload = {
-        name: newChapterName,
+        name: editChapterName,
       };
       onChaptersChange([...chapters, newChapter]);
-      setNewChapterName("");
+      setEditChapterName("");
       // TODO: Gọi API thêm chương
       dispatch(addChapter({ id: routeParams?.id, form: payload }));
     }
@@ -183,8 +184,8 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
       <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
         <TextField
-          value={newChapterName}
-          onChange={(e) => setNewChapterName(e.target.value)}
+          value={editChapterName}
+          onChange={(e) => setEditChapterName(e.target.value)}
           placeholder="Nhập tên chương mới"
           fullWidth
           size="small"
@@ -193,7 +194,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
           variant="contained"
           startIcon={<Add />}
           onClick={handleAddChapter}
-          disabled={!newChapterName.trim()}
+          disabled={!editChapterName.trim()}
           sx={{
             whiteSpace: "nowrap",
             textTransform: "none",

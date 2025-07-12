@@ -103,7 +103,7 @@ const Sidebar = () => {
       icon: <AssignmentTurnedIn />,
       label: "Kết quả thi",
       path: "/workspace/exam-result",
-      roles: ["TEACHER", "STUDENT"],
+      roles: ["TEACHER"],
     },
     // { icon: <Category />, label: "Môn học" },
     {

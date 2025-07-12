@@ -23,6 +23,7 @@ import QuestionForm from "../components/QuestionForm";
 import {
   deleteQuestionFromExam,
   getQuestionsByExam,
+  resetExamState,
   selectExam,
   selectImportStatus,
   setImportStatus,
@@ -66,6 +67,12 @@ const ComposeQuestion = () => {
     fetchAfterImport();
   }, [importStatus]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(resetExamState());
+    };
+  }, []);
+
   useDeepCompareEffect(() => {
     const fetchData = async () => {
       if (!routeParams.id) {
@@ -94,7 +101,9 @@ const ComposeQuestion = () => {
 
   useDeepCompareEffect(() => {
     if (routeParams.id && exam?.questions?.length > 0) {
-      dispatch(getQuestionById(exam?.questions[0]?.id))
+      dispatch(
+        getQuestionById(exam?.questions[0]?.id || questionsData?.[0]?.id)
+      )
         .then((res) => {
           setQuestion(res.payload.data);
         })
@@ -108,7 +117,7 @@ const ComposeQuestion = () => {
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, exam?.questions]);
+  }, [dispatch, routeParams?.id, exam?.questions, questionsData]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {
@@ -249,7 +258,7 @@ const ComposeQuestion = () => {
                 Xóa câu hỏi
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {noOfQuestions > 0 &&
                 Array.from({ length: noOfQuestions }, (_, index) => (
                   <Button

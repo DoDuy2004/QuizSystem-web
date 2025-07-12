@@ -1,7 +1,8 @@
 import _ from "lodash";
 
 function QuestionModel(data?: any) {
-  data = data || {};
+  // Tạo bản sao để tránh lỗi "object is not extensible"
+  data = _.cloneDeep(data || {});
 
   return _.defaults(data, {
     id: null,

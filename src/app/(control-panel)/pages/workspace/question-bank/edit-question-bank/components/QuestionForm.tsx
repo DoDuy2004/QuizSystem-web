@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import _ from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
 import RadioButtonCheckedOutlinedIcon from "@mui/icons-material/RadioButtonCheckedOutlined";
@@ -91,6 +91,19 @@ const QuestionForm = ({ questionData }: any) => {
   });
   const form = watch();
 
+  const normalizedData = useMemo(() => {
+    if (_.isEmpty(questionData)) return QuestionModel({});
+    return QuestionModel({
+      ...questionData,
+      chapterId: questionData?.chapter?.id,
+      subjectId: questionData?.chapter?.subject?.id,
+    });
+  }, [questionData]);
+
+  const isFormUnchanged = useMemo(() => {
+    return _.isEqual(form, normalizedData);
+  }, [form, normalizedData]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "answers",
@@ -135,9 +148,12 @@ const QuestionForm = ({ questionData }: any) => {
         // subjectId: questionData?.chapter?.subject?.id,
         difficulty: questionData.difficulty,
       };
-      reset(QuestionModel(transformedData));
+      reset(QuestionModel(transformedData), {
+        keepDirty: false, // This ensures dirtyFields is cleared
+        keepErrors: false, // This clears any validation errors
+      });
       setValue("subjectId", questionData?.chapter?.subject?.id, {
-        shouldDirty: true,
+        shouldDirty: false,
         shouldValidate: true,
       });
     }
@@ -524,10 +540,7 @@ const QuestionForm = ({ questionData }: any) => {
             type="submit"
             variant="contained"
             disabled={
-              _.isEqual(form, questionData) ||
-              _.isEmpty(dirtyFields) ||
-              !isValid ||
-              loading
+              !isValid || _.isEmpty(dirtyFields) || isFormUnchanged || loading
             }
             sx={{
               textTransform: "none",

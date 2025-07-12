@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 // import FullscreenLoader from "../../../../../components/FullscreenLoader";
 import { useRef } from "react";
 // import reducer from "./store";
@@ -29,9 +30,10 @@ const ExamResultDetail = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
   const [examResults, setExamResults] = useState([]);
-  const user = useSelector(selectUser);
+  // const user = useSelector(selectUser);
   const routeParams = useParams();
   //   console.log({ questionBanks });
+  const navigate = useNavigate();
 
   function formatVietnamTime(dateString: string): string {
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -63,9 +65,14 @@ const ExamResultDetail = () => {
 
   return (
     <>
-      <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
-        Kết quả thi
-      </Typography>
+      <div className="flex items-center gap-x-4">
+        <IconButton onClick={() => navigate(-1)}>
+          <ArrowBackOutlinedIcon />
+        </IconButton>
+        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
+          Chi tiết kỳ thi
+        </Typography>
+      </div>
       <div className=" bg-white rounded-md shadow-md">
         <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
@@ -129,10 +136,11 @@ const ExamResultDetail = () => {
                 {examResults?.map((row: any) => (
                   <TableRow
                     key={row?.id}
-                    // onClick={() => {
-                    //   dispatch(openAddStudentDialog());
-                    //   navigate(`/workspace/student/${row.id}/edit`);
-                    // }}
+                    onClick={() => {
+                      navigate(
+                        `/workspace/room-exam/${routeParams.id}/student-exams/${row?.id}/detail/${row.student.id}`
+                      );
+                    }}
                     sx={{
                       "&:last-child td": {
                         borderBottom: "none", // Bỏ border bottom cho hàng cuối

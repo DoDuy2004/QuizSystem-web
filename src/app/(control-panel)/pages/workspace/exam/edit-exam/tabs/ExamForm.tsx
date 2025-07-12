@@ -13,6 +13,7 @@ import {
   addExam,
   editExam,
   getExambyId,
+  resetExamState,
   selectExam,
 } from "../../../../../../../store/slices/examSlice";
 import ExamModel from "../../../../../../../models/ExamModel";
@@ -21,9 +22,17 @@ import { getSubjects } from "../../../../../../../store/slices/subjectSlice";
 
 const schema: any = yup.object().shape({
   name: yup.string().required("Tên đề thi là bắt buộc"),
-  durationMinutes: yup.string(),
+  durationMinutes: yup
+    .number()
+    .typeError("Thời gian làm bài phải là số")
+    .min(1, "Thời gian làm bài phải lớn hơn 0 phút")
+    .required("Thời gian làm bài là bắt buộc"),
   subjectId: yup.string().required("Môn học là bắt buộc"),
-  noOfQuestions: yup.string().required("Mã đề là bắt buộc"),
+  noOfQuestions: yup
+    .number()
+    .typeError("Số câu hỏi phải là số")
+    .min(1, "Số câu hỏi phải lớn hơn 0")
+    .required("Số câu hỏi là bắt buộc"),
 });
 
 const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
@@ -64,13 +73,20 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   }, [dispatch, routeParams?.id]);
 
   useEffect(() => {
-    if (exam) {
+    if (exam && routeParams?.id) {
       const transformedData = {
         ...exam?.data,
       };
       reset(ExamModel(transformedData));
     }
   }, [exam, reset]);
+
+  useEffect(() => {
+    return () => {
+      // dispatch(resetExamState());
+      reset(ExamModel({}));
+    };
+  }, []);
 
   useDeepCompareEffect(() => {
     if (hasFetchedSubject.current) return;
@@ -173,8 +189,8 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                     </>
                   }
                   variant="outlined"
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
+                  error={!!errors.noOfQuestions}
+                  helperText={errors.noOfQuestions?.message}
                 />
               )}
             />
@@ -222,8 +238,8 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                       </>
                     }
                     variant="outlined"
-                    error={!!errors.subject}
-                    helperText={errors.subject?.message}
+                    error={!!errors.subjectId}
+                    helperText={errors.subjectId?.message}
                   />
                 )}
               />

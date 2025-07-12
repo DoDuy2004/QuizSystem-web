@@ -28,7 +28,6 @@ const schema: any = yup.object().shape({
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
-  const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -52,35 +51,40 @@ const ForgotPassword = () => {
     setLoading(true);
     jwtService
       .requestPin({ email })
-      .then(() => {
-        // if (form?.remember) {
-        //   localStorage.setItem("username", username);
-        // } else {
-        //   localStorage.setItem("username", "");
-        // }
-        // console.log({ user })
-        setStep(2);
-        dispatch(
-          showMessage({ message: "Otp được gửi thành công", ...successAnchor })
-        );
+      .then((res: any) => {
         setLoading(false);
-      })
-      .catch((err: any) => {
-        if (err) {
+        console.log("Response from requestPin:", res); // Debug response
+        if (res && !res.error) {
           dispatch(
             showMessage({
-              message:
-                "Tên đăng nhập hoặc mật khẩu không đúng, vui lòng thử lại",
+              message: "OTP được gửi thành công",
+              ...successAnchor,
+            })
+          );
+          setStep(2); // Chỉ chuyển bước khi không có lỗi
+        } else {
+          dispatch(
+            showMessage({
+              message: res?.message || "Email không tồn tại trong hệ thống",
               ...errorAnchor,
             })
           );
         }
+      })
+      .catch((err: any) => {
         setLoading(false);
+        console.log("Error from requestPin:", err); // Debug error
+        dispatch(
+          showMessage({
+            message: err?.message || "Lỗi khi gửi OTP, vui lòng thử lại sau",
+            ...errorAnchor,
+          })
+        );
       });
   };
 
   return (
-    <div className="lg:w-1/4 sm:w-1/2 w-full rounded-xl m-auto sm:h-fit h-full shodow bg-white px-8 py-16 flex flex-col gap-y-6">
+    <div className="lg:w-1/4 sm:w-1/2 w-full rounded-xl m-auto sm:h-fit h-full shadow bg-white px-8 py-16 flex flex-col gap-y-6">
       <img src="/assets/images/logo_1.png" className="w-1/2" alt="" />
       {step === 1 && (
         <>
@@ -93,7 +97,7 @@ const ForgotPassword = () => {
           <form
             action=""
             onSubmit={handleSubmit(onSubmit)}
-            className=" flex flex-col gap-y-6"
+            className="flex flex-col gap-y-6"
           >
             <Controller
               name="email"
@@ -140,10 +144,8 @@ const ForgotPassword = () => {
           </form>
         </>
       )}
-          {step === 2 && <OtpInput email={email} setStep={setStep} />}
-          {
-              step === 3 && <ResetPassword email={email} />
-          }
+      {step === 2 && <OtpInput email={email} setStep={setStep} />}
+      {step === 3 && <ResetPassword email={email} />}
       <div className="flex items-center gap-x-2">
         <Typography fontSize={14}>Trở lại</Typography>
         <Link to="/auth/login" className="text-blue-500 underline">
