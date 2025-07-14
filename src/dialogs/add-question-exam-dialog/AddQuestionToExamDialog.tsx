@@ -211,7 +211,7 @@ const AddQuestionToExamDialog = () => {
 
     return () => {
       if (!addQuestionToExamDialog?.isOpen) {
-        setQuestions([]);
+        // setQuestions([]);
         setChapters([]);
       }
     };
@@ -256,7 +256,13 @@ const AddQuestionToExamDialog = () => {
         })
       );
 
-      reset({ matrix: [] });
+      // ✅ Reset lại form với dữ liệu mặc định từ chương
+      reset({
+        matrix: chapters.map((chapter: any) => ({
+          chapterId: chapter.id,
+          difficultyMap: { EASY: 0, MEDIUM: 0, HARD: 0 },
+        })),
+      });
     } finally {
       setLoading(false);
     }

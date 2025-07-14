@@ -49,17 +49,19 @@ const ComposeQuestion = () => {
         setLoading(true);
         try {
           const res = await dispatch(
-            // getQuestionsByQuestionBank({ id: routeParams.id || questionBankId })
             getQuestionsByExam(exam?.data?.id || (routeParams?.id as string))
           ).unwrap();
 
           const data = Array.isArray(res?.data) ? res.data : [];
           setNoOfQuestions(data.length || 1);
-          // setQuestionsData(data);
+          // setQuestionsData(data);  <-- bạn nên set lại dữ liệu ở đây
+          setQuestionsData(data);
         } catch {
           setNoOfQuestions(0);
         } finally {
           setLoading(false);
+          // ✅ Reset lại importStatus sau khi đã xử lý xong
+          dispatch(setImportStatus("idle"));
         }
       }
     };
@@ -100,7 +102,7 @@ const ComposeQuestion = () => {
   }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && exam?.questions?.length > 0) {
+    if (routeParams.id && exam?.questions?.length > 0 && _.isEmpty(qu)) {
       dispatch(
         getQuestionById(exam?.questions[0]?.id || questionsData?.[0]?.id)
       )

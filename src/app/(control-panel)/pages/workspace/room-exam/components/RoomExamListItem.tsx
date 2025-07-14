@@ -1,7 +1,8 @@
 import { Tooltip, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch } from "../../../../../../store/store";
+import { selectUser } from "../../../../../../store/slices/userSlice";
 
 const RoomExamListItem = ({ data }: any) => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const RoomExamListItem = ({ data }: any) => {
   const duration = data?.exams?.[0]?.durationMinutes || 0;
   const endDate = new Date(startDate.getTime() + duration * 60000);
   const now = new Date();
-
+  const user = useSelector(selectUser);
   const isStarted = now >= startDate;
   const expired = now > endDate;
 
@@ -71,29 +72,30 @@ const RoomExamListItem = ({ data }: any) => {
         phút
       </Typography>
 
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isStarted && !expired) handleJoinRoomExam();
-        }}
-        disabled={!isStarted || expired}
-        className={`w-full py-1.5 px-3 text-sm rounded font-semibold transition ${
-          expired
-            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+      {user?.role === "STUDENT" && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isStarted && !expired) handleJoinRoomExam();
+          }}
+          disabled={!isStarted || expired}
+          className={`w-full py-1.5 px-3 text-sm rounded font-semibold transition ${
+            expired
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : !isStarted
+              ? "bg-yellow-300 text-yellow-800 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
+          }`}
+        >
+          {expired
+            ? "Đã kết thúc"
             : !isStarted
-            ? "bg-yellow-300 text-yellow-800 cursor-not-allowed"
-            : "bg-orange-500 hover:bg-orange-600 text-white"
-        }`}
-      >
-        {expired
-          ? "Đã kết thúc"
-          : !isStarted
-          ? "Chưa bắt đầu"
-          : "Vào phòng thi"}
-      </button>
+            ? "Chưa bắt đầu"
+            : "Vào phòng thi"}
+        </button>
+      )}
     </div>
   );
 };
 
 export default RoomExamListItem;
-  

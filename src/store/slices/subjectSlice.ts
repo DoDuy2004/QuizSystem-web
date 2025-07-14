@@ -119,7 +119,7 @@ export const subjectSlice = createSlice({
       const { id } = action.meta.arg;
       const index = state.data.findIndex((item: any) => item.id === id);
       state.data[index] = action.payload.data;
-      state.subjectDetail = action.payload.data;
+      state.subjectDetail.data = action.payload.data;
     });
     builder.addCase(addChapter.fulfilled, (state, action) => {
       state.subjectDetail.chapters = [
