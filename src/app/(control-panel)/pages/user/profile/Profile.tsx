@@ -96,7 +96,7 @@ const Profile = () => {
 
           dispatch(
             showMessage({
-              message: "Đổi mật khẩu thành công",
+              message: "Cập nhập thông tin cá nhân thành công",
               ...successAnchor,
             })
           );
@@ -105,7 +105,7 @@ const Profile = () => {
     } catch (error: any) {
       dispatch(
         showMessage({
-          message: "Mật khẩu cũ không đúng vui lòng thử lại",
+          message: "Có lỗi xảy ra, vui lòng thử lại",
           ...errorAnchor,
         })
       );
@@ -116,7 +116,7 @@ const Profile = () => {
     <div className="col-span-5 bg-white rounded-md flex flex-col gap-y-4 shadow px-6 py-4">
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Avatar */}
-        <div className="grid grid-cols-6 border-b-1 border-[#e4e3e3] py-6 gap-4">
+        {/* <div className="grid grid-cols-6 border-b-1 border-[#e4e3e3] py-6 gap-4">
           <div className="col-span-2">
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               Ảnh đại diện
@@ -132,7 +132,7 @@ const Profile = () => {
               alt="avatar"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Email */}
         <div className="grid grid-cols-6 py-4 pt-8 gap-4">

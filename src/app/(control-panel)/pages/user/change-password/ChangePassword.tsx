@@ -67,28 +67,31 @@ const ChangePassword = () => {
 
   const onSubmit = (data: any) => {
     setLoading(true);
-    try {
-      dispatch(changePassword({ userId: user?.id, form: data }))
-        .unwrap()
-        .then((res) => {
-          // console.log({ res });
-          reset(defaultValues);
-          dispatch(
-            showMessage({
-              message: "Đổi mật khẩu thành công",
-              ...successAnchor,
-            })
-          );
-          setLoading(false);
-        });
-    } catch (error: any) {
-      dispatch(
-        showMessage({
-          message: "Mật khẩu cũ không đúng vui lòng thử lại",
-          ...errorAnchor,
-        })
-      );
-    }
+    dispatch(changePassword({ userId: user?.id, form: data }))
+      .unwrap()
+      .then((res) => {
+        reset(defaultValues);
+        dispatch(
+          showMessage({
+            message: "Đổi mật khẩu thành công",
+            ...successAnchor,
+          })
+        );
+      })
+      .catch((error) => {
+        const errorMessage =
+          error?.data?.message || "Mật khẩu cũ không đúng, vui lòng thử lại";
+
+        dispatch(
+          showMessage({
+            message: errorMessage,
+            ...errorAnchor,
+          })
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (

@@ -36,6 +36,7 @@ import {
 } from "../../../../../../../store/slices/examSlice";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../../../../../../constants/confirm";
+import CircularLoading from "../../../../../../../components/CircularLoading";
 
 const difficultyOptions = [
   { label: "Dễ", value: "EASY" },
@@ -229,30 +230,7 @@ const QuestionForm = ({ questionData }: any) => {
   //   });
 
   const onSubmit = (data: any) => {
-    // console.log({ data });
-    // setLoading(true);
-    // const payload1 = {
-    //   questionScores: [
-    //     {
-    //       question: {
-    //         topic: data.topic,
-    //         type: data.type,
-    //         content: data.content.trim(),
-    //         status: 0,
-    //         difficulty: difficultyOptions.findIndex(
-    //           (item) => item.value == data.difficulty
-    //         ),
-    //         image: data.image,
-    //         chapterId: data.chapterId,
-    //         answers: data.answers,
-    //         createdBy: user?.id,
-    //       },
-    //       score: 0,
-    //     },
-    //   ],
-    //   examId: exam?.data?.id,
-    // };
-
+    setLoading(true);
     const payload2 = {
       topic: data.topic,
       type: data.type,
@@ -279,6 +257,7 @@ const QuestionForm = ({ questionData }: any) => {
     dispatch(action)
       .unwrap()
       .then((res) => {
+        console.log({ res });
         if (!_.isEmpty(questionData)) {
           setQuestion(res.data);
           reset(QuestionModel(res.data));
@@ -287,18 +266,14 @@ const QuestionForm = ({ questionData }: any) => {
             shouldValidate: true,
           });
         } else {
-          setQuestion(res.data?.questionScores?.[0]?.question);
-          reset(QuestionModel(res.data?.questionScores?.[0]?.question));
-          setValue(
-            "subjectId",
-            res?.data?.questionScores?.[0]?.question.chapter?.subject?.id,
-            {
-              shouldDirty: true,
-              shouldValidate: true,
-            }
-          );
+          setQuestion(res.data);
+          reset(QuestionModel(res.data));
+          setValue("subjectId", res?.data?.chapter?.subject?.id, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
         }
-        dispatch(setImportStatus("succeeded"));
+        // dispatch(setImportStatus("succeeded"));
         dispatch(showMessage({ message: "Lưu thành công", ...successAnchor }));
       })
       .finally(() => {
@@ -312,6 +287,7 @@ const QuestionForm = ({ questionData }: any) => {
   //       isCorrect?: FieldError;
   //     }>
   //   | undefined;
+  if (loading) return <CircularLoading />;
 
   return (
     <div className="flex flex-col gap-y-4">
