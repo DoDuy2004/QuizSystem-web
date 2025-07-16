@@ -146,7 +146,7 @@ const ClassItem = ({ data }: any) => {
               Cập nhập
             </ListItemText>
           </MenuItem>
-          <Divider />
+          {/* <Divider />
           <MenuItem
             sx={{ paddingY: 0 }}
             onClick={(e) => openConfirmDialog(e, data?.id)}
@@ -154,7 +154,7 @@ const ClassItem = ({ data }: any) => {
             <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>
               Lưu trữ
             </ListItemText>
-          </MenuItem>
+          </MenuItem> */}
         </Menu>
       </div>
       <div className="h-28 relative bg-white border-b-1 border-gray-200">

@@ -24,6 +24,7 @@ import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
 import { type AppDispatch } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import FullscreenLoader from "../../components/FullscreenLoader";
+import { resetExamState } from "../../store/slices/examSlice";
 
 const Header = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
@@ -93,7 +94,10 @@ const Header = () => {
           {userData?.role === "TEACHER" && !isMobile && (
             <Button
               startIcon={<QueueIcon />}
-              onClick={() => navigate("/workspace/exam/new")}
+              onClick={() => {
+                navigate("/workspace/exam/new");
+                dispatch(resetExamState());
+              }}
               sx={{
                 padding: "10px 16px",
                 fontWeight: "bold",

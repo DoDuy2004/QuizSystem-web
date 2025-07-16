@@ -175,29 +175,31 @@ class ExamService {
     });
   };
 
-  createExamMatrix =  (params: any) => {
+  createExamMatrix = (params: any) => {
     return new Promise((resolve, reject) => {
       const form = params?.form;
       axios
         .post(`${import.meta.env.VITE_DOMAIN}/api/exams/create-matrix`, form)
         .then((response) => {
-          // Chỉ trả về response.data (dữ liệu JSON từ API)
-          resolve(response);
+          console.log("✅ Status", response.status);
+          console.log("✅ Data", response.data);
+          resolve(response.data);
         })
-        .catch(function (error) {
+        .catch((error) => {
+          console.log("❌ Error", error);
+
           if (error.response) {
-            console.log({ error });
-            // Lỗi từ server (ví dụ: 400 Bad Request)
-            console.log("Server error data:", error.response?.data);
-            reject(error.response?.data); // Trả về dữ liệu lỗi từ API
-          } else if (error.request) {
-            // Không nhận được response
-            console.log("No response:", error.request);
-            reject({ error: true, message: "Không thể kết nối đến server" });
+            // Lỗi từ server có response
+            reject({
+              status: error.response.status,
+              data: error.response.data, // { errors: "..."}
+            });
           } else {
-            // Lỗi khi thiết lập request
-            console.log("Error:", error.message);
-            reject({ error: true, message: error.message });
+            // Lỗi network
+            reject({
+              status: 0,
+              data: { errors: error.message || "Lỗi không xác định" },
+            });
           }
         });
     });

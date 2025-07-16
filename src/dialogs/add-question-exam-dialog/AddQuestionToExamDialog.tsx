@@ -38,7 +38,7 @@ import {
   setImportStatus,
 } from "../../store/slices/examSlice";
 import { showMessage } from "../../components/FuseMessage/fuseMessageSlice";
-import { successAnchor } from "../../constants/confirm";
+import { errorAnchor, successAnchor } from "../../constants/confirm";
 import { useParams } from "react-router-dom";
 import { getChapters } from "../../store/slices/subjectSlice";
 import * as yup from "yup";
@@ -242,21 +242,23 @@ const AddQuestionToExamDialog = () => {
 
       dispatch(closeAddQuestionToExamDialog());
     } catch (error: any) {
-      let errorMessage = "Không đủ câu hỏi để thêm";
+      // Lấy message lỗi từ error.payload
+      const errorMessage = (
+        error?.errors || "Đã xảy ra lỗi khi thêm câu hỏi vào đề thi"
+      )
+        .replace(/MEDIUM/g, "Trung bình")
+        .replace(/HARD/g, "Khó")
+        .replace(/EASY/g, "Dễ");
 
       dispatch(
         showMessage({
           message: errorMessage,
-          autoHideDuration: 6000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
-          },
-          variant: "error",
+          autoHideDuration: 10000, // Hiển thị lâu hơn
+          ...errorAnchor,
         })
       );
 
-      // ✅ Reset lại form với dữ liệu mặc định từ chương
+      // Reset form
       reset({
         matrix: chapters.map((chapter: any) => ({
           chapterId: chapter.id,

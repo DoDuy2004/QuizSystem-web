@@ -45,6 +45,7 @@ function RichTextEditor({
     if (quillRef.current) {
       const quillContainer = quillRef.current.getEditor().container;
       quillContainer.style.minHeight = "100px"; // Tăng chiều cao
+      quillContainer.style.fontSize = "18px";
     }
   }, []);
 

@@ -110,8 +110,6 @@ const AddMultiQuestionsDialog = () => {
           });
         }
 
-        console.log({ validQuestions });
-
         // Hiển thị thông báo thành công
         dispatch(
           showMessage({
@@ -124,19 +122,22 @@ const AddMultiQuestionsDialog = () => {
           (item: any) => !item.isValid || item.errorMessages.length > 0
         );
         if (invalidQuestions.length > 0) {
-          const errorMessage =
-            `Có ${invalidQuestions.length} câu hỏi không hợp lệ:\n` +
-            invalidQuestions
-              .map(
-                (item: any) =>
-                  `Dòng ${item.rowIndex}: ${item.content} - Lỗi: ${
-                    item.errorMessages.join(", ") || "Dữ liệu không hợp lệ"
-                  }`
-              )
-              .join("\n");
           dispatch(
             showMessage({
-              message: errorMessage,
+              message: (
+                <>
+                  <div>Có {invalidQuestions.length} câu hỏi không hợp lệ:</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {invalidQuestions.map((item: any, index: any) => (
+                      <div key={index}>
+                        - Dòng {item.rowIndex}:{" "}
+                        {item.errorMessages[0] || "Dữ liệu không hợp lệ"}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ),
+              autoHideDuration: 5000,
               ...errorAnchor,
             })
           );
@@ -144,9 +145,11 @@ const AddMultiQuestionsDialog = () => {
 
         handleClose();
       } catch (error: any) {
-        // Xử lý lỗi chung (nếu API thất bại)
         dispatch(
-          showMessage({ message: "Import câu hỏi thất bại", ...errorAnchor })
+          showMessage({
+            message: "Import câu hỏi thất bại",
+            ...errorAnchor,
+          })
         );
       } finally {
         setLoading(false);

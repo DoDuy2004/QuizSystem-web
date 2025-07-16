@@ -96,23 +96,30 @@ const ComposeQuestion = () => {
     fetchData();
   }, [dispatch, routeParams?.id]);
 
-  useDeepCompareEffect(() => {
-    if (routeParams.id && questionBank?.questions?.length > 0) {
-      dispatch(getQuestionById(questionBank?.questions[0]?.id))
-        .then((res) => {
-          setQuestion(res.payload.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching question:", error);
-        })
-        .finally(() => {
-          setQuestionLoading(false);
-          setIsActive(0);
-        });
+  useEffect(() => {
+    if (questionsData.length > 0 && questionsData[0]?.id) {
+      if (_.isEmpty(question)) {
+        console.log("here");
+        setQuestionLoading(true);
+        dispatch(getQuestionById(questionsData[0].id))
+          .then((res) => {
+            setQuestion(res.payload.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching question:", error);
+          })
+          .finally(() => {
+            setQuestionLoading(false);
+            setIsActive(0);
+          });
+      }
     } else {
+      console.log("here 1");
+      setQuestion({});
+      setIsActive(null);
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, questionBank?.questions]);
+  }, [dispatch, questionsData]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {
@@ -123,7 +130,7 @@ const ComposeQuestion = () => {
     setIsActive(index);
     const questionId = questionBank?.questions?.[index]?.id;
 
-    console.log({ questionId });
+    // console.log({ questionId });
 
     if (questionId) {
       setQuestionLoading(true);

@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import _ from "lodash";
+import _, { set } from "lodash";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
@@ -27,6 +27,7 @@ import { type AppDispatch } from "../../../../../../../store/store";
 import {
   getChapters,
   getSubjects,
+  selectSubjects,
   // selectSubjects,
 } from "../../../../../../../store/slices/subjectSlice";
 import {
@@ -52,7 +53,7 @@ const schema = yup.object().shape({
   image: yup.string().optional(),
   difficulty: yup.string().required("Độ khó là bắt buộc"),
   chapterId: yup.string().required("Chương là bắt buộc"),
-  subjectId: yup.string().required("Chương là bắt buộc"),
+  subjectId: yup.string().required("Môn học là bắt buộc"),
   answers: yup
     .array()
     .of(
@@ -68,15 +69,17 @@ const schema = yup.object().shape({
 const QuestionForm = ({ questionData }: any) => {
   const [selectedValue, setSelectedValue] = useState("SingleChoice"); // Mặc định là "Một đáp án"
   const [loading, setLoading] = useState(false);
+  const [subjectLoading, setSubjectLoading] = useState(false);
   const [chapters, setChapters] = useState([]);
   // const subjects = useSelector(selectSubjects);
-  const [subjects, setSubjects] = useState([]);
+  // const [subjects, setSubjects] = useState([]);
   const [isSubjectOpen, setIsSubjectOpen] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
   const questionBank = useSelector(selectQuestionBank);
   const [question, setQuestion] = useState(questionData || {});
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
+  const subjects = useSelector(selectSubjects);
   const {
     handleSubmit,
     formState: { isValid, dirtyFields, errors },
@@ -96,7 +99,7 @@ const QuestionForm = ({ questionData }: any) => {
     return QuestionModel({
       ...questionData,
       chapterId: questionData?.chapter?.id,
-      subjectId: questionData?.chapter?.subject?.id,
+      subjectId: questionBank?.data?.subjectId,
     });
   }, [questionData]);
 
@@ -128,6 +131,7 @@ const QuestionForm = ({ questionData }: any) => {
   // console.log({ questionBank });
 
   useEffect(() => {
+    setLoading(true);
     if (_.isEmpty(questionData)) {
       const defaultAnswers = Array.from({ length: 4 }, (_, index) => ({
         isCorrect: index === 0,
@@ -140,6 +144,11 @@ const QuestionForm = ({ questionData }: any) => {
         answers: defaultAnswers,
         type: selectedValue,
       });
+      setValue("subjectId", questionBank?.data?.subjectId, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+      setLoading(false);
     } else {
       setQuestion(questionData);
       const transformedData = {
@@ -156,19 +165,20 @@ const QuestionForm = ({ questionData }: any) => {
         shouldDirty: false,
         shouldValidate: true,
       });
+      setLoading(false);
     }
   }, [reset, questionData]);
 
   useEffect(() => {
     if (isSubjectOpen && subjects?.length === 0) {
-      setLoading(true);
+      setSubjectLoading(true);
       dispatch(getSubjects())
         .unwrap()
         .then((res) => {
           console.log({ res });
-          setSubjects(res.data);
+          // setSubjects(res.data);
         })
-        .finally(() => setLoading(false));
+        .finally(() => setSubjectLoading(false));
     }
   }, [isSubjectOpen, dispatch]);
 
@@ -228,18 +238,23 @@ const QuestionForm = ({ questionData }: any) => {
       questionBankId: questionBank?.data?.id,
     };
 
-    const action = !_.isEmpty(questionData)
-      ? editQuestion({
-          id: question.id,
-          form: { id: question.id, ...payload },
-        })
-      : addQuestionToQuestionBank({ form: payload });
+    const action =
+      !_.isEmpty(questionData) || !_.isEmpty(question)
+        ? editQuestion({
+            id: question.id,
+            form: { id: question.id, ...payload },
+          })
+        : addQuestionToQuestionBank({ form: payload });
     // console.log({ payload });
     dispatch(action)
       .then((res) => {
         setQuestion(res.payload.data);
         reset(QuestionModel(res.payload?.data));
         setValue("subjectId", res.payload?.data?.chapter?.subject?.id, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue("chapterId", res.payload?.data?.chapter?.id, {
           shouldDirty: true,
           shouldValidate: true,
         });
@@ -250,13 +265,6 @@ const QuestionForm = ({ questionData }: any) => {
         setLoading(false);
       });
   };
-
-  // const answerErrors = errors.answers as
-  //   | Array<{
-  //       content?: FieldError;
-  //       isCorrect?: FieldError;
-  //     }>
-  //   | undefined;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -323,6 +331,7 @@ const QuestionForm = ({ questionData }: any) => {
               onOpen={() => setIsSubjectOpen(true)}
               onClose={() => setIsSubjectOpen(false)}
               options={subjects}
+              disabled
               getOptionLabel={(option: any) =>
                 typeof option === "string" ? option : option?.name || ""
               }

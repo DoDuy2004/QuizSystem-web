@@ -23,7 +23,7 @@ import QuestionForm from "../components/QuestionForm";
 import {
   deleteQuestionFromExam,
   getQuestionsByExam,
-  resetExamState,
+  // resetExamState,
   selectExam,
   selectImportStatus,
   setImportStatus,
@@ -60,7 +60,6 @@ const ComposeQuestion = () => {
           setNoOfQuestions(0);
         } finally {
           setLoading(false);
-          // ✅ Reset lại importStatus sau khi đã xử lý xong
           dispatch(setImportStatus("idle"));
         }
       }
@@ -69,11 +68,11 @@ const ComposeQuestion = () => {
     fetchAfterImport();
   }, [importStatus]);
 
-  useEffect(() => {
-    return () => {
-      dispatch(resetExamState());
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     dispatch(resetExamState());
+  //   };
+  // }, []);
 
   useDeepCompareEffect(() => {
     const fetchData = async () => {
@@ -102,24 +101,31 @@ const ComposeQuestion = () => {
   }, [dispatch, routeParams?.id]);
 
   useDeepCompareEffect(() => {
-    if (routeParams.id && exam?.questions?.length > 0 && _.isEmpty(qu)) {
-      dispatch(
-        getQuestionById(exam?.questions[0]?.id || questionsData?.[0]?.id)
-      )
-        .then((res) => {
-          setQuestion(res.payload.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching question:", error);
-        })
-        .finally(() => {
-          setQuestionLoading(false);
-          setIsActive(0);
-        });
+    if (
+      routeParams.id &&
+      exam?.questions?.length > 0 &&
+      questionsData?.[0]?.id
+    ) {
+      if (_.isEmpty(question)) {
+        setQuestionLoading(true);
+        dispatch(
+          getQuestionById(exam?.questions[0]?.id || questionsData?.[0]?.id)
+        )
+          .then((res) => {
+            setQuestion(res.payload.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching question:", error);
+          })
+          .finally(() => {
+            setQuestionLoading(false);
+            setIsActive(0);
+          });
+      }
     } else {
       setQuestionLoading(false);
     }
-  }, [dispatch, routeParams?.id, exam?.questions, questionsData]);
+  }, [dispatch, questionsData]);
 
   const handleGetQuestion = (index: number) => {
     if (index === isActive) {

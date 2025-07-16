@@ -115,7 +115,7 @@ const QuestionBankForm = ({
       .finally(() => setLoading(false));
   };
 
-  console.log({ form: watch() });
+  // console.log({ form: watch() });
 
   if (loading) {
     return <CircularLoading />;
