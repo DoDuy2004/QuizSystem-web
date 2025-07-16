@@ -104,7 +104,9 @@ const QuestionForm = ({ questionData }: any) => {
     reset,
   } = useForm({
     mode: "onChange",
-    defaultValues: QuestionModel({}),
+    defaultValues: QuestionModel({
+      subjectId: exam?.data?.subjectId,
+    }),
     resolver: yupResolver(schema),
   });
   const form = watch();
@@ -145,7 +147,7 @@ const QuestionForm = ({ questionData }: any) => {
   // console.log({ empty: _.isEmpty(questionData) });
 
   useEffect(() => {
-    if (isSubjectOpen && subjects?.length === 0) {
+    if (subjects?.length === 0) {
       setLoading(true);
       dispatch(getSubjects())
         .unwrap()
@@ -155,7 +157,7 @@ const QuestionForm = ({ questionData }: any) => {
         })
         .finally(() => setLoading(false));
     }
-  }, [isSubjectOpen, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     const subjectId = watch("subjectId");
@@ -181,6 +183,7 @@ const QuestionForm = ({ questionData }: any) => {
         ...QuestionModel({}),
         answers: defaultAnswers,
         type: selectedValue,
+        subjectId: exam?.data?.subjectId,
       });
     } else {
       setQuestion(questionData);
@@ -202,9 +205,15 @@ const QuestionForm = ({ questionData }: any) => {
         shouldValidate: true,
       });
     }
-  }, [reset, questionData]);
+  }, [reset, questionData, exam?.data?.subjectId]);
 
-  //
+  useEffect(() => {
+    console.log({ subject: exam?.data?.subjectId });
+    setValue("subjectId", exam?.data?.subjectId, {
+      shouldDirty: false,
+      shouldValidate: true,
+    });
+  }, [exam?.data?.subjectId]);
 
   const handleAnswerChange =
     (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,8 +277,8 @@ const QuestionForm = ({ questionData }: any) => {
         } else {
           setQuestion(res.data);
           reset(QuestionModel(res.data));
-          setValue("subjectId", res?.data?.chapter?.subject?.id, {
-            shouldDirty: true,
+          setValue("subjectId", exam?.data?.subjectId, {
+            shouldDirty: false,
             shouldValidate: true,
           });
         }
@@ -355,6 +364,7 @@ const QuestionForm = ({ questionData }: any) => {
               onOpen={() => setIsSubjectOpen(true)}
               onClose={() => setIsSubjectOpen(false)}
               options={subjects}
+              disabled
               getOptionLabel={(option: any) =>
                 typeof option === "string" ? option : option?.name || ""
               }

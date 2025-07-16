@@ -71,37 +71,57 @@ class JwtService {
     this.handleAuthentication();
   }
 
+  // setInterceptors = (): void => {
+  //   axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
+  //   axios.interceptors.response.use(
+  //     (response: AxiosResponse) => {
+  //       return response;
+  //     },
+  //     async (err: AxiosError) => {
+  //       try {
+  //         return await new Promise((resolve, reject) => {
+  //           if (!err.response) {
+  //             reject(err);
+  //           }
+
+  //           if (err.response?.status === 401 && err.config) {
+  //             this.emit("onAutoLogout", "Invalid access_token");
+  //           }
+
+  //           if (err.response?.status === 500 && err.config) {
+  //             this.emit("serverError", "Server Error");
+  //           }
+
+  //           if (err.response?.status === 400 && err.config) {
+  //             this.emit("badRequest", "Bad Request");
+  //           }
+  //           throw err;
+  //         });
+  //       } catch (err_1: any) {
+  //         if (!err_1.response) {
+  //           throw err_1;
+  //           // this.emit("networkError", "Network Error");
+  //         }
+  //       }
+  //     }
+  //   );
+  // };
+
   setInterceptors = (): void => {
     axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
+
     axios.interceptors.response.use(
-      (response: AxiosResponse) => {
-        return response;
-      },
-      async (err: AxiosError) => {
-        try {
-          return await new Promise((resolve, reject) => {
-            if (!err.response) {
-              reject(err);
-            }
-
-            if (err.response?.status === 401 && err.config) {
-              this.emit("onAutoLogout", "Invalid access_token");
-            }
-
-            if (err.response?.status === 500 && err.config) {
-              this.emit("serverError", "Server Error");
-            }
-
-            if (err.response?.status === 400 && err.config) {
-              this.emit("badRequest", "Bad Request");
-            }
-            throw err;
-          });
-        } catch (err_1: any) {
-          if (!err_1.response) {
-            // this.emit("networkError", "Network Error");
-          }
+      (response: AxiosResponse) => response,
+      (error: AxiosError) => {
+        if (error.response?.status === 401) {
+          this.emit("onAutoLogout", "Invalid access_token");
+        } else if (error.response?.status === 500) {
+          this.emit("serverError", "Server Error");
+        } else if (error.response?.status === 400) {
+          this.emit("badRequest", "Bad Request");
         }
+
+        return Promise.reject(error); // ✅ Phải có dòng này để lỗi đến được .catch()
       }
     );
   };

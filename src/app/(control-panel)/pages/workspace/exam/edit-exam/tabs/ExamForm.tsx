@@ -28,19 +28,18 @@ const schema: any = yup.object().shape({
     .min(1, "Thời gian làm bài phải lớn hơn 0 phút")
     .required("Thời gian làm bài là bắt buộc"),
   subjectId: yup.string().required("Môn học là bắt buộc"),
-  noOfQuestions: yup
-    .number()
-    .typeError("Số câu hỏi phải là số")
-    .min(1, "Số câu hỏi phải lớn hơn 0")
-    .required("Số câu hỏi là bắt buộc"),
+  // noOfQuestions: yup
+  //   .number()
+  //   .typeError("Số câu hỏi phải là số")
+  //   .min(1, "Số câu hỏi phải lớn hơn 0")
+  //   .required("Số câu hỏi là bắt buộc"),
 });
 
 const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
-  const hasFetched = useRef(false);
   const hasFetchedSubject = useRef(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [subjects, setSubjects] = useState([]);
   const exam = useSelector(selectExam);
   const user = useSelector(selectUser);
@@ -58,10 +57,12 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   });
 
   useDeepCompareEffect(() => {
-    if (hasFetched.current) return;
+    if (!routeParams.id) {
+      setLoading(false);
+      return;
+    }
 
     if (routeParams.id) {
-      hasFetched.current = true;
       setLoading(true);
 
       dispatch(getExambyId({ id: routeParams.id }))
@@ -73,20 +74,29 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   }, [dispatch, routeParams?.id]);
 
   useEffect(() => {
-    if (exam && routeParams?.id) {
+    if (!_.isEmpty(exam?.data) || routeParams?.id) {
       const transformedData = {
         ...exam?.data,
       };
       reset(ExamModel(transformedData));
     }
-  }, [exam, reset]);
 
-  useEffect(() => {
     return () => {
-      // dispatch(resetExamState());
-      reset(ExamModel({}));
+      if (_.isEmpty(exam?.data) && !routeParams?.id) {
+        // dispatch(resetExamState());
+        reset(ExamModel({}));
+      }
     };
-  }, []);
+  }, [exam, reset, routeParams]);
+
+  // useEffect(() => {
+  //   return () => {
+  //     if (!routeParams?.id) {
+  //       dispatch(resetExamState());
+  //       reset(ExamModel({}));
+  //     }
+  //   };
+  // }, [routeParams]);
 
   useDeepCompareEffect(() => {
     if (hasFetchedSubject.current) return;
@@ -162,7 +172,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                 <TextField
                   {...field}
                   fullWidth
-                  className="col-span-3"
+                  className="col-span-4"
                   label={
                     <>
                       Tên đề thi <span className="text-red-500">*</span>
@@ -174,7 +184,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                 />
               )}
             />
-            <Controller
+            {/* <Controller
               name="noOfQuestions"
               control={control}
               render={({ field }) => (
@@ -193,7 +203,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
                   helperText={errors.noOfQuestions?.message}
                 />
               )}
-            />
+            /> */}
           </div>
 
           {/* Môn học */}

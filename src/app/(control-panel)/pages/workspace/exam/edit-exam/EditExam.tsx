@@ -53,6 +53,8 @@ const CreateExam = () => {
   useEffect(() => {
     if (routeParams.id) {
       setIsQuestionTabEnabled(true);
+    } else {
+      setIsQuestionTabEnabled(false);
     }
   }, [routeParams.id]);
 

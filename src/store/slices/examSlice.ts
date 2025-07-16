@@ -3,7 +3,7 @@ import CourseClassService from "../../services/course-class/CourseClassService";
 import ExamService from "../../services/exam/ExamService";
 
 export interface ExamStateProps {
-  data: [];
+  data: any[];
   examDetail: {
     data: {};
     questions: any[];
@@ -144,17 +144,19 @@ export const deleteQuestionFromExam = createAsyncThunk(
 );
 
 // Ví dụ định nghĩa createMatrix (nếu dùng createAsyncThunk)
+
 export const createMatrix = createAsyncThunk(
   "exam/createMatrix",
   async (params: any, { rejectWithValue }) => {
     try {
-      const response: any = await ExamService.createExamMatrix(params);
-      return response.data;
+      const response = await ExamService.createExamMatrix(params);
+      return response;
     } catch (error: any) {
-      if (error.response?.data) {
-        return rejectWithValue(error.response.data); // <-- chính là { errors: ... }
-      }
-      return rejectWithValue({ message: error.message });
+      // Truyền nguyên error data vào rejectWithValue
+      return rejectWithValue({
+        status: error.status || 500,
+        ...error.data,
+      });
     }
   }
 );
@@ -202,8 +204,9 @@ export const examSlice = createSlice({
       }
     });
     builder.addCase(addExam.fulfilled, (state, action) => {
-      // console.log({ data: action.payload });
+      console.log({ data: action.payload.data });
       state.examDetail.data = action.payload.data;
+      state.data = [...state.data, action.payload.data];
     });
     builder.addCase(editExam.fulfilled, (state, action) => {
       //   console.log({ data: action.payload });

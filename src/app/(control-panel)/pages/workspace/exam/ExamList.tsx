@@ -107,7 +107,10 @@ const ExamList = () => {
             </IconButton>
           </div>
           <Button
-            onClick={() => navigate("/workspace/exam/new")}
+            onClick={() => {
+              navigate("/workspace/exam/new");
+              dispatch(resetExamState());
+            }}
             sx={{
               marginLeft: "auto",
               padding: "6px 10px",
