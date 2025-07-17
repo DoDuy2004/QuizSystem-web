@@ -33,6 +33,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import CircularLoading from "../../../../../../../components/CircularLoading";
 import type { AppDispatch } from "../../../../../../../store/store";
 import { getStudentStatus } from "../../../../../../../store/slices/roomExamSlice";
+import signalrConnection from "../../../../../../../utils/signalR";
+import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
+import { successAnchor } from "../../../../../../../constants/confirm";
 
 const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
   const { id } = useParams();
@@ -106,6 +109,55 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
 
   // console.log({ roomExam });
   // console.log({ examInfo });
+
+  useEffect(() => {
+    const connectSignalR = async () => {
+      try {
+        if (signalrConnection.state === "Disconnected") {
+          await signalrConnection.start();
+          console.log("SignalR connected");
+        }
+
+        signalrConnection.on(
+          "ReceiveStatusChange",
+          (studentId, fullName, status, submitAt) => {
+            let message = "";
+
+            console.log({ studentId, fullName, status, submitAt });
+
+            if (status === "InProgress") {
+              message = `${fullName} đã vào phòng thi`;
+            } else if (status === "Submitted") {
+              message = `${fullName} đã nộp bài thi`;
+            }
+
+            dispatch(
+              showMessage({
+                message,
+                ...successAnchor,
+              })
+            );
+
+            setStudents((prev) =>
+              prev.map((s) =>
+                s.id === studentId
+                  ? { ...s, submitStatus: status, submittedAt: submitAt }
+                  : s
+              )
+            );
+          }
+        );
+      } catch (error) {
+        console.error("SignalR connection error:", error);
+      }
+    };
+
+    connectSignalR();
+
+    return () => {
+      signalrConnection.off("ReceiveStatusChange");
+    };
+  }, []);
 
   if (loading) return <CircularLoading />;
 
