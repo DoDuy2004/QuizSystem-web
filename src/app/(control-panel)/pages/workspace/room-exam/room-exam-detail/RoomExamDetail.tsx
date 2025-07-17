@@ -90,7 +90,7 @@ const RoomExamDetail = () => {
     }
   }, [roomExam]);
 
-  console.log({ roomExam });
+  // console.log({ roomExam });
 
   useEffect(() => {
     const now = new Date();
@@ -255,7 +255,7 @@ const RoomExamDetail = () => {
       return;
     }
 
-    console.log({ payload });
+    // console.log({ payload });
 
     setSubmitting(true);
 
