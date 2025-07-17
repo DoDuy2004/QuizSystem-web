@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import SearchIcon from "@mui/icons-material/Search";
 import { type AppDispatch } from "../../../../../store/store";
-import { useDeepCompareEffect } from "../../../../../hooks";
+import { useDeepCompareEffect, useThemeMediaQuery } from "../../../../../hooks";
 // import FullscreenLoader from "../../../../../components/FullscreenLoader";
 import { useRef } from "react";
 // import reducer from "./store";
@@ -22,7 +22,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import SearchInput from "../../../../../components/SearchInput";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate } from "react-router-dom";
 // import ExamListItem from "./components/ExamListItem";
@@ -39,7 +38,7 @@ const ExamResult = () => {
   const user = useSelector(selectUser);
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
-  //   console.log({ questionBanks });
+    const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   function formatVietnamTime(dateString: string): string {
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -96,7 +95,7 @@ const ExamResult = () => {
         Kết quả thi
       </Typography>
       <div className=" bg-white rounded-md shadow-md">
-        <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
+        <div className="w-full border-b-1 md:px-6 px-4 py-4 border-gray-200 flex items-center justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
             <Typography className="w-1/2" fontSize={15}>
               <span className="text-blue-600 font-semibold">
@@ -140,7 +139,7 @@ const ExamResult = () => {
                 sx={{
                   minWidth: 650,
                   "& .MuiTableCell-root": {
-                    padding: "16px 24px", // Tăng padding cho các cell
+                    padding: !isMobile ? "16px 24px" : "16px", // Tăng padding cho các cell
                     fontSize: "0.875rem",
                     borderColor: "#f0f0f0",
                   },

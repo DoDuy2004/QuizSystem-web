@@ -93,8 +93,8 @@ const QuestionBankDetail = () => {
           Chi tiết ngân hàng câu hỏi
         </Typography>
       </div>
-      <div className="grid grid-cols-6 gap-8">
-        <div className="col-span-2 flex flex-col gap-y-4 bg-white rounded-md shadow-md px-6 py-4 h-fit">
+      <div className="grid grid-cols-6 md:gap-8 gap-4">
+        <div className="md:col-span-2 col-span-6 flex flex-col gap-y-4 bg-white rounded-md shadow-md md:px-6 px-4 py-4 h-fit">
           <Typography component={"h6"} fontSize={14} color="primary">
             {questionBank?.data?.name}
           </Typography>
@@ -144,7 +144,7 @@ const QuestionBankDetail = () => {
             </Tooltip>
           </div>
         </div>
-        <div className="col-span-4 flex flex-col gap-y-4 bg-white px-6 py-4 shadow rounded-md">
+        <div className="md:col-span-4 col-span-6 flex flex-col gap-y-4 bg-white md:px-6 px-4 py-4 shadow rounded-md">
           {questionBank?.questions && questionBank?.questions?.length === 0 ? (
             <Typography>
               Không có câu hỏi nào trong ngân hàng câu hỏi

@@ -25,6 +25,7 @@ import { type AppDispatch } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import FullscreenLoader from "../../components/FullscreenLoader";
 import { resetExamState } from "../../store/slices/examSlice";
+import { openSidebar } from "../../store/slices/globalSlice";
 
 const Header = () => {
   const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
@@ -66,7 +67,7 @@ const Header = () => {
   return (
     <div>
       <div className="lg:px-6 px-3 py-3 flex justify-between items-center gap-x-3 border-b-1 border-[#f3f1f1] sticky top-0 bg-white z-50">
-        {isMobile && <MenuIcon />}
+        {isMobile && <MenuIcon onClick={() => dispatch(openSidebar())} />}
         <div className="flex items-center gap-x-3">
           {!isMobile && (
             <>

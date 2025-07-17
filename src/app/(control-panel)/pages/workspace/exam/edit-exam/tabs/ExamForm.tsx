@@ -160,7 +160,7 @@ const ExamForm = ({ setIsQuestionTabEnabled, setTabValue }: any) => {
   }
 
   return (
-    <div className="bg-white rounded-md px-6 py-4 flex flex-col gap-y-5">
+    <div className="bg-white rounded-md md:px-6 px-4 py-4 flex flex-col gap-y-5">
       <Typography>Thông tin cơ bản</Typography>
       <form action="" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-y-6 px-2">

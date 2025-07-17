@@ -195,9 +195,9 @@ const AddRoomExamDialog = () => {
           "& .MuiDialog-paper": {
             margin: isMobile ? 0 : isTablet ? "1.5vh auto" : "2vh auto",
             width: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-            height: "80%",
+            height: "100%",
             maxWidth: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-            maxHeight: isMobile ? "100vh" : "auto",
+            maxHeight: isMobile ? "100%" : "auto",
             borderRadius: isMobile ? 0 : 2,
             boxSizing: "border-box",
             overflow: isMobile ? "hidden" : "hidden",

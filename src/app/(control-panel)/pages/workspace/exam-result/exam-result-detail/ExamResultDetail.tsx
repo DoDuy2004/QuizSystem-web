@@ -20,8 +20,8 @@ import {
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { useNavigate, useParams } from "react-router-dom";
 import type { AppDispatch } from "../../../../../../store/store";
-import { selectUser } from "../../../../../../store/slices/userSlice";
-import { useDeepCompareEffect } from "../../../../../../hooks";
+// import { selectUser } from "../../../../../../store/slices/userSlice";
+import { useDeepCompareEffect, useThemeMediaQuery } from "../../../../../../hooks";
 import CircularLoading from "../../../../../../components/CircularLoading";
 import { getStudentExamsByRoom } from "../../../../../../store/slices/roomExamSlice";
 // import ExamListItem from "./components/ExamListItem";";
@@ -32,19 +32,20 @@ const ExamResultDetail = () => {
   const [examResults, setExamResults] = useState([]);
   // const user = useSelector(selectUser);
   const routeParams = useParams();
+  const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
   //   console.log({ questionBanks });
   const navigate = useNavigate();
 
-  function formatVietnamTime(dateString: string): string {
-    return new Date(dateString).toLocaleString("vi-VN", {
-      hour12: false,
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  // function formatVietnamTime(dateString: string): string {
+  //   return new Date(dateString).toLocaleString("vi-VN", {
+  //     hour12: false,
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //     year: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //   });
+  // }
 
   useDeepCompareEffect(() => {
     setLoading(true);
@@ -74,7 +75,7 @@ const ExamResultDetail = () => {
         </Typography>
       </div>
       <div className=" bg-white rounded-md shadow-md">
-        <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
+        <div className="w-full border-b-1 md:px-6 px-4 py-4 border-gray-200 flex items-center justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
             <Typography className="w-1/2" fontSize={15}>
               <span className="text-blue-600 font-semibold">
@@ -101,7 +102,7 @@ const ExamResultDetail = () => {
               sx={{
                 minWidth: 650,
                 "& .MuiTableCell-root": {
-                  padding: "16px 24px", // Tăng padding cho các cell
+                  padding: !isMobile ? "16px 24px" : "16px", 
                   fontSize: "0.875rem",
                   borderColor: "#f0f0f0",
                 },

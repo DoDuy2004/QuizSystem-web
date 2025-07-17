@@ -492,7 +492,7 @@ const NewsBoard = ({ data }: any) => {
                   )}
                 </div>
               )}
-              <div className="px-6 py-1.5 flex justify-between items-center gap-x-5">
+              <div className="md:px-6 px-4 py-1.5 flex justify-between items-center gap-x-5">
                 <Avatar sx={{ width: 32, height: 32 }}>D</Avatar>
                 <TextField
                   name="comment"

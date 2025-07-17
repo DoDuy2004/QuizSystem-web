@@ -36,6 +36,7 @@ import { getStudentStatus } from "../../../../../../../store/slices/roomExamSlic
 import signalrConnection from "../../../../../../../utils/signalR";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../../../../../../constants/confirm";
+import { useThemeMediaQuery } from "../../../../../../../hooks";
 
 const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
   const { id } = useParams();
@@ -44,6 +45,7 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<any[]>([]);
   // const [timeRemaining, setTimeRemaining] = useState(0);
+  const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
   const navigate = useNavigate();
   const routeParams = useParams();
   const [isStart, setIsStart] = useState(false);
@@ -200,7 +202,7 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
             <Paper className="p-3 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <AccessTime className="text-gray-500" />
-                <Typography variant="body2">Thời gian nộp bài</Typography>
+                <Typography variant="body2">Thời gian làm bài</Typography>
               </div>
               <Typography variant="h5" fontWeight="bold">
                 {roomExam?.data?.durationMinutes || 0} phút
@@ -232,7 +234,7 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
                 p: 1.5,
                 border: "1px solid #ddd",
                 borderRadius: 1,
-                minWidth: 180,
+                minWidth: isMobile ? "100%" : 180,
               }}
             >
               <HourglassEmpty color="disabled" />
@@ -254,7 +256,7 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
                 p: 1.5,
                 border: "1px solid #ff9800",
                 borderRadius: 1,
-                minWidth: 180,
+                minWidth: isMobile ? "100%" : 180,
               }}
             >
               <AccessTime color="warning" />
@@ -276,7 +278,7 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
                 p: 1.5,
                 border: "1px solid #4caf50",
                 borderRadius: 1,
-                minWidth: 180,
+                minWidth: isMobile ? "100%" : 180,
               }}
             >
               <CheckCircle color="success" />
@@ -319,9 +321,9 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
                   <TableCell>STT</TableCell>
                   <TableCell>Sinh viên</TableCell>
                   <TableCell>Email</TableCell>
-                  <TableCell align="center">Trạng thái</TableCell>
-                  <TableCell align="center">Thời gian nộp bài</TableCell>
-                  <TableCell align="center"></TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Thời gian nộp bài</TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -329,18 +331,18 @@ const RoomExamManagement = ({ examInfo, roomExam, timeRemaining }: any) => {
                   <TableRow key={student.id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-fit">
                         <Avatar
                           src={student.avatar}
                           alt={student.fullName}
                         ></Avatar>
-                        <Typography>{student.fullName}</Typography>
+                        <Typography className="w-fit">{student.fullName}</Typography>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Typography variant="body2">
-                          {student.email}%
+                          {student.email}
                         </Typography>
                       </div>
                     </TableCell>

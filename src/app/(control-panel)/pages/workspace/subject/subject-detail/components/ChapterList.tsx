@@ -120,7 +120,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
             key={chapter.id}
             sx={{
               p: 2,
-              mb: 2,
+              mb: 0,
               borderRadius: 1,
               backgroundColor:
                 chapter?.isEditing || false ? "grey.50" : "transparent",

@@ -39,6 +39,7 @@ import { showMessage } from "../../../../../../components/FuseMessage/fuseMessag
 import { errorAnchor } from "../../../../../../constants/confirm";
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
 import RoomExamManagement from "./components/RoomExamManagement";
+import { useThemeMediaQuery } from "../../../../../../hooks";
 
 // Types
 interface Question {
@@ -73,6 +74,7 @@ const RoomExamDetail = () => {
   const [submitted, setSubmitted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const routeParams = useParams();
+  const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   const formatTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60)
@@ -250,8 +252,13 @@ const RoomExamDetail = () => {
       answers: submissionData,
     };
 
-    if (submissionData.length === 0) {
-      dispatch(showMessage({ message: "Bạn chưa làm bài", ...errorAnchor }));
+    if (submissionData.length < questionsData.length) {
+      dispatch(
+        showMessage({
+          message: `Bạn cần trả lời tất cả ${questionsData.length} câu hỏi trước khi nộp`,
+          ...errorAnchor,
+        })
+      );
       return;
     }
 
@@ -320,7 +327,7 @@ const RoomExamDetail = () => {
 
   return (
     <div className="grid grid-cols-6 gap-3">
-      <div className="col-span-2 h-fit">
+      <div className="md:col-span-2 col-span-6 h-fit">
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <div className="flex flex-col gap-y-1.5 h-fit">
@@ -378,70 +385,72 @@ const RoomExamDetail = () => {
             </Alert>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent sx={{ p: 2 }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: 1.5,
-              }}
-            >
-              <Box>
-                <Typography variant="subtitle2" gutterBottom>
-                  Sẵn sàng nộp bài?
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: "12px" }}
-                >
-                  Đã trả lời: {answeredCount}/{questionsData.length} câu hỏi
-                </Typography>
+        {!isMobile && (
+          <Card>
+            <CardContent sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1.5,
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Sẵn sàng nộp bài?
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: "12px" }}
+                  >
+                    Đã trả lời: {answeredCount}/{questionsData.length} câu hỏi
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1.5 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={(e) => openConfirmDialog(e)}
+                    disabled={submitting}
+                    sx={{
+                      minWidth: 120,
+                      textTransform: "none",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {submitting ? (
+                      <>
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            border: "2px solid #fff",
+                            borderTop: "2px solid transparent",
+                            borderRadius: "50%",
+                            animation: "spin 1s linear infinite",
+                            mr: 1,
+                            "@keyframes spin": {
+                              "0%": { transform: "rotate(0deg)" },
+                              "100%": { transform: "rotate(360deg)" },
+                            },
+                          }}
+                        />
+                        Đang nộp...
+                      </>
+                    ) : (
+                      "Nộp bài"
+                    )}
+                  </Button>
+                </Box>
               </Box>
-              <Box sx={{ display: "flex", gap: 1.5 }}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={(e) => openConfirmDialog(e)}
-                  disabled={submitting}
-                  sx={{
-                    minWidth: 120,
-                    textTransform: "none",
-                    fontSize: "13px",
-                  }}
-                >
-                  {submitting ? (
-                    <>
-                      <Box
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          border: "2px solid #fff",
-                          borderTop: "2px solid transparent",
-                          borderRadius: "50%",
-                          animation: "spin 1s linear infinite",
-                          mr: 1,
-                          "@keyframes spin": {
-                            "0%": { transform: "rotate(0deg)" },
-                            "100%": { transform: "rotate(360deg)" },
-                          },
-                        }}
-                      />
-                      Đang nộp...
-                    </>
-                  ) : (
-                    "Nộp bài"
-                  )}
-                </Button>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
-      <div className="col-span-4 h-screen overflow-y-scroll">
+      <div className="md:col-span-4 col-span-6 h-screen overflow-y-scroll">
         {questionsData?.map((question: any, index: number) => (
           <Card key={question.id} sx={{ mb: 2 }}>
             <CardContent sx={{ p: 1.5 }}>
@@ -644,6 +653,71 @@ const RoomExamDetail = () => {
             </CardContent>
           </Card>
         ))}
+
+        {isMobile && (
+          <Card>
+            <CardContent sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1.5,
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Sẵn sàng nộp bài?
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: "12px" }}
+                  >
+                    Đã trả lời: {answeredCount}/{questionsData.length} câu hỏi
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1.5 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={(e) => openConfirmDialog(e)}
+                    disabled={submitting}
+                    sx={{
+                      minWidth: 120,
+                      textTransform: "none",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {submitting ? (
+                      <>
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            border: "2px solid #fff",
+                            borderTop: "2px solid transparent",
+                            borderRadius: "50%",
+                            animation: "spin 1s linear infinite",
+                            mr: 1,
+                            "@keyframes spin": {
+                              "0%": { transform: "rotate(0deg)" },
+                              "100%": { transform: "rotate(360deg)" },
+                            },
+                          }}
+                        />
+                        Đang nộp...
+                      </>
+                    ) : (
+                      "Nộp bài"
+                    )}
+                  </Button>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -292,9 +292,10 @@ const AddQuestionToExamDialog = () => {
         "& .MuiDialog-paper": {
           margin: isMobile ? 0 : isTablet ? "1.5vh auto" : "2vh auto",
           width: isMobile ? "100vw" : isTablet ? "70%" : "60%",
-          maxWidth: isMobile ? "100vw" : isTablet ? "70%" : "800px",
+          maxWidth: isMobile ? "100%" : isTablet ? "70%" : "800px",
           height: "100%",
           borderRadius: isMobile ? 0 : 2,
+          maxHeight: isMobile ? "100%" : "auto",
           overflow: "hidden",
         },
       }}
@@ -310,10 +311,10 @@ const AddQuestionToExamDialog = () => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent className="p-6">
+      <DialogContent className="md:p-6 px-0">
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto md:p-4 p-0">
             {loading ? (
               <div className="flex justify-center py-4">
                 <CircularProgress />

@@ -216,7 +216,7 @@ const ComposeQuestion = () => {
 
   return (
     <div className="grid grid-cols-6 gap-4">
-      <div className="px-6 py-4 bg-white rounded-md shadow-md col-span-2 flex flex-col gap-y-5 h-fit">
+      <div className="md:px-6 px-4 py-4 bg-white rounded-md shadow-md md:col-span-2 col-span-6 flex flex-col gap-y-5 h-fit">
         <Typography>Danh mục câu hỏi</Typography>
         {loading ? (
           <CircularLoading />
@@ -289,7 +289,7 @@ const ComposeQuestion = () => {
           </>
         )}
       </div>
-      <div className="px-6 py-4 bg-white rounded-md shadow-md col-span-4 h-fit">
+      <div className="md:px-6 px-4 py-4 bg-white rounded-md shadow-md md:col-span-4 col-span-6 h-fit">
         {questionLoading ? (
           <CircularLoading />
         ) : (
