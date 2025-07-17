@@ -1,5 +1,5 @@
 import { Button, InputAdornment, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useThemeMediaQuery } from "../../../../../hooks";
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
@@ -53,10 +53,10 @@ const ChangePassword = () => {
     handleSubmit,
     reset,
     formState,
-    watch,
+    // watch,
     control,
-    setValue,
-    getValues,
+    // setValue,
+    // getValues,
   }: any = useForm({
     mode: "onChange",
     defaultValues,
