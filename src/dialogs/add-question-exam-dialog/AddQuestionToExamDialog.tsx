@@ -311,10 +311,10 @@ const AddQuestionToExamDialog = () => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent className="p-6">
+      <DialogContent className="md:p-6 px-0">
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto md:p-4 p-0">
             {loading ? (
               <div className="flex justify-center py-4">
                 <CircularProgress />
