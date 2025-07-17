@@ -93,7 +93,7 @@ const CommentItem = ({
   };
 
   return (
-    <div className="flex items-start justify-between  px-6 py-2">
+    <div className="flex items-start justify-between px-6 py-2 group">
       <div className="flex items-center gap-3">
         <Avatar sx={{ width: 32, height: 32 }} src={avatarUrl}>
           {fullName.charAt(0)}
@@ -106,31 +106,23 @@ const CommentItem = ({
           <Typography variant="body2">{content}</Typography>
         </div>
       </div>
+
       {user?.id === userId && (
-        <IconButton onClick={handleClick}>
-          <MoreVertOutlinedIcon className="w-fit ml-auto" />
-        </IconButton>
+        <div className="invisible group-hover:visible">
+          <IconButton onClick={handleClick}>
+            <MoreVertOutlinedIcon className="w-fit ml-auto" />
+          </IconButton>
+        </div>
       )}
+
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        slotProps={{
-          list: {
-            "aria-labelledby": "basic-button",
-          },
-        }}
-        PaperProps={{
-          sx: {
-            px: 1,
-            boxShadow: 1,
-          },
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        slotProps={{ list: { "aria-labelledby": "basic-button" } }}
+        PaperProps={{ sx: { px: 1, boxShadow: 1 } }}
       >
         <MenuItem sx={{ paddingY: 0 }} onClick={(e) => openConfirmDialog(e)}>
           <ListItemText primaryTypographyProps={{ fontSize: "12px" }}>

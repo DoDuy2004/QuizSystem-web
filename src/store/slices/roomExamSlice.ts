@@ -139,6 +139,28 @@ export const getStudentExamDetail = createAsyncThunk(
   }
 );
 
+export const getStudentStatus = createAsyncThunk(
+  "student/getStudentStatus",
+  async (id: string) => {
+    const response: any = await RoomExamService.getStudentStatus(id);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
+export const studentEnterRoom = createAsyncThunk(
+  "student/studentEnterRoom",
+  async (roomId: string) => {
+    const response: any = await RoomExamService.studentEnterRoom(roomId);
+
+    const data = response.data;
+
+    return data;
+  }
+);
+
 export const examSlice = createSlice({
   name: "questionBankSlice",
   initialState,

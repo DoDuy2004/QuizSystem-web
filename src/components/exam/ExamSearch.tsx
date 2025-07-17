@@ -151,9 +151,9 @@ const ExamSearch = ({
                 >
                   <div>
                     <div style={{ fontWeight: 500 }}>{option.name}</div>
-                    <Typography variant="caption" color="text.secondary">
+                    {/* <Typography variant="caption" color="text.secondary">
                       Mã: {option.examCode}
-                    </Typography>
+                    </Typography> */}
                   </div>
                   {isDisabled && (
                     <Box

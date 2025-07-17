@@ -13,6 +13,7 @@ import {
   Avatar,
   Paper,
   Alert,
+  IconButton,
 } from "@mui/material";
 import {
   CheckCircle,
@@ -22,8 +23,9 @@ import {
   RadioButtonUnchecked,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CircularLoading from "../../../../../../components/CircularLoading";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useDispatch } from "react-redux";
 import { type AppDispatch } from "../../../../../../store/store";
 import { getStudentExamDetail } from "../../../../../../store/slices/roomExamSlice";
@@ -70,6 +72,7 @@ const StudentExamDetail = () => {
   const [examResult, setExamResult] = useState<ExamResultData | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   const routeParams = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,356 +151,375 @@ const StudentExamDetail = () => {
   const correctCount = getCorrectCount();
 
   return (
-    <div className="grid grid-cols-6 gap-3">
-      {/* Phần thông tin bên trái */}
-      <div className="col-span-2 h-fit">
-        <Card sx={{ mb: 2 }}>
-          <CardContent sx={{ p: 2 }}>
-            <div className="flex flex-col gap-y-1.5 h-fit">
-              <div className="flex items-center gap-x-2">
-                <Quiz sx={{ fontSize: 24, color: "primary.main" }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {examResult.exam.name}
+    <>
+      <div className="flex items-center gap-x-4">
+        <IconButton onClick={() => navigate(-1)}>
+          <ArrowBackOutlinedIcon />
+        </IconButton>
+        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
+          Chi tiết bài làm
+        </Typography>
+      </div>
+      <div className="grid grid-cols-6 gap-3">
+        {/* Phần thông tin bên trái */}
+        <div className="col-span-2 h-fit">
+          <Card sx={{ mb: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <div className="flex flex-col gap-y-1.5 h-fit">
+                <div className="flex items-center gap-x-2">
+                  <Quiz sx={{ fontSize: 24, color: "primary.main" }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {examResult.exam.name}
+                  </Typography>
+                </div>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  Môn: {examResult.exam.subject.name}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  Thời gian làm bài: {examResult.exam.durationMinutes} phút
                 </Typography>
               </div>
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Môn: {examResult.exam.subject.name}
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Thời gian làm bài: {examResult.exam.durationMinutes} phút
-              </Typography>
-            </div>
 
-            <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2 }} />
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Avatar
-                sx={{
-                  width: 56,
-                  height: 56,
-                  bgcolor: "primary.main",
-                  color: "white",
-                  fontSize: 24,
-                }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
               >
-                {examResult.student.fullName.charAt(0)}
-              </Avatar>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {examResult.student.fullName}
+                <Avatar
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    bgcolor: "primary.main",
+                    color: "white",
+                    fontSize: 24,
+                  }}
+                >
+                  {examResult.student.fullName.charAt(0)}
+                </Avatar>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {examResult.student.fullName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {examResult.student.email}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Thời gian nộp bài:</strong>{" "}
+                  {formatDateTime(examResult.submittedAt)}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {examResult.student.email}
+                <Typography variant="body2">
+                  <strong>Thời gian làm bài thực tế:</strong>{" "}
+                  {formatDuration(examResult.durationTaken)}
                 </Typography>
               </Box>
-            </Box>
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                <strong>Thời gian nộp bài:</strong>{" "}
-                {formatDateTime(examResult.submittedAt)}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Thời gian làm bài thực tế:</strong>{" "}
-                {formatDuration(examResult.durationTaken)}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                backgroundColor: "#f5f5f5",
-                borderRadius: 2,
-                p: 2,
-                textAlign: "center",
-                border: "1px solid #e0e0e0",
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                Điểm số
-              </Typography>
-              <Typography
-                variant="h4"
+              <Box
                 sx={{
-                  fontWeight: 700,
-                  color:
-                    score >= 8
-                      ? "success.main"
-                      : score >= 5
-                      ? "warning.main"
-                      : "error.main",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: 2,
+                  p: 2,
+                  textAlign: "center",
+                  border: "1px solid #e0e0e0",
                 }}
               >
-                {score.toFixed(1)}/10
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={score * 10}
-                sx={{
-                  height: 8,
-                  borderRadius: 4,
-                  mt: 1,
-                  "& .MuiLinearProgress-bar": {
-                    backgroundColor:
+                <Typography variant="body2" color="text.secondary">
+                  Điểm số
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 700,
+                    color:
                       score >= 8
                         ? "success.main"
                         : score >= 5
                         ? "warning.main"
                         : "error.main",
-                  },
+                  }}
+                >
+                  {score.toFixed(1)}/10
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={score * 10}
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    mt: 1,
+                    "& .MuiLinearProgress-bar": {
+                      backgroundColor:
+                        score >= 8
+                          ? "success.main"
+                          : score >= 5
+                          ? "warning.main"
+                          : "error.main",
+                    },
+                  }}
+                />
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Đã làm đúng: {correctCount}/{examResult.questions.length} câu
+                </Typography>
+              </Box>
+
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2" sx={{ fontSize: "12px" }}>
+                  <strong>Chú thích:</strong>
+                  <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                    <li>✓ Đáp án đúng</li>
+                    <li>✗ Đáp án sai</li>
+                    <li>Viền đậm: Đáp án sinh viên chọn</li>
+                  </Box>
+                </Typography>
+              </Alert>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Phần câu hỏi và đáp án bên phải */}
+        <div className="col-span-4 h-screen overflow-y-scroll">
+          {examResult.questions.map((question, index) => {
+            const studentAnswerIds =
+              examResult.studentAnswers[question.id] || [];
+            const isCorrect =
+              question.correctAnswerIds.every((id) =>
+                studentAnswerIds.includes(id)
+              ) &&
+              studentAnswerIds.every((id) =>
+                question.correctAnswerIds.includes(id)
+              );
+
+            return (
+              <Card
+                key={question.id}
+                sx={{
+                  mb: 2,
+                  // borderLeft: `4px solid ${isCorrect ? "#4caf50" : "#f44336"}`,
                 }}
-              />
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Đã làm đúng: {correctCount}/{examResult.questions.length} câu
-              </Typography>
-            </Box>
-
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2" sx={{ fontSize: "12px" }}>
-                <strong>Chú thích:</strong>
-                <Box component="ul" sx={{ pl: 2, mb: 0 }}>
-                  <li>✓ Đáp án đúng</li>
-                  <li>✗ Đáp án sai</li>
-                  <li>Viền đậm: Đáp án sinh viên chọn</li>
-                </Box>
-              </Typography>
-            </Alert>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Phần câu hỏi và đáp án bên phải */}
-      <div className="col-span-4 h-screen overflow-y-scroll">
-        {examResult.questions.map((question, index) => {
-          const studentAnswerIds = examResult.studentAnswers[question.id] || [];
-          const isCorrect =
-            question.correctAnswerIds.every((id) =>
-              studentAnswerIds.includes(id)
-            ) &&
-            studentAnswerIds.every((id) =>
-              question.correctAnswerIds.includes(id)
-            );
-
-          return (
-            <Card
-              key={question.id}
-              sx={{
-                mb: 2,
-                // borderLeft: `4px solid ${isCorrect ? "#4caf50" : "#f44336"}`,
-              }}
-            >
-              <CardContent sx={{ p: 1.5 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    gap: 1.5,
-                    mb: 1.5,
-                  }}
-                >
-                  <div className="flex items-start gap-x-1">
-                    <Typography
-                      className="underline"
-                      sx={{ fontWeight: 550 }}
-                      fontSize={14}
-                    >
-                      Câu {index + 1}:
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ flex: 1, fontSize: "14px", fontWeight: 500 }}
-                      dangerouslySetInnerHTML={{ __html: question.content }}
-                    />
-                  </div>
-                  {isCorrect ? (
-                    <Check sx={{ color: "success.main" }} />
-                  ) : (
-                    <Close sx={{ color: "error.main" }} />
-                  )}
-                </Box>
-
-                <FormControl component="fieldset" sx={{ width: "100%" }}>
-                  {question.type === "SingleChoice" ? (
-                    <Box>
-                      {question.answers.map((answer) => {
-                        const isSelected = studentAnswerIds.includes(answer.id);
-                        const isRightAnswer =
-                          question.correctAnswerIds.includes(answer.id);
-
-                        return (
-                          <FormControlLabel
-                            key={answer.id}
-                            value={answer.id}
-                            control={
-                              <Radio
-                                size="small"
-                                checked={isSelected}
-                                sx={{
-                                  color: isRightAnswer
-                                    ? "success.main"
-                                    : isSelected
-                                    ? "error.main"
-                                    : "default",
-                                  "&.Mui-checked": {
-                                    color: isRightAnswer
-                                      ? "success.main"
-                                      : "error.main",
-                                  },
-                                }}
-                              />
-                            }
-                            label={
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: "13px",
-                                  color: isRightAnswer
-                                    ? "success.main"
-                                    : isSelected && !isRightAnswer
-                                    ? "error.main"
-                                    : "inherit",
-                                }}
-                              >
-                                {answer.content}
-                              </Typography>
-                            }
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mb: 0.5,
-                              p: 0.5,
-                              borderRadius: 1,
-                              backgroundColor: isRightAnswer
-                                ? "rgba(76, 175, 80, 0.1)"
-                                : isSelected && !isRightAnswer
-                                ? "rgba(244, 67, 54, 0.1)"
-                                : "transparent",
-                              border: isSelected
-                                ? "2px solid #1976d2"
-                                : "1px solid transparent",
-                              position: "relative",
-                              "&:after": {
-                                position: "absolute",
-                                right: 8,
-                                ...(isRightAnswer
-                                  ? {
-                                      content: '"✓"',
-                                      color: "success.main",
-                                    }
-                                  : isSelected && !isRightAnswer
-                                  ? {
-                                      content: '"✗"',
-                                      color: "error.main",
-                                    }
-                                  : {}),
-                              },
-                            }}
-                          />
-                        );
-                      })}
-                    </Box>
-                  ) : (
-                    <Box>
-                      {question.answers.map((answer) => {
-                        const isSelected = studentAnswerIds.includes(answer.id);
-                        const isRightAnswer =
-                          question.correctAnswerIds.includes(answer.id);
-
-                        return (
-                          <FormControlLabel
-                            key={answer.id}
-                            control={
-                              <Checkbox
-                                size="small"
-                                checked={isSelected}
-                                sx={{
-                                  color: isRightAnswer
-                                    ? "success.main"
-                                    : isSelected
-                                    ? "error.main"
-                                    : "default",
-                                  "&.Mui-checked": {
-                                    color: isRightAnswer
-                                      ? "success.main"
-                                      : "error.main",
-                                  },
-                                }}
-                              />
-                            }
-                            label={
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: "13px",
-                                  color: isRightAnswer
-                                    ? "success.main"
-                                    : isSelected && !isRightAnswer
-                                    ? "error.main"
-                                    : "inherit",
-                                }}
-                              >
-                                {answer.content}
-                              </Typography>
-                            }
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mb: 0.5,
-                              p: 0.5,
-                              borderRadius: 1,
-                              backgroundColor: isRightAnswer
-                                ? "rgba(76, 175, 80, 0.1)"
-                                : isSelected && !isRightAnswer
-                                ? "rgba(244, 67, 54, 0.1)"
-                                : "transparent",
-                              border: isSelected
-                                ? "2px solid #1976d2"
-                                : "1px solid transparent",
-                            }}
-                          />
-                        );
-                      })}
-                    </Box>
-                  )}
-                </FormControl>
-
-                <Box
-                  sx={{
-                    mt: 1.5,
-                    p: 1,
-                    backgroundColor: isCorrect
-                      ? "rgba(76, 175, 80, 0.1)"
-                      : "rgba(244, 67, 54, 0.1)",
-                    borderRadius: 1,
-                    border: `1px solid ${isCorrect ? "#4caf50" : "#f44336"}`,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ fontSize: "12px", fontWeight: 500 }}
-                    color={isCorrect ? "success.main" : "error.main"}
+              >
+                <CardContent sx={{ p: 1.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 1.5,
+                      mb: 1.5,
+                    }}
                   >
-                    {isCorrect ? "✓ Câu trả lời đúng" : "✗ Câu trả lời sai"}
-                  </Typography>
-                  {!isCorrect && question.correctAnswerIds.length > 0 && (
+                    <div className="flex items-start gap-x-1">
+                      <Typography
+                        className="underline"
+                        sx={{ fontWeight: 550 }}
+                        fontSize={14}
+                      >
+                        Câu {index + 1}:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ flex: 1, fontSize: "14px", fontWeight: 500 }}
+                        dangerouslySetInnerHTML={{ __html: question.content }}
+                      />
+                    </div>
+                    {isCorrect ? (
+                      <Check sx={{ color: "success.main" }} />
+                    ) : (
+                      <Close sx={{ color: "error.main" }} />
+                    )}
+                  </Box>
+
+                  <FormControl component="fieldset" sx={{ width: "100%" }}>
+                    {question.type === "SingleChoice" ? (
+                      <Box>
+                        {question.answers.map((answer) => {
+                          const isSelected = studentAnswerIds.includes(
+                            answer.id
+                          );
+                          const isRightAnswer =
+                            question.correctAnswerIds.includes(answer.id);
+
+                          return (
+                            <FormControlLabel
+                              key={answer.id}
+                              value={answer.id}
+                              control={
+                                <Radio
+                                  size="small"
+                                  checked={isSelected}
+                                  sx={{
+                                    color: isRightAnswer
+                                      ? "success.main"
+                                      : isSelected
+                                      ? "error.main"
+                                      : "default",
+                                    "&.Mui-checked": {
+                                      color: isRightAnswer
+                                        ? "success.main"
+                                        : "error.main",
+                                    },
+                                  }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontSize: "13px",
+                                    color: isRightAnswer
+                                      ? "success.main"
+                                      : isSelected && !isRightAnswer
+                                      ? "error.main"
+                                      : "inherit",
+                                  }}
+                                >
+                                  {answer.content}
+                                </Typography>
+                              }
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mb: 0.5,
+                                p: 0.5,
+                                borderRadius: 1,
+                                backgroundColor: isRightAnswer
+                                  ? "rgba(76, 175, 80, 0.1)"
+                                  : isSelected && !isRightAnswer
+                                  ? "rgba(244, 67, 54, 0.1)"
+                                  : "transparent",
+                                border: isSelected
+                                  ? "2px solid #1976d2"
+                                  : "1px solid transparent",
+                                position: "relative",
+                                "&:after": {
+                                  position: "absolute",
+                                  right: 8,
+                                  ...(isRightAnswer
+                                    ? {
+                                        content: '"✓"',
+                                        color: "success.main",
+                                      }
+                                    : isSelected && !isRightAnswer
+                                    ? {
+                                        content: '"✗"',
+                                        color: "error.main",
+                                      }
+                                    : {}),
+                                },
+                              }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    ) : (
+                      <Box>
+                        {question.answers.map((answer) => {
+                          const isSelected = studentAnswerIds.includes(
+                            answer.id
+                          );
+                          const isRightAnswer =
+                            question.correctAnswerIds.includes(answer.id);
+
+                          return (
+                            <FormControlLabel
+                              key={answer.id}
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={isSelected}
+                                  sx={{
+                                    color: isRightAnswer
+                                      ? "success.main"
+                                      : isSelected
+                                      ? "error.main"
+                                      : "default",
+                                    "&.Mui-checked": {
+                                      color: isRightAnswer
+                                        ? "success.main"
+                                        : "error.main",
+                                    },
+                                  }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontSize: "13px",
+                                    color: isRightAnswer
+                                      ? "success.main"
+                                      : isSelected && !isRightAnswer
+                                      ? "error.main"
+                                      : "inherit",
+                                  }}
+                                >
+                                  {answer.content}
+                                </Typography>
+                              }
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mb: 0.5,
+                                p: 0.5,
+                                borderRadius: 1,
+                                backgroundColor: isRightAnswer
+                                  ? "rgba(76, 175, 80, 0.1)"
+                                  : isSelected && !isRightAnswer
+                                  ? "rgba(244, 67, 54, 0.1)"
+                                  : "transparent",
+                                border: isSelected
+                                  ? "2px solid #1976d2"
+                                  : "1px solid transparent",
+                              }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    )}
+                  </FormControl>
+
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      p: 1,
+                      backgroundColor: isCorrect
+                        ? "rgba(76, 175, 80, 0.1)"
+                        : "rgba(244, 67, 54, 0.1)",
+                      borderRadius: 1,
+                      border: `1px solid ${isCorrect ? "#4caf50" : "#f44336"}`,
+                    }}
+                  >
                     <Typography
                       variant="body2"
-                      sx={{ fontSize: "12px", mt: 1 }}
+                      sx={{ fontSize: "12px", fontWeight: 500 }}
+                      color={isCorrect ? "success.main" : "error.main"}
                     >
-                      <strong>Đáp án đúng:</strong>{" "}
-                      {question.answers
-                        .filter((a) => question.correctAnswerIds.includes(a.id))
-                        .map((a) => a.content)
-                        .join(", ")}
+                      {isCorrect ? "✓ Câu trả lời đúng" : "✗ Câu trả lời sai"}
                     </Typography>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          );
-        })}
+                    {!isCorrect && question.correctAnswerIds.length > 0 && (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: "12px", mt: 1 }}
+                      >
+                        <strong>Đáp án đúng:</strong>{" "}
+                        {question.answers
+                          .filter((a) =>
+                            question.correctAnswerIds.includes(a.id)
+                          )
+                          .map((a) => a.content)
+                          .join(", ")}
+                      </Typography>
+                    )}
+                  </Box>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -22,6 +22,7 @@ import type { AppDispatch } from "../../../../../../store/store";
 import {
   getRoomExambyId,
   selectRoomExam,
+  studentEnterRoom,
 } from "../../../../../../store/slices/roomExamSlice";
 import _ from "lodash";
 import {
@@ -37,6 +38,7 @@ import CircularLoading from "../../../../../../components/CircularLoading";
 import { showMessage } from "../../../../../../components/FuseMessage/fuseMessageSlice";
 import { errorAnchor } from "../../../../../../constants/confirm";
 import { openConfirmationDialog } from "../../../../../../store/slices/confirmationSlice";
+import RoomExamManagement from "./components/RoomExamManagement";
 
 // Types
 interface Question {
@@ -70,6 +72,7 @@ const RoomExamDetail = () => {
   const user = useSelector(selectUser);
   const [submitted, setSubmitted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const routeParams = useParams();
 
   const formatTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60)
@@ -87,14 +90,24 @@ const RoomExamDetail = () => {
     }
   }, [roomExam]);
 
+  console.log({ roomExam });
+
   useEffect(() => {
+    const now = new Date();
+    const startDate = new Date(roomExam?.data?.startDate);
+
+    if (now === startDate) return;
+
     if (timeRemaining <= 0 || submitted) return;
 
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
+          dispatch(getRoomExambyId({ id }));
           clearInterval(timer);
-          handleSubmit();
+          if (user?.role === "STUDENT") {
+            handleSubmit();
+          }
           return 0;
         }
         return prev - 1;
@@ -207,6 +220,12 @@ const RoomExamDetail = () => {
     return submissionData;
   };
 
+  useEffect(() => {
+    if (user?.role === "STUDENT") {
+      dispatch(studentEnterRoom(routeParams?.id as string));
+    }
+  }, [user?.id, routeParams?.id]);
+
   const calculateProgress = (): number => {
     const answeredQuestions = Object.values(answers).filter((answer) => {
       if (Array.isArray(answer)) return answer.length > 0;
@@ -288,6 +307,16 @@ const RoomExamDetail = () => {
   }
 
   if (loading) return <CircularLoading />;
+
+  if (user?.role === "TEACHER" && !loading) {
+    return (
+      <RoomExamManagement
+        examInfo={examInfo}
+        roomExam={roomExam}
+        timeRemaining={timeRemaining}
+      />
+    );
+  }
 
   return (
     <div className="grid grid-cols-6 gap-3">

@@ -72,7 +72,7 @@ const RoomExamListItem = ({ data }: any) => {
         phút
       </Typography>
 
-      {user?.role === "STUDENT" && (
+      {user?.role === "STUDENT" ? (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -92,6 +92,21 @@ const RoomExamListItem = ({ data }: any) => {
             : !isStarted
             ? "Chưa bắt đầu"
             : "Vào phòng thi"}
+        </button>
+      ) : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!expired) handleJoinRoomExam();
+          }}
+          disabled={expired}
+          className={`w-full py-1.5 px-3 text-sm rounded font-semibold transition ${
+            expired
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
+          }`}
+        >
+          {expired ? "Đã kết thúc" : "Quản lý kỳ thi"}
         </button>
       )}
     </div>
