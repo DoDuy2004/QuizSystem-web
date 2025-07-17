@@ -292,9 +292,10 @@ const AddQuestionToExamDialog = () => {
         "& .MuiDialog-paper": {
           margin: isMobile ? 0 : isTablet ? "1.5vh auto" : "2vh auto",
           width: isMobile ? "100vw" : isTablet ? "70%" : "60%",
-          maxWidth: isMobile ? "100vw" : isTablet ? "70%" : "800px",
+          maxWidth: isMobile ? "100%" : isTablet ? "70%" : "800px",
           height: "100%",
           borderRadius: isMobile ? 0 : 2,
+          maxHeight: isMobile ? "100%" : "auto",
           overflow: "hidden",
         },
       }}

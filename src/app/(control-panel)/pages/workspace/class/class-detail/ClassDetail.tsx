@@ -102,7 +102,7 @@ const ClassDetail = () => {
           />
         </Tabs>
       </Box>
-      <div className="px-8 py-2 overflow-y-scroll scrollbar-hide">
+      <div className="md:px-8 px-4 py-2 overflow-y-scroll scrollbar-hide">
         <CustomTabPanel value={value} index={0}>
           <NewsBoard data={courseClass?.data} />
         </CustomTabPanel>

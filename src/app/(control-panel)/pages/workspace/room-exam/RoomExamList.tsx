@@ -85,7 +85,7 @@ const RoomExamList = () => {
         {user?.role === "TEACHER" ? "Quản lý kỳ thi" : "Kỳ thi của bạn"}
       </Typography>
       <div className=" bg-white rounded-md shadow-md">
-        <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
+        <div className="w-full border-b-1 md:px-6 px-3 py-4 border-gray-200 flex items-center justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
             <Typography className="w-1/2" fontSize={15}>
               <span className="text-blue-600 font-semibold">
@@ -132,7 +132,7 @@ const RoomExamList = () => {
             </Button>
           )}
         </div>
-        <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 p-6 grid-cols-1 lg:gap-4">
+        <div className="grid xl:grid-cols-5 sm:grid-cols-4 md:gap-8 gap-4 md:p-6 p-4 grid-cols-1 lg:gap-4">
           {roomExams &&
             roomExams?.length > 0 &&
             roomExams?.map((item: any, index: number) => {

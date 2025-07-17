@@ -95,7 +95,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="col-span-5 bg-white rounded-md flex flex-col gap-y-4 shadow px-6 py-4">
+    <div className="md:col-span-5 col-span-7 bg-white rounded-md flex flex-col gap-y-4 shadow md:px-6 px-4 py-4">
       <form action="" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-6 py-4 gap-4">
           <div className="col-span-6">

@@ -169,7 +169,7 @@ const AddMultiTeachersDialog = () => {
           width: isMobile ? "100vw" : isTablet ? "50%" : "40%",
           height: "100%",
           maxWidth: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-          maxHeight: isMobile ? "100vh" : "auto",
+          maxHeight: isMobile ? "100%" : "auto",
           borderRadius: isMobile ? 0 : 2,
           boxSizing: "border-box",
           overflow: isMobile ? "hidden" : "hidden",

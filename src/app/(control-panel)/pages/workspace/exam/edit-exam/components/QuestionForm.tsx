@@ -312,7 +312,7 @@ const QuestionForm = ({ questionData }: any) => {
             name="type"
             control={control}
             render={({ field }) => (
-              <FormControl sx={{ width: "30%" }} size="small">
+              <FormControl sx={{ width: "fit-content" }} size="small">
                 <Select
                   {...field}
                   labelId="select-type-label"

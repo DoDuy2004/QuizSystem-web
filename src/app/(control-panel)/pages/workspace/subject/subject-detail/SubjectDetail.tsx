@@ -26,6 +26,7 @@ import {
 } from "../../../../../../store/slices/subjectSlice";
 import CircularLoading from "../../../../../../components/CircularLoading";
 import ChapterList from "./components/ChapterList";
+import { useThemeMediaQuery } from "../../../../../../hooks";
 
 const subjectSchema = yup.object().shape({
   name: yup.string().required("Tên môn học là bắt buộc"),
@@ -42,6 +43,7 @@ const SubjectDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [localChapters, setLocalChapters] = useState(subject?.chapters || []);
+  const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   const {
     handleSubmit,
@@ -116,18 +118,18 @@ const SubjectDetail = () => {
   if (loading) return <CircularLoading />;
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{ px: 0 }}>
       {/* Header */}
-      <div className="flex items-center mb-8">
+      <div className="flex items-center md:mb-8 mb-4">
         <IconButton onClick={handleBack} className="mr-4">
           <ArrowBack />
         </IconButton>
-        <Typography sx={{ fontSize: 20, fontWeight: 600 }}>
+        <Typography sx={{ fontSize: isMobile ? 18 : 20, fontWeight: 600 }}>
           Chi tiết môn học
         </Typography>
         <div className="flex-grow" />
         {isEditing ? (
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={isMobile ? 1 : 2}>
             <Button
               variant="outlined"
               startIcon={<Cancel />}
@@ -145,7 +147,7 @@ const SubjectDetail = () => {
               sx={{ textTransform: "none" }}
               className="bg-gradient-to-r from-blue-500 to-purple-500 shadow-none"
             >
-              Lưu thay đổi
+              {isMobile ? "Lưu" : " Lưu thay đổi"}
             </Button>
           </Stack>
         ) : (
@@ -162,8 +164,8 @@ const SubjectDetail = () => {
       </div>
 
       {/* Thông tin môn học */}
-      <Paper className="p-8 mb-8 rounded-xl shadow-lg">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <Paper className="md:p-8 p-4 md:mb-8 mb-4 rounded-xl shadow-lg">
+        <div className="grid grid-cols-1 md:grid-cols-3 md:gap-8 gap-4">
           <div className="md:col-span-2">
             {isEditing ? (
               <div className="flex flex-col gap-y-6">
@@ -249,11 +251,11 @@ const SubjectDetail = () => {
       </Paper>
 
       {/* Danh sách chương học */}
-      <Paper className="p-8 rounded-xl shadow-lg">
+      <Paper className="md:p-8 p-4 rounded-xl shadow-lg">
         <Typography variant="h6" className="font-semibold mb-4">
           Danh sách chương học
         </Typography>
-        <Divider className="mb-6" />
+        <Divider className="md:mb-6 mb-4" />
         {id && (
           <ChapterList
             subjectId={id}

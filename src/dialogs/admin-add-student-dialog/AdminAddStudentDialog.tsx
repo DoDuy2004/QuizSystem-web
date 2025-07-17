@@ -204,9 +204,9 @@ const AdminAddStudentDialog = () => {
           "& .MuiDialog-paper": {
             margin: isMobile ? 0 : isTablet ? "1.5vh auto" : "2vh auto",
             width: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-            height: "80%",
+            height: isMobile ? "100%" : "80%",
             maxWidth: isMobile ? "100vw" : isTablet ? "50%" : "40%",
-            maxHeight: isMobile ? "100vh" : "auto",
+            maxHeight: isMobile ? "100%" : "auto",
             borderRadius: isMobile ? 0 : 2,
             boxSizing: "border-box",
             overflow: isMobile ? "hidden" : "hidden",
@@ -239,7 +239,7 @@ const AdminAddStudentDialog = () => {
           ) : (
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-4 p-4"
+              className="flex flex-col gap-4 md:p-4 p-2"
             >
               <Controller
                 name="email"

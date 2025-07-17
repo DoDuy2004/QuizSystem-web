@@ -1,11 +1,16 @@
 import { Typography } from "@mui/material";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import { useThemeMediaQuery } from "../../../../../../../hooks";
 
 const QuestionItem = ({ data, index }: any) => {
+  const isMobile = useThemeMediaQuery((theme) => theme.breakpoints.down("lg"));
+
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="flex items-start gap-x-2">
-        <Typography fontSize={14}>Câu {index}:</Typography>
+      <div className="flex items-start md:gap-x-2 gap-x-1.5">
+        <Typography className="w-fit" fontSize={14}>
+          {!isMobile && "Câu"} {index}:
+        </Typography>
         <Typography
           fontSize={14}
           fontWeight={500}

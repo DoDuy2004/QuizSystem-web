@@ -33,6 +33,9 @@ export interface GlobalSliceState {
   addTeacherDialog: {
     isOpen: boolean;
   };
+  sidebar: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: GlobalSliceState = {
@@ -66,6 +69,9 @@ const initialState: GlobalSliceState = {
     isOpen: false,
   },
   addTeacherDialog: {
+    isOpen: false,
+  },
+  sidebar: {
     isOpen: false,
   },
 };
@@ -156,6 +162,14 @@ const globalSlice = createSlice({
     closeAddTeachersDialog: (state) => {
       state.addTeachersDialog.isOpen = false;
     },
+
+    // sidebar
+    openSidebar: (state) => {
+      state.sidebar.isOpen = true;
+    },
+    closeSidebar: (state) => {
+      state.sidebar.isOpen = false;
+    },
   },
 });
 
@@ -180,6 +194,8 @@ export const {
   closeAddTeacherDialog,
   openAddTeachersDialog,
   closeAddTeachersDialog,
+  openSidebar,
+  closeSidebar,
 } = globalSlice.actions;
 
 export const selectAddClassDialog = ({ globalSlice }: any) =>
@@ -209,5 +225,7 @@ export const selectAddTeacherDialog = ({ globalSlice }: any) =>
 
 export const selectAddTeachersDialog = ({ globalSlice }: any) =>
   globalSlice.addTeachersDialog;
+
+export const selectSidebar = ({ globalSlice }: any) => globalSlice.sidebar;
 
 export default globalSlice.reducer;

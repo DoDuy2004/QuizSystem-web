@@ -40,8 +40,8 @@ const ClassList = () => {
   };
 
   return (
-    <div className="px-8 py-4">
-      <div className="flex items-center justify-between pr-10">
+    <div className="md:px-8 px-4 py-4">
+      <div className="flex items-center justify-between md:pr-10 pr-0">
         <Typography sx={{ fontSize: 20, fontWeight: 600 }}>Lớp học</Typography>
 
         {user?.role !== "STUDENT" && (
@@ -59,7 +59,7 @@ const ClassList = () => {
       {loading && !hasFetched ? (
         <CircularLoading />
       ) : (
-        <div className="grid xl:grid-cols-5 sm:grid-cols-4 gap-8 grid-cols-1 lg:gap-4 mt-6">
+        <div className="grid xl:grid-cols-5 sm:grid-cols-4 md:gap-8 gap-4 grid-cols-1 lg:gap-4 mt-6">
           {classes && classes.length > 0 ? (
             classes.map((item: any, index: number) => (
               <ClassItem key={index} data={{ ...item }} />

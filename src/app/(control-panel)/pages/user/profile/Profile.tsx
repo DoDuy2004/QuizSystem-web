@@ -32,7 +32,7 @@ const schema: any = yup.object().shape({
     .matches(
       /^0\d{9}$/,
       "Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và đủ 10 chữ số)"
-    ) ,
+    ),
   fullName: yup.string().required("Họ tên là bắt buộc"),
   gender: yup.string(),
   birthday: yup.date().nullable(),
@@ -113,7 +113,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="col-span-5 bg-white rounded-md flex flex-col gap-y-4 shadow px-6 py-4">
+    <div className="md:col-span-5 col-span-7 bg-white rounded-md flex flex-col gap-y-4 shadow md:px-6 px-4 py-4">
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Avatar */}
         {/* <div className="grid grid-cols-6 border-b-1 border-[#e4e3e3] py-6 gap-4">
@@ -136,15 +136,17 @@ const Profile = () => {
 
         {/* Email */}
         <div className="grid grid-cols-6 py-4 pt-8 gap-4">
-          <div className="col-span-2">
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Email
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-              Nhập email của bạn
-            </Typography>
-          </div>
-          <div className="col-span-4">
+          {!isMobile && (
+            <div className="md:col-span-2 col-span-6 flex flex-col">
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                Email
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                Nhập email của bạn
+              </Typography>
+            </div>
+          )}
+          <div className="md:col-span-4 col-span-6">
             <Controller
               name="email"
               control={control}
@@ -163,15 +165,17 @@ const Profile = () => {
 
         {/* Phone */}
         <div className="grid grid-cols-6 py-4 gap-4">
-          <div className="col-span-2">
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Số điện thoại
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-              Nhập số điện thoại của bạn
-            </Typography>
-          </div>
-          <div className="col-span-4">
+          {!isMobile && (
+            <div className="md:col-span-2 col-span-6">
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                Số điện thoại
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                Nhập số điện thoại của bạn
+              </Typography>
+            </div>
+          )}
+          <div className="md:col-span-4 col-span-6">
             <Controller
               name="phoneNumber"
               control={control}
@@ -190,15 +194,17 @@ const Profile = () => {
 
         {/* Full name */}
         <div className="grid grid-cols-6 py-4 gap-4">
-          <div className="col-span-2">
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Họ tên
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-              Nhập họ tên của bạn
-            </Typography>
-          </div>
-          <div className="col-span-4">
+          {!isMobile && (
+            <div className="col-span-2">
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                Họ tên
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                Nhập họ tên của bạn
+              </Typography>
+            </div>
+          )}
+          <div className="md:col-span-4 col-span-6">
             <Controller
               name="fullName"
               control={control}
@@ -217,15 +223,17 @@ const Profile = () => {
 
         {/* Gender */}
         <div className="grid grid-cols-6 py-4 gap-4">
-          <div className="col-span-2">
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Giới tính
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-              Chọn giới tính của bạn
-            </Typography>
-          </div>
-          <div className="col-span-4">
+          {!isMobile && (
+            <div className="col-span-2">
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                Giới tính
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                Chọn giới tính của bạn
+              </Typography>
+            </div>
+          )}
+          <div className="md:col-span-4 col-span-6">
             <Controller
               name="gender"
               control={control}
@@ -249,15 +257,17 @@ const Profile = () => {
 
         {/* Birthday */}
         <div className="grid grid-cols-6 py-4 gap-4">
-          <div className="col-span-2">
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-              Ngày sinh
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-              Nhập ngày sinh của bạn
-            </Typography>
-          </div>
-          <div className="col-span-4">
+          {!isMobile && (
+            <div className="col-span-2">
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                Ngày sinh
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                Nhập ngày sinh của bạn
+              </Typography>
+            </div>
+          )}
+          <div className="md:col-span-4 col-span-6">
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <Controller
                 name="birthday"

@@ -126,7 +126,7 @@ const SubjectList = () => {
         Quản lý môn học
       </Typography>
       <div className=" bg-white rounded-md shadow-md">
-        <div className="w-full border-b-1 px-6 py-4 border-gray-200 flex items-center justify-between">
+        <div className="w-full border-b-1 md:px-6 px-4 py-4 border-gray-200 flex  md:flex-row flex-col md:items-center items-start gap-4 md:gap-0 justify-between">
           <div className="w-fit flex items-center gap-x-4 justify-start">
             <Typography className="w-1/2" fontSize={15}>
               <span className="text-blue-600 font-semibold">

@@ -162,7 +162,7 @@ const StudentExamDetail = () => {
       </div>
       <div className="grid grid-cols-6 gap-3">
         {/* Phần thông tin bên trái */}
-        <div className="col-span-2 h-fit">
+        <div className="md:col-span-2 col-span-6 h-fit">
           <Card sx={{ mb: 2 }}>
             <CardContent sx={{ p: 2 }}>
               <div className="flex flex-col gap-y-1.5 h-fit">
@@ -280,7 +280,7 @@ const StudentExamDetail = () => {
         </div>
 
         {/* Phần câu hỏi và đáp án bên phải */}
-        <div className="col-span-4 h-screen overflow-y-scroll">
+        <div className="md:col-span-4 col-span-6 h-screen overflow-y-scroll">
           {examResult.questions.map((question, index) => {
             const studentAnswerIds =
               examResult.studentAnswers[question.id] || [];
