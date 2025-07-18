@@ -50,11 +50,12 @@ const initialState: QuestionBankStateProps = {
 export const getQuestionBanks = createAsyncThunk(
   "questionBank/getQuestionBanks",
   async (searchText?: string) => {
-    const response: any = await QuestionBankService.getQuestionBanks(searchText);
+    const response: any = await QuestionBankService.getQuestionBanks(
+      searchText
+    );
     return response.data;
   }
 );
-
 
 export const getQuestionBankById = createAsyncThunk(
   "questionBank/getQuestionBankById",
@@ -200,7 +201,10 @@ export const addListQuestions = createAsyncThunk(
   async (params: any) => {
     const form = params?.form;
     const id = params?.id;
-    const response: any = await QuestionBankService.addListQuestions({ id, form });
+    const response: any = await QuestionBankService.addListQuestions({
+      id,
+      form,
+    });
 
     const data = response.data;
 
@@ -261,7 +265,7 @@ export const questionBankSlice = createSlice({
       state.questionBankDetail.data = action.payload.data;
     });
     builder.addCase(addQuestionToQuestionBank.fulfilled, (state, action) => {
-      // console.log({ data: action.payload });
+      console.log({ data: action.payload });
       state.questionBankDetail.questions = [
         ...state.questionBankDetail.questions,
         action.payload.data,

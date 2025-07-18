@@ -325,13 +325,13 @@ const AddQuestionToExamDialog = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell className="font-semibold">Chương</TableCell>
-                      <TableCell className="font-semibold text-center">
+                      <TableCell className="font-semibold text-center w-20">
                         Dễ
                       </TableCell>
-                      <TableCell className="font-semibold text-center">
+                      <TableCell className="font-semibold text-center w-20">
                         Trung bình
                       </TableCell>
-                      <TableCell className="font-semibold text-center">
+                      <TableCell className="font-semibold text-center w-20">
                         Khó
                       </TableCell>
                     </TableRow>
