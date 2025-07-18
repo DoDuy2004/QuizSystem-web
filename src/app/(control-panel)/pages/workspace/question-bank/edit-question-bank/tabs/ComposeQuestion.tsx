@@ -278,14 +278,14 @@ const ComposeQuestion = () => {
         )}
       </div>
       <div className="md:px-6 px-4 py-4 bg-white rounded-md shadow-md md:col-span-4 col-span-6 h-fit">
-        {questionLoading || _.isEmpty(question) ? (
+        {/* {questionLoading || _.isEmpty(question) ? (
           <CircularLoading />
-        ) : (
-          <QuestionForm
-            questionData={question}
-            questionLoading={questionLoading}
-          />
-        )}
+        ) : ( */}
+        <QuestionForm
+          questionData={question}
+          questionLoading={questionLoading}
+        />
+        {/* )} */}
       </div>
     </div>
   );

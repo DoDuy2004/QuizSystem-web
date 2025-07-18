@@ -239,13 +239,12 @@ const QuestionForm = ({ questionData, questionLoading }: any) => {
       questionBankId: questionBank?.data?.id,
     };
 
-    const action =
-      !_.isEmpty(questionData) || !_.isEmpty(question)
-        ? editQuestion({
-            id: question.id,
-            form: { id: question.id, ...payload },
-          })
-        : addQuestionToQuestionBank({ form: payload });
+    const action = !_.isEmpty(questionData)
+      ? editQuestion({
+          id: question.id,
+          form: { id: question.id, ...payload },
+        })
+      : addQuestionToQuestionBank({ form: payload });
     // console.log({ payload });
     dispatch(action)
       .then((res) => {
@@ -266,6 +265,8 @@ const QuestionForm = ({ questionData, questionLoading }: any) => {
         setLoading(false);
       });
   };
+
+  // if (questionLoading) return <CircularLoading />;
 
   return (
     <div className="flex flex-col gap-y-4">
