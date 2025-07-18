@@ -12,7 +12,13 @@ import { useDeepCompareEffect } from "../../../../../hooks";
 import { useRef } from "react";
 // import reducer from "./store";
 import CircularLoading from "../../../../../components/CircularLoading";
-import { Button, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import QuestionBankItem from "./components/QuestionBankItem";
 import SearchInput from "../../../../../components/SearchInput";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,7 +30,7 @@ const QuestionBankList = () => {
   const questionBanks = useSelector(selectQuestionBanks);
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
-  const hasFetched = useRef(false);
+  // const hasFetched = useRef(false);
   const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
   //   console.log({ questionBanks });
@@ -49,10 +55,10 @@ const QuestionBankList = () => {
   }, [debouncedSearch]);
 
   useDeepCompareEffect(() => {
-    if (hasFetched.current) return;
+    // if (hasFetched.current) return;
 
     setLoading(true);
-    hasFetched.current = true;
+    // hasFetched.current = true;
 
     dispatch(getQuestionBanks(searchText)).finally(() => {
       setLoading(false);
@@ -69,7 +75,7 @@ const QuestionBankList = () => {
     debouncedSearch(text);
   };
 
-  if (loading || (!questionBanks?.length && !hasFetched.current)) {
+  if (loading || !questionBanks?.length) {
     return <CircularLoading delay={0} />;
   }
 

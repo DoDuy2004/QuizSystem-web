@@ -39,6 +39,7 @@ import {
 import { selectUser } from "../../../../../../../store/slices/userSlice";
 import { showMessage } from "../../../../../../../components/FuseMessage/fuseMessageSlice";
 import { successAnchor } from "../../../../../../../constants/confirm";
+import CircularLoading from "../../../../../../../components/CircularLoading";
 
 const difficultyOptions = [
   { label: "Dễ", value: "EASY" },
@@ -66,7 +67,7 @@ const schema = yup.object().shape({
     .min(2, "Phải có ít nhất 2 câu trả lời"),
 });
 
-const QuestionForm = ({ questionData }: any) => {
+const QuestionForm = ({ questionData, questionLoading }: any) => {
   const [selectedValue, setSelectedValue] = useState("SingleChoice"); // Mặc định là "Một đáp án"
   const [loading, setLoading] = useState(false);
   const [subjectLoading, setSubjectLoading] = useState(false);
@@ -131,7 +132,7 @@ const QuestionForm = ({ questionData }: any) => {
   // console.log({ questionBank });
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     if (_.isEmpty(questionData)) {
       const defaultAnswers = Array.from({ length: 4 }, (_, index) => ({
         isCorrect: index === 0,
@@ -148,7 +149,7 @@ const QuestionForm = ({ questionData }: any) => {
         shouldDirty: false,
         shouldValidate: true,
       });
-      setLoading(false);
+      // setLoading(false);
     } else {
       setQuestion(questionData);
       const transformedData = {
@@ -165,7 +166,7 @@ const QuestionForm = ({ questionData }: any) => {
         shouldDirty: false,
         shouldValidate: true,
       });
-      setLoading(false);
+      // setLoading(false);
     }
   }, [reset, questionData]);
 
