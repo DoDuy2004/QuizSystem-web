@@ -187,7 +187,7 @@ class JwtService {
   signInWithToken = async (): Promise<User> => {
     return new Promise((resolve, reject) => {
       axios
-        .post(`${DOMAIN}/api/auth/token`, {
+        .post(`${import.meta.env.VITE_DOMAIN}/api/auth/token`, {
           token: this.getToken(),
         })
         .then(async (response: AxiosResponse<ApiResponse>) => {
@@ -218,7 +218,10 @@ class JwtService {
   ): Promise<User> => {
     return new Promise((resolve, reject) => {
       axios
-        .post(`${DOMAIN}/api/auth/login`, { username, password })
+        .post(`${import.meta.env.VITE_DOMAIN}/api/auth/login`, {
+          username,
+          password,
+        })
         .then(async (response: AxiosResponse<ApiResponse>) => {
           if (!response || !response?.data?.data) {
             if (response?.status === 403) {

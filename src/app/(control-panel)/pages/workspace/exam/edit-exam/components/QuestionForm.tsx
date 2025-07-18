@@ -296,7 +296,7 @@ const QuestionForm = ({ questionData }: any) => {
   //       isCorrect?: FieldError;
   //     }>
   //   | undefined;
-  if (loading) return <CircularLoading />;
+  // if (loading) return <CircularLoading />;
 
   return (
     <div className="flex flex-col gap-y-4">

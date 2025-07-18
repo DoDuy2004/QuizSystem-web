@@ -99,7 +99,7 @@ const ComposeQuestion = () => {
   useEffect(() => {
     if (questionsData.length > 0 && questionsData[0]?.id) {
       if (_.isEmpty(question)) {
-        console.log("here");
+        // console.log("here");
         setQuestionLoading(true);
         dispatch(getQuestionById(questionsData[0].id))
           .then((res) => {
@@ -114,7 +114,7 @@ const ComposeQuestion = () => {
           });
       }
     } else {
-      console.log("here 1");
+      // console.log("here 1");
       setQuestion({});
       setIsActive(null);
       setQuestionLoading(false);
@@ -278,10 +278,13 @@ const ComposeQuestion = () => {
         )}
       </div>
       <div className="md:px-6 px-4 py-4 bg-white rounded-md shadow-md md:col-span-4 col-span-6 h-fit">
-        {questionLoading ? (
+        {questionLoading || _.isEmpty(question) ? (
           <CircularLoading />
         ) : (
-          <QuestionForm questionData={question} />
+          <QuestionForm
+            questionData={question}
+            questionLoading={questionLoading}
+          />
         )}
       </div>
     </div>
